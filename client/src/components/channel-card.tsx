@@ -41,15 +41,30 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
           {channel.description}
         </p>
         
-        <div className="flex items-center justify-between">
-          <div className="text-2xl font-bold text-primary">
-            {formatCurrency(channel.price)}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-2xl font-bold text-primary">
+                {formatCurrency(channel.price)}
+              </div>
+              <div className="text-sm text-gray-500">
+                per {channel.subscriptionType || 'month'}
+              </div>
+            </div>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              Auto-renew
+            </Badge>
           </div>
-          <Button asChild>
+          
+          <Button asChild className="w-full">
             <Link href={`/payment/${channel.slug}`}>
-              Buy Now
+              Subscribe Now
             </Link>
           </Button>
+          
+          <p className="text-xs text-gray-400 text-center">
+            Cancel anytime • No hidden fees
+          </p>
         </div>
       </CardContent>
     </Card>

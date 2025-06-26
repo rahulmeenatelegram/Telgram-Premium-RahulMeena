@@ -32,9 +32,9 @@ export default function PaymentPage() {
     enabled: !!channelSlug,
   });
 
-  const createOrderMutation = useMutation({
-    mutationFn: async (data: { channelId: number; email: string; paymentMethod: string }) => {
-      const res = await apiRequest("POST", "/api/payments/create-order", data);
+  const createSubscriptionMutation = useMutation({
+    mutationFn: async (data: { channelId: number; email: string; paymentMethod: string; subscriptionType: string }) => {
+      const res = await apiRequest("POST", "/api/subscriptions/create-order", data);
       return res.json();
     },
     onSuccess: (orderData) => {
@@ -109,22 +109,21 @@ export default function PaymentPage() {
     rzp.open();
   };
 
-  const handlePayment = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email || !channel) {
+  const handleSubscriptionPayment = (data: { email: string; paymentMethod: "upi" | "card"; subscriptionType: string }) => {
+    if (!channel) {
       toast({
         title: "Error",
-        description: "Please enter your email address",
+        description: "Channel not found",
         variant: "destructive",
       });
       return;
     }
 
-    createOrderMutation.mutate({
+    createSubscriptionMutation.mutate({
       channelId: channel.id,
-      email,
-      paymentMethod,
+      email: data.email,
+      paymentMethod: data.paymentMethod,
+      subscriptionType: data.subscriptionType,
     });
   };
 
@@ -204,7 +203,7 @@ export default function PaymentPage() {
                 <Separator />
 
                 {/* Payment Form */}
-                <form onSubmit={handlePayment} className="space-y-6">
+                <div className="space-y-6">
                   <div>
                     <Label htmlFor="email" className="text-sm font-medium">
                       Email Address
@@ -259,20 +258,14 @@ export default function PaymentPage() {
                   </div>
 
                   <Button
-                    type="submit"
+                    type="button"
                     className="w-full py-3 text-lg"
-                    disabled={createOrderMutation.isPending}
+                    onClick={() => setShowPaymentModal(true)}
                   >
-                    {createOrderMutation.isPending ? (
-                      "Processing..."
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5 mr-2" />
-                        Pay {formatCurrency(channel.price)} Securely
-                      </>
-                    )}
+                    <Lock className="w-5 h-5 mr-2" />
+                    Subscribe Now - {formatCurrency(channel.price)}/month
                   </Button>
-                </form>
+                </div>
 
                 <div className="text-center">
                   <p className="text-xs text-gray-500 flex items-center justify-center space-x-1">
@@ -285,6 +278,16 @@ export default function PaymentPage() {
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        channelName={channel.name}
+        channelPrice={channel.price}
+        subscriptionType={channel.subscriptionType || "monthly"}
+        onPayment={handleSubscriptionPayment}
+        isProcessing={createSubscriptionMutation.isPending}
+      />
 
       <SuccessModal
         isOpen={showSuccessModal}

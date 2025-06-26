@@ -2,7 +2,7 @@
 
 ## Overview
 
-TeleChannels is a full-stack web application that allows users to purchase access to premium Telegram channels. The platform handles payment processing through Razorpay, manages user authentication, and provides admin tools for channel management and analytics.
+TeleChannels is a full-stack subscription-based web application that provides recurring access to premium Telegram channels. The platform handles subscription billing with autopay through Razorpay, manages user authentication, and provides admin tools for subscription management and analytics.
 
 ## System Architecture
 
@@ -34,22 +34,24 @@ The application follows a monorepo structure with clear separation between clien
 - **Payment Integration**: Razorpay for handling order creation and payment verification
 
 ### Database Schema
-The application uses five main tables:
+The application uses six main tables:
 - **users**: User accounts with role-based access (user/admin)
-- **channels**: Telegram channel definitions with pricing and metadata
-- **payments**: Payment transaction records with Razorpay integration
+- **channels**: Telegram channel definitions with subscription pricing and billing periods
+- **subscriptions**: Active recurring subscriptions with billing schedules and autopay management
+- **payments**: Payment transaction records including subscription payments with Razorpay integration
 - **purchases**: User channel access records with generated access links
 - **withdrawals**: Admin withdrawal requests and processing
 
 ## Data Flow
 
-1. **Channel Discovery**: Users browse available channels on the homepage
-2. **Payment Process**: Users select a channel, provide email, choose payment method
-3. **Order Creation**: Backend creates Razorpay order and payment record
-4. **Payment Processing**: Frontend handles Razorpay payment modal
-5. **Payment Verification**: Backend verifies payment signature and updates records
-6. **Access Provisioning**: System creates purchase record with unique Telegram access link
-7. **Admin Management**: Admins can manage channels, view analytics, and process withdrawals
+1. **Channel Discovery**: Users browse available subscription channels on the homepage
+2. **Subscription Process**: Users select a channel, choose billing period (monthly/yearly), provide email
+3. **Subscription Creation**: Backend creates subscription record with billing schedule
+4. **Payment Processing**: Frontend handles Razorpay payment modal with autopay setup
+5. **Payment Verification**: Backend verifies payment signature and activates subscription
+6. **Access Provisioning**: System provides unique Telegram access link with recurring billing
+7. **Autopay Management**: System tracks billing cycles and processes automatic renewals
+8. **Admin Management**: Admins can manage subscriptions, view analytics, and process withdrawals
 
 ## External Dependencies
 
@@ -92,6 +94,7 @@ Changelog:
 - June 26, 2025. Initial setup
 - June 26, 2025. Fixed authentication system to use email-based login, resolved Razorpay payment integration, added test channel for 2 rupees
 - June 26, 2025. Enhanced admin dashboard with working withdrawal system, fixed validation errors, admin role assigned to main user
+- June 26, 2025. Converted to subscription-based autopay platform with recurring billing, monthly/yearly options, subscription management, and cancel-anytime functionality
 
 ## User Preferences
 

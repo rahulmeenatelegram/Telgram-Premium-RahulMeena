@@ -1,13 +1,15 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, ExternalLink } from "lucide-react";
+import { CheckCircle, ExternalLink, RefreshCw, Calendar } from "lucide-react";
 
 interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
   accessLink: string;
   channelName: string;
+  isSubscription?: boolean;
+  nextBillingDate?: string;
 }
 
 export default function SuccessModal({
@@ -15,6 +17,8 @@ export default function SuccessModal({
   onClose,
   accessLink,
   channelName,
+  isSubscription = true,
+  nextBillingDate,
 }: SuccessModalProps) {
   const handleOpenTelegram = () => {
     window.open(accessLink, "_blank");
@@ -29,20 +33,30 @@ export default function SuccessModal({
               <CheckCircle className="text-green-600 w-8 h-8" />
             </div>
           </div>
-          <DialogTitle className="text-xl">Payment Successful!</DialogTitle>
+          <DialogTitle className="text-xl">Subscription Active!</DialogTitle>
           <DialogDescription>
-            Your Telegram channel access has been activated
+            Your recurring subscription has been activated
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
           <div className="bg-blue-50 rounded-lg p-4">
             <h4 className="font-semibold text-gray-900 mb-2">Your Channel Access</h4>
-            <div className="flex items-center justify-center space-x-2">
+            <div className="flex items-center justify-center space-x-2 mb-3">
               <Badge variant="secondary" className="text-sm">
                 {channelName}
               </Badge>
+              <Badge variant="secondary" className="bg-green-100 text-green-800 flex items-center gap-1">
+                <RefreshCw className="w-3 h-3" />
+                Auto-renew
+              </Badge>
             </div>
+            {nextBillingDate && (
+              <div className="flex items-center justify-center text-sm text-gray-600">
+                <Calendar className="w-4 h-4 mr-1" />
+                Next billing: {new Date(nextBillingDate).toLocaleDateString()}
+              </div>
+            )}
           </div>
 
           <Button

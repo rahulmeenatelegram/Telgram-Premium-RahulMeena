@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertChannelSchema, insertPaymentSchema, insertWithdrawalSchema } from "@shared/schema";
+import { insertChannelSchema, insertPaymentSchema, insertWithdrawalSchema, insertSubscriptionSchema } from "@shared/schema";
 import { createHmac } from "crypto";
 import Razorpay from "razorpay";
 
@@ -39,7 +39,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create Razorpay order
+  // Create subscription order
+  app.post("/api/subscriptions/create-order", async (req, res) => {
+    try {
+      const { channelId, email, paymentMethod, subscriptionType = "monthly" } = req.body;
+      
+      const channel = await storage.getChannel(channelId);
+      if (!channel) {
+        return res.status(404).json({ message: "Channel not found" });
+      }
+
+      // Calculate subscription period dates
+      const currentPeriodStart = new Date();
+      const currentPeriodEnd = new Date();
+      const nextBillingDate = new Date();
+      
+      if (subscriptionType === "monthly") {
+        currentPeriodEnd.setMonth(currentPeriodEnd.getMonth() + 1);
+        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+      } else if (subscriptionType === "yearly") {
+        currentPeriodEnd.setFullYear(currentPeriodEnd.getFullYear() + 1);
+        nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
+      }
+
+      // Generate unique access link
+      const accessLink = `https://t.me/+${Math.random().toString(36).substring(2, 15)}`;
+
+      // Create subscription record
+      const subscription = await storage.createSubscription({
+        userId: req.user?.id,
+        channelId,
+        email,
+        accessLink,
+        status: "active",
+        subscriptionType,
+        amount: channel.price,
+        currentPeriodStart,
+        currentPeriodEnd,
+        nextBillingDate,
+      });
+
+      // Create initial payment record
+      const payment = await storage.createPayment({
+        userId: req.user?.id,
+        channelId,
+        subscriptionId: subscription.id,
+        email,
+        amount: channel.price,
+        paymentType: "subscription",
+        status: "pending",
+        paymentMethod,
+      });
+
+      // Create Razorpay order
+      const razorpay = new Razorpay({
+        key_id: RAZORPAY_KEY_ID,
+        key_secret: RAZORPAY_KEY_SECRET,
+      });
+
+      const options = {
+        amount: Math.round(parseFloat(channel.price) * 100), // Amount in paise
+        currency: "INR",
+        receipt: `sub_${subscription.id}_${payment.id}`,
+        payment_capture: 1,
+      };
+
+      const order = await razorpay.orders.create(options);
+      
+      // Update payment with Razorpay order ID
+      await storage.updatePayment(payment.id, {
+        razorpayOrderId: order.id,
+      });
+
+      res.json({
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        keyId: RAZORPAY_KEY_ID,
+        paymentId: payment.id,
+        subscriptionId: subscription.id,
+        subscriptionType,
+        nextBillingDate: nextBillingDate.toISOString(),
+      });
+    } catch (error) {
+      console.error("Error creating subscription order:", error);
+      res.status(500).json({ message: "Failed to create subscription order" });
+    }
+  });
+
+  // Create Razorpay order (one-time payment - legacy)
   app.post("/api/payments/create-order", async (req, res) => {
     try {
       const { channelId, email, paymentMethod } = req.body;
@@ -122,25 +210,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Channel not found" });
       }
 
+      let accessLink = channel.telegramLink;
+      let isSubscription = false;
+
+      // Handle subscription payment
+      if (payment.subscriptionId) {
+        isSubscription = true;
+        // Get subscription details and use its access link
+        const subscription = await storage.getSubscription(payment.subscriptionId);
+        if (subscription) {
+          accessLink = subscription.accessLink;
+        }
+      }
+
       // Create purchase record with access link
       const purchase = await storage.createPurchase({
         userId: payment.userId,
         channelId: payment.channelId,
         paymentId: payment.id,
         email: payment.email,
-        accessLink: channel.telegramLink,
+        accessLink,
         isActive: true,
       });
 
       res.json({
         success: true,
-        accessLink: channel.telegramLink,
+        accessLink,
         channelName: channel.name,
         purchaseId: purchase.id,
+        isSubscription,
+        subscriptionId: payment.subscriptionId,
       });
     } catch (error) {
       console.error("Error verifying payment:", error);
       res.status(500).json({ message: "Failed to verify payment" });
+    }
+  });
+
+  // Get user subscriptions
+  app.get("/api/subscriptions", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const subscriptions = await storage.getUserSubscriptions(req.user.id);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  // Cancel subscription
+  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      const subscriptionId = parseInt(req.params.id);
+      const subscription = await storage.getSubscription(subscriptionId);
+      
+      if (!subscription || subscription.userId !== req.user.id) {
+        return res.status(404).json({ message: "Subscription not found" });
+      }
+
+      const cancelledSubscription = await storage.cancelSubscription(subscriptionId);
+      res.json(cancelledSubscription);
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ message: "Failed to cancel subscription" });
     }
   });
 

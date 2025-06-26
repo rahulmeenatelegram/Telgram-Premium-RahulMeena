@@ -1,4 +1,4 @@
-import { users, channels, payments, purchases, withdrawals, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type Purchase, type InsertPurchase, type Withdrawal, type InsertWithdrawal } from "@shared/schema";
+import { users, channels, payments, purchases, withdrawals, subscriptions, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type Purchase, type InsertPurchase, type Withdrawal, type InsertWithdrawal, type Subscription, type InsertSubscription } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import session from "express-session";
@@ -29,6 +29,16 @@ export interface IStorage {
   updatePayment(id: number, updates: Partial<InsertPayment>): Promise<Payment | undefined>;
   getAllPayments(): Promise<Payment[]>;
   getRecentPayments(limit?: number): Promise<Payment[]>;
+  
+  // Subscription methods
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  getSubscription(id: number): Promise<Subscription | undefined>;
+  getUserSubscriptions(userId: number): Promise<Subscription[]>;
+  getEmailSubscriptions(email: string): Promise<Subscription[]>;
+  getActiveSubscriptions(): Promise<Subscription[]>;
+  updateSubscription(id: number, updates: Partial<InsertSubscription>): Promise<Subscription | undefined>;
+  cancelSubscription(id: number): Promise<Subscription | undefined>;
+  getExpiringSubscriptions(): Promise<Subscription[]>;
   
   // Purchase methods
   createPurchase(purchase: InsertPurchase): Promise<Purchase>;
@@ -198,6 +208,66 @@ export class DatabaseStorage implements IStorage {
       .where(eq(withdrawals.id, id))
       .returning();
     return updatedWithdrawal || undefined;
+  }
+
+  // Subscription methods
+  async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    const [newSubscription] = await db.insert(subscriptions).values(subscription).returning();
+    return newSubscription;
+  }
+
+  async getSubscription(id: number): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return subscription || undefined;
+  }
+
+  async getUserSubscriptions(userId: number): Promise<Subscription[]> {
+    return await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).orderBy(desc(subscriptions.createdAt));
+  }
+
+  async getEmailSubscriptions(email: string): Promise<Subscription[]> {
+    return await db.select().from(subscriptions).where(eq(subscriptions.email, email)).orderBy(desc(subscriptions.createdAt));
+  }
+
+  async getActiveSubscriptions(): Promise<Subscription[]> {
+    return await db.select().from(subscriptions).where(eq(subscriptions.status, 'active')).orderBy(desc(subscriptions.createdAt));
+  }
+
+  async updateSubscription(id: number, updates: Partial<InsertSubscription>): Promise<Subscription | undefined> {
+    const [updatedSubscription] = await db
+      .update(subscriptions)
+      .set(updates)
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return updatedSubscription || undefined;
+  }
+
+  async cancelSubscription(id: number): Promise<Subscription | undefined> {
+    const [cancelledSubscription] = await db
+      .update(subscriptions)
+      .set({ 
+        status: 'cancelled',
+        cancelledAt: new Date()
+      })
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return cancelledSubscription || undefined;
+  }
+
+  async getExpiringSubscriptions(): Promise<Subscription[]> {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    return await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.status, 'active'),
+          sql`${subscriptions.nextBillingDate} <= ${tomorrow}`
+        )
+      )
+      .orderBy(subscriptions.nextBillingDate);
   }
 
   // Analytics methods

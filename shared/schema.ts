@@ -17,6 +17,7 @@ export const channels = pgTable("channels", {
   slug: text("slug").notNull().unique(),
   description: text("description").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  subscriptionType: text("subscription_type").notNull().default("monthly"), // monthly, yearly
   telegramLink: text("telegram_link").notNull(),
   memberCount: integer("member_count").default(0),
   icon: text("icon").notNull(), // Font Awesome icon class
@@ -28,8 +29,10 @@ export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   userId: integer("user_id"),
   channelId: integer("channel_id").notNull(),
+  subscriptionId: integer("subscription_id"), // Link to subscription for recurring payments
   email: text("email").notNull(), // For guest purchases
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentType: text("payment_type").notNull().default("one-time"), // one-time, subscription
   razorpayOrderId: text("razorpay_order_id"),
   razorpayPaymentId: text("razorpay_payment_id"),
   razorpaySignature: text("razorpay_signature"),
@@ -37,6 +40,24 @@ export const payments = pgTable("payments", {
   paymentMethod: text("payment_method"), // upi, card
   createdAt: timestamp("created_at").defaultNow().notNull(),
   completedAt: timestamp("completed_at"),
+});
+
+// Subscriptions table for recurring billing
+export const subscriptions = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  channelId: integer("channel_id").notNull(),
+  email: text("email").notNull(),
+  accessLink: text("access_link").notNull(),
+  status: text("status").notNull().default("active"), // active, paused, cancelled, expired
+  subscriptionType: text("subscription_type").notNull(), // monthly, yearly
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  razorpaySubscriptionId: text("razorpay_subscription_id"),
+  currentPeriodStart: timestamp("current_period_start").notNull(),
+  currentPeriodEnd: timestamp("current_period_end").notNull(),
+  nextBillingDate: timestamp("next_billing_date").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  cancelledAt: timestamp("cancelled_at"),
 });
 
 export const purchases = pgTable("purchases", {
@@ -65,16 +86,25 @@ export const withdrawals = pgTable("withdrawals", {
 export const usersRelations = relations(users, ({ many }) => ({
   payments: many(payments),
   purchases: many(purchases),
+  subscriptions: many(subscriptions),
 }));
 
 export const channelsRelations = relations(channels, ({ many }) => ({
   payments: many(payments),
   purchases: many(purchases),
+  subscriptions: many(subscriptions),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one, many }) => ({
+  user: one(users, { fields: [subscriptions.userId], references: [users.id] }),
+  channel: one(channels, { fields: [subscriptions.channelId], references: [channels.id] }),
+  payments: many(payments),
 }));
 
 export const paymentsRelations = relations(payments, ({ one, many }) => ({
   user: one(users, { fields: [payments.userId], references: [users.id] }),
   channel: one(channels, { fields: [payments.channelId], references: [channels.id] }),
+  subscription: one(subscriptions, { fields: [payments.subscriptionId], references: [subscriptions.id] }),
   purchases: many(purchases),
 }));
 
@@ -110,6 +140,12 @@ export const insertPurchaseSchema = createInsertSchema(purchases).omit({
   createdAt: true,
 });
 
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  cancelledAt: true,
+});
+
 export const insertWithdrawalSchema = createInsertSchema(withdrawals).omit({
   id: true,
   createdAt: true,
@@ -121,6 +157,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Channel = typeof channels.$inferSelect;
 export type InsertChannel = z.infer<typeof insertChannelSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
 export type Purchase = typeof purchases.$inferSelect;

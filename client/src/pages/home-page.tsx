@@ -22,17 +22,17 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="gradient-primary text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">Access Premium Telegram Channels</h1>
+          <h1 className="text-5xl font-bold mb-6">Subscribe to Premium Telegram Channels</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Get instant access to exclusive content, trading signals, and premium communities. 
-            Join thousands of satisfied members today.
+            Get continuous access to exclusive content, trading signals, and premium communities. 
+            Flexible monthly or yearly subscriptions with autopay. Cancel anytime.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild>
-              <Link href="#channels">View Channels</Link>
+              <Link href="#channels">View Subscriptions</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary">
-              Quick Purchase
+              Start Free Trial
             </Button>
           </div>
         </div>
