@@ -87,6 +87,43 @@ export default function PaymentPage() {
       prefill: {
         email: email,
       },
+      method: {
+        upi: paymentMethod === "upi",
+        card: paymentMethod === "card",
+        netbanking: false,
+        wallet: false,
+        emi: false,
+        paylater: false,
+      },
+      config: {
+        display: {
+          blocks: {
+            utib: {
+              name: "Pay using UPI",
+              instruments: [
+                {
+                  method: "upi"
+                }
+              ]
+            },
+            other: {
+              name: "Other Payment Methods",
+              instruments: [
+                {
+                  method: "card"
+                },
+                {
+                  method: "netbanking"
+                }
+              ]
+            }
+          },
+          sequence: paymentMethod === "upi" ? ["utib", "other"] : ["other", "utib"],
+          preferences: {
+            show_default_blocks: false
+          }
+        }
+      },
       theme: {
         color: "#1E40AF",
       },
