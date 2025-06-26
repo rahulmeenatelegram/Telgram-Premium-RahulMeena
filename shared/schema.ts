@@ -82,6 +82,36 @@ export const withdrawals = pgTable("withdrawals", {
   completedAt: timestamp("completed_at"),
 });
 
+export const adminWallet = pgTable("admin_wallet", {
+  id: serial("id").primaryKey(),
+  balance: decimal("balance", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  totalWithdrawn: decimal("total_withdrawn", { precision: 10, scale: 2 }).default("0.00").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const adminWalletTransactions = pgTable("admin_wallet_transactions", {
+  id: serial("id").primaryKey(),
+  type: text("type", { enum: ["credit", "debit"] }).notNull(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  reference: text("reference"), // payment_id, subscription_id, withdrawal_id
+  balanceAfter: decimal("balance_after", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const adminWithdrawals = pgTable("admin_withdrawals", {
+  id: serial("id").primaryKey(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  withdrawalMethod: text("withdrawal_method", { enum: ["bank_account", "upi", "wallet"] }).notNull(),
+  accountDetails: jsonb("account_details").notNull(), // bank details, UPI ID, etc.
+  status: text("status", { enum: ["pending", "processing", "completed", "failed"] }).default("pending").notNull(),
+  razorpayPayoutId: text("razorpay_payout_id"),
+  failureReason: text("failure_reason"),
+  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   payments: many(payments),
@@ -116,6 +146,19 @@ export const purchasesRelations = relations(purchases, ({ one }) => ({
 
 export const withdrawalsRelations = relations(withdrawals, ({ one }) => ({
   requestedByUser: one(users, { fields: [withdrawals.requestedBy], references: [users.id] }),
+}));
+
+export const adminWalletRelations = relations(adminWallet, ({ many }) => ({
+  transactions: many(adminWalletTransactions),
+  withdrawals: many(adminWithdrawals),
+}));
+
+export const adminWalletTransactionsRelations = relations(adminWalletTransactions, ({ one }) => ({
+  wallet: one(adminWallet),
+}));
+
+export const adminWithdrawalsRelations = relations(adminWithdrawals, ({ one }) => ({
+  wallet: one(adminWallet),
 }));
 
 // Schemas
