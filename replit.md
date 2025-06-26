@@ -90,6 +90,7 @@ The application is configured for deployment on Replit with autoscaling:
 
 Changelog:
 - June 26, 2025. Initial setup
+- June 26, 2025. Fixed authentication system to use email-based login, resolved Razorpay payment integration, added test channel for 2 rupees
 
 ## User Preferences
 
