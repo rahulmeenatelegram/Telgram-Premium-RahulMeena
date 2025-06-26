@@ -4,6 +4,8 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertChannelSchema, insertPaymentSchema, insertWithdrawalSchema } from "@shared/schema";
+import { createHmac } from "crypto";
+import Razorpay from "razorpay";
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_KEY || "rzp_test_default";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || "razorpay_secret";
@@ -58,7 +60,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create Razorpay order
-      const Razorpay = require("razorpay");
       const razorpay = new Razorpay({
         key_id: RAZORPAY_KEY_ID,
         key_secret: RAZORPAY_KEY_SECRET,
@@ -96,9 +97,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentId } = req.body;
       
-      const crypto = require("crypto");
-      const expectedSignature = crypto
-        .createHmac("sha256", RAZORPAY_KEY_SECRET)
+      const expectedSignature = createHmac("sha256", RAZORPAY_KEY_SECRET)
         .update(razorpay_order_id + "|" + razorpay_payment_id)
         .digest("hex");
 
