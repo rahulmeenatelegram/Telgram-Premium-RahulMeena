@@ -272,6 +272,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertWithdrawalSchema.parse({
         ...req.body,
+        amount: req.body.amount.toString(),
         requestedBy: req.user!.id,
       });
       

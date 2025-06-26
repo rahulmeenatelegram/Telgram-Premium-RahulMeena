@@ -99,7 +99,7 @@ export default function AdminDashboard() {
   const withdrawalMutation = useMutation({
     mutationFn: async (amount: string) => {
       const res = await apiRequest("POST", "/api/admin/withdrawals", {
-        amount: parseFloat(amount),
+        amount: amount,
         status: "pending",
       });
       return res.json();
