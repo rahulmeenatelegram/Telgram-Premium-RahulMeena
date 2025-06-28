@@ -1,4 +1,4 @@
-import { users, channels, payments, purchases, withdrawals, subscriptions, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type Purchase, type InsertPurchase, type Withdrawal, type InsertWithdrawal, type Subscription, type InsertSubscription } from "@shared/schema";
+import { users, channels, payments, purchases, withdrawals, subscriptions, adminWallet, adminWalletTransactions, adminWithdrawals, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type Purchase, type InsertPurchase, type Withdrawal, type InsertWithdrawal, type Subscription, type InsertSubscription, type AdminWallet, type AdminWalletTransaction, type InsertAdminWalletTransaction, type AdminWithdrawal, type InsertAdminWithdrawal } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import session from "express-session";
@@ -56,6 +56,16 @@ export interface IStorage {
   getTotalRevenue(): Promise<number>;
   getAvailableBalance(): Promise<number>;
   getTotalWithdrawn(): Promise<number>;
+  
+  // Admin Wallet methods
+  getAdminWallet(): Promise<AdminWallet>;
+  updateAdminWalletBalance(amount: number, type: 'credit' | 'debit', description: string, reference?: string): Promise<AdminWallet>;
+  createAdminWalletTransaction(transaction: InsertAdminWalletTransaction): Promise<AdminWalletTransaction>;
+  getAdminWalletTransactions(limit?: number): Promise<AdminWalletTransaction[]>;
+  createAdminWithdrawal(withdrawal: InsertAdminWithdrawal): Promise<AdminWithdrawal>;
+  getAdminWithdrawals(): Promise<AdminWithdrawal[]>;
+  updateAdminWithdrawal(id: number, updates: Partial<InsertAdminWithdrawal>): Promise<AdminWithdrawal | undefined>;
+  processRazorpayPayout(withdrawalId: number, amount: number, accountDetails: any): Promise<{ success: boolean; payoutId?: string; error?: string }>;
   
   sessionStore: any;
 }
@@ -296,6 +306,152 @@ export class DatabaseStorage implements IStorage {
       .from(withdrawals)
       .where(eq(withdrawals.status, 'completed'));
     return result.total || 0;
+  }
+
+  // Admin Wallet methods
+  async getAdminWallet(): Promise<AdminWallet> {
+    const [wallet] = await db.select().from(adminWallet).limit(1);
+    if (!wallet) {
+      // Initialize wallet if doesn't exist
+      const [newWallet] = await db.insert(adminWallet).values({
+        balance: "0.00",
+        totalEarnings: "0.00",
+        totalWithdrawn: "0.00"
+      }).returning();
+      return newWallet;
+    }
+    return wallet;
+  }
+
+  async updateAdminWalletBalance(amount: number, type: 'credit' | 'debit', description: string, reference?: string): Promise<AdminWallet> {
+    const wallet = await this.getAdminWallet();
+    const currentBalance = parseFloat(wallet.balance);
+    const newBalance = type === 'credit' ? currentBalance + amount : currentBalance - amount;
+    
+    if (newBalance < 0) {
+      throw new Error('Insufficient wallet balance');
+    }
+
+    const updates: any = {
+      balance: newBalance.toFixed(2),
+      updatedAt: new Date()
+    };
+
+    if (type === 'credit') {
+      const totalEarnings = parseFloat(wallet.totalEarnings) + amount;
+      updates.totalEarnings = totalEarnings.toFixed(2);
+    } else {
+      const totalWithdrawn = parseFloat(wallet.totalWithdrawn) + amount;
+      updates.totalWithdrawn = totalWithdrawn.toFixed(2);
+    }
+
+    const [updatedWallet] = await db.update(adminWallet)
+      .set(updates)
+      .where(eq(adminWallet.id, wallet.id))
+      .returning();
+
+    // Create transaction record
+    await this.createAdminWalletTransaction({
+      type,
+      amount: amount.toFixed(2),
+      description,
+      reference,
+      balanceAfter: newBalance.toFixed(2)
+    });
+
+    return updatedWallet;
+  }
+
+  async createAdminWalletTransaction(transaction: InsertAdminWalletTransaction): Promise<AdminWalletTransaction> {
+    const [newTransaction] = await db.insert(adminWalletTransactions)
+      .values(transaction)
+      .returning();
+    return newTransaction;
+  }
+
+  async getAdminWalletTransactions(limit: number = 50): Promise<AdminWalletTransaction[]> {
+    return await db.select()
+      .from(adminWalletTransactions)
+      .orderBy(desc(adminWalletTransactions.createdAt))
+      .limit(limit);
+  }
+
+  async createAdminWithdrawal(withdrawal: InsertAdminWithdrawal): Promise<AdminWithdrawal> {
+    const [newWithdrawal] = await db.insert(adminWithdrawals)
+      .values(withdrawal)
+      .returning();
+    return newWithdrawal;
+  }
+
+  async getAdminWithdrawals(): Promise<AdminWithdrawal[]> {
+    return await db.select()
+      .from(adminWithdrawals)
+      .orderBy(desc(adminWithdrawals.requestedAt));
+  }
+
+  async updateAdminWithdrawal(id: number, updates: Partial<InsertAdminWithdrawal>): Promise<AdminWithdrawal | undefined> {
+    const [updatedWithdrawal] = await db.update(adminWithdrawals)
+      .set(updates)
+      .where(eq(adminWithdrawals.id, id))
+      .returning();
+    return updatedWithdrawal || undefined;
+  }
+
+  async processRazorpayPayout(withdrawalId: number, amount: number, accountDetails: any): Promise<{ success: boolean; payoutId?: string; error?: string }> {
+    try {
+      const Razorpay = require('razorpay');
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+      });
+
+      const payoutData: any = {
+        account_number: '2323230086066488', // Use your Razorpay account number
+        amount: Math.round(amount * 100), // Convert to paise
+        currency: 'INR',
+        mode: accountDetails.type === 'upi' ? 'UPI' : 'IMPS',
+        purpose: 'payout',
+        fund_account: {
+          account_type: accountDetails.type === 'bank_account' ? 'bank_account' : 'vpa',
+          ...(accountDetails.type === 'bank_account' ? {
+            bank_account: {
+              name: accountDetails.name,
+              ifsc: accountDetails.ifsc,
+              account_number: accountDetails.accountNumber
+            }
+          } : {
+            vpa: {
+              address: accountDetails.upiId
+            }
+          }),
+          contact: {
+            name: accountDetails.name,
+            email: accountDetails.email || 'admin@telechannels.com',
+            contact: accountDetails.mobile || '9999999999',
+            type: 'self'
+          }
+        },
+        queue_if_low_balance: true,
+        reference_id: `withdrawal_${withdrawalId}`,
+        narration: 'TeleChannels Admin Withdrawal'
+      };
+
+      const payout = await razorpay.payouts.create(payoutData);
+      
+      await this.updateAdminWithdrawal(withdrawalId, {
+        status: 'processing',
+        razorpayPayoutId: payout.id
+      });
+
+      return { success: true, payoutId: payout.id };
+    } catch (error: any) {
+      await this.updateAdminWithdrawal(withdrawalId, {
+        status: 'failed',
+        failureReason: error.message || 'Unknown error occurred'
+      });
+      
+      return { success: false, error: error.message || 'Payout failed' };
+    }
   }
 }
 

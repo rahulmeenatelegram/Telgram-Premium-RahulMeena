@@ -195,6 +195,19 @@ export const insertWithdrawalSchema = createInsertSchema(withdrawals).omit({
   completedAt: true,
 });
 
+export const insertAdminWithdrawalSchema = createInsertSchema(adminWithdrawals).omit({
+  id: true,
+  requestedAt: true,
+  completedAt: true,
+  razorpayPayoutId: true,
+  failureReason: true,
+});
+
+export const insertAdminWalletTransactionSchema = createInsertSchema(adminWalletTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -208,3 +221,8 @@ export type Purchase = typeof purchases.$inferSelect;
 export type InsertPurchase = z.infer<typeof insertPurchaseSchema>;
 export type Withdrawal = typeof withdrawals.$inferSelect;
 export type InsertWithdrawal = z.infer<typeof insertWithdrawalSchema>;
+export type AdminWallet = typeof adminWallet.$inferSelect;
+export type AdminWalletTransaction = typeof adminWalletTransactions.$inferSelect;
+export type InsertAdminWalletTransaction = z.infer<typeof insertAdminWalletTransactionSchema>;
+export type AdminWithdrawal = typeof adminWithdrawals.$inferSelect;
+export type InsertAdminWithdrawal = z.infer<typeof insertAdminWithdrawalSchema>;
