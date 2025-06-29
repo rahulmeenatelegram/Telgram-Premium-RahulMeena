@@ -159,7 +159,8 @@ export default function AdminDashboard() {
     }).format(amount);
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date: string | Date | null | undefined) => {
+    if (!date) return "-";
     return new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
