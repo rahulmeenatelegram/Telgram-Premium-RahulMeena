@@ -179,7 +179,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -280,44 +280,47 @@ export default function AdminDashboard() {
 
             <Card>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Members</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {channels?.map((channel) => (
-                      <TableRow key={channel.id}>
-                        <TableCell className="font-medium">{channel.name}</TableCell>
-                        <TableCell>{formatCurrency(parseFloat(channel.price))}</TableCell>
-                        <TableCell>{channel.memberCount}</TableCell>
-                        <TableCell>
-                          <Badge variant={channel.isActive ? "default" : "secondary"}>
-                            {channel.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="space-x-2">
-                          <Button size="sm" variant="outline">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteChannelMutation.mutate(channel.id)}
-                            disabled={deleteChannelMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px]">Name</TableHead>
+                        <TableHead className="min-w-[80px]">Price</TableHead>
+                        <TableHead className="min-w-[80px] hidden sm:table-cell">Members</TableHead>
+                        <TableHead className="min-w-[80px]">Status</TableHead>
+                        <TableHead className="min-w-[100px]">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {channels?.map((channel) => (
+                        <TableRow key={channel.id}>
+                          <TableCell className="font-medium">{channel.name}</TableCell>
+                          <TableCell>{formatCurrency(parseFloat(channel.price))}</TableCell>
+                          <TableCell className="hidden sm:table-cell">{channel.memberCount}</TableCell>
+                          <TableCell>
+                            <Badge variant={channel.isActive ? "default" : "secondary"} className="text-xs">
+                              {channel.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="space-x-1">
+                            <Button size="sm" variant="outline" className="p-1">
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="p-1"
+                              onClick={() => deleteChannelMutation.mutate(channel.id)}
+                              disabled={deleteChannelMutation.isPending}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -329,86 +332,92 @@ export default function AdminDashboard() {
 
             <Card>
               <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Amount</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Date</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments?.slice(0, 10).map((payment) => (
-                      <TableRow key={payment.id}>
-                        <TableCell>{payment.email}</TableCell>
-                        <TableCell>{formatCurrency(parseFloat(payment.amount))}</TableCell>
-                        <TableCell className="capitalize">{payment.paymentMethod}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={
-                              payment.status === "success" 
-                                ? "default" 
-                                : payment.status === "failed" 
-                                ? "destructive" 
-                                : "secondary"
-                            }
-                          >
-                            {payment.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(payment.createdAt)}</TableCell>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px]">Email</TableHead>
+                        <TableHead className="min-w-[80px]">Amount</TableHead>
+                        <TableHead className="min-w-[70px] hidden sm:table-cell">Method</TableHead>
+                        <TableHead className="min-w-[80px]">Status</TableHead>
+                        <TableHead className="min-w-[90px] hidden md:table-cell">Date</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {payments?.slice(0, 10).map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell className="max-w-[120px] truncate">{payment.email}</TableCell>
+                          <TableCell>{formatCurrency(parseFloat(payment.amount))}</TableCell>
+                          <TableCell className="capitalize hidden sm:table-cell">{payment.paymentMethod}</TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={
+                                payment.status === "success" 
+                                  ? "default" 
+                                  : payment.status === "failed" 
+                                  ? "destructive" 
+                                  : "secondary"
+                              }
+                              className="text-xs"
+                            >
+                              {payment.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">{formatDate(payment.createdAt)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           <TabsContent value="withdrawals" className="space-y-4">
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
               <div className="lg:col-span-2">
                 <Card>
                   <CardHeader>
                     <CardTitle>Withdrawal History</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Amount</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Requested</TableHead>
-                          <TableHead>Completed</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {withdrawals?.map((withdrawal) => (
-                          <TableRow key={withdrawal.id}>
-                            <TableCell>{formatCurrency(parseFloat(withdrawal.amount))}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant={
-                                  withdrawal.status === "completed" 
-                                    ? "default" 
-                                    : withdrawal.status === "failed" 
-                                    ? "destructive" 
-                                    : "secondary"
-                                }
-                              >
-                                {withdrawal.status}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{formatDate(withdrawal.createdAt)}</TableCell>
-                            <TableCell>
-                              {withdrawal.completedAt ? formatDate(withdrawal.completedAt) : "-"}
-                            </TableCell>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="min-w-[90px]">Amount</TableHead>
+                            <TableHead className="min-w-[80px]">Status</TableHead>
+                            <TableHead className="min-w-[90px] hidden sm:table-cell">Requested</TableHead>
+                            <TableHead className="min-w-[90px] hidden md:table-cell">Completed</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {withdrawals?.map((withdrawal) => (
+                            <TableRow key={withdrawal.id}>
+                              <TableCell>{formatCurrency(parseFloat(withdrawal.amount))}</TableCell>
+                              <TableCell>
+                                <Badge 
+                                  variant={
+                                    withdrawal.status === "completed" 
+                                      ? "default" 
+                                      : withdrawal.status === "failed" 
+                                      ? "destructive" 
+                                      : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {withdrawal.status}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="hidden sm:table-cell">{formatDate(withdrawal.createdAt)}</TableCell>
+                              <TableCell className="hidden md:table-cell">
+                                {withdrawal.completedAt ? formatDate(withdrawal.completedAt) : "-"}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

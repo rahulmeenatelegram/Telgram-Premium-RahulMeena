@@ -25,33 +25,33 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
+    <Card className="hover:shadow-lg transition-shadow w-full max-w-full">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex items-center mb-4">
-          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getIconColor(channel.icon)}`}>
-            <i className={`${channel.icon} text-xl`}></i>
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${getIconColor(channel.icon)}`}>
+            <i className={`${channel.icon} text-lg sm:text-xl`}></i>
           </div>
-          <div className="ml-3">
-            <h3 className="text-lg font-semibold text-gray-900">{channel.name}</h3>
-            <p className="text-sm text-gray-500">{channel.memberCount}+ members</p>
+          <div className="ml-3 min-w-0 flex-1">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{channel.name}</h3>
+            <p className="text-xs sm:text-sm text-gray-500">{channel.memberCount}+ members</p>
           </div>
         </div>
         
-        <p className="text-gray-600 mb-4 text-sm line-clamp-3">
+        <p className="text-gray-600 mb-4 text-xs sm:text-sm line-clamp-3">
           {channel.description}
         </p>
         
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-2xl font-bold text-primary">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="text-xl sm:text-2xl font-bold text-primary">
                 {formatCurrency(channel.price)}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-xs sm:text-sm text-gray-500">
                 per {channel.subscriptionType || 'month'}
               </div>
             </div>
-            <Badge variant="secondary" className="bg-green-100 text-green-800">
+            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs whitespace-nowrap flex-shrink-0">
               Auto-renew
             </Badge>
           </div>

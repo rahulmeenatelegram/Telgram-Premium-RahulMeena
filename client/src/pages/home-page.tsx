@@ -108,60 +108,60 @@ export default function HomePage() {
           </div>
           
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="glass-effect p-8 rounded-3xl border border-white/5 animate-pulse">
-                  <div className="h-32 bg-white/5 rounded-2xl mb-6" />
-                  <div className="h-4 bg-white/5 rounded mb-3" />
-                  <div className="h-3 bg-white/5 rounded w-2/3 mb-6" />
-                  <div className="h-10 bg-white/5 rounded-full" />
+                <div key={i} className="glass-effect p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-white/5 animate-pulse w-full max-w-full">
+                  <div className="h-24 sm:h-28 md:h-32 bg-white/5 rounded-xl sm:rounded-2xl mb-4 sm:mb-6" />
+                  <div className="h-3 sm:h-4 bg-white/5 rounded mb-2 sm:mb-3" />
+                  <div className="h-3 bg-white/5 rounded w-2/3 mb-4 sm:mb-6" />
+                  <div className="h-8 sm:h-10 bg-white/5 rounded-full" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {featuredChannels.map((channel, index) => (
                 <Card 
                   key={channel.id}
-                  className={`glass-effect border-white/5 rounded-3xl overflow-hidden group card-hover ${
+                  className={`glass-effect border-white/5 rounded-2xl sm:rounded-3xl overflow-hidden group card-hover w-full max-w-full ${
                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                   }`}
                   style={{ transitionDelay: `${index * 100}ms` }}
                 >
-                  <div className="p-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-primary flex items-center justify-center">
-                        <Zap className="w-6 h-6 text-white" />
+                  <div className="p-4 sm:p-6 md:p-8">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-primary flex items-center justify-center flex-shrink-0">
+                        <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
-                      <Badge variant="secondary" className="text-xs font-light">
+                      <Badge variant="secondary" className="text-xs font-light whitespace-nowrap">
                         ₹{channel.price}/mo
                       </Badge>
                     </div>
                     
-                    <h3 className="text-xl font-medium mb-3 group-hover:text-primary transition-colors">
+                    <h3 className="text-lg sm:text-xl font-medium mb-2 sm:mb-3 group-hover:text-primary transition-colors">
                       {channel.name}
                     </h3>
                     
-                    <p className="text-sm text-muted-foreground font-light mb-6 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-muted-foreground font-light mb-4 sm:mb-6 leading-relaxed line-clamp-3">
                       {channel.description}
                     </p>
                     
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-6">
-                      <div className="flex items-center">
-                        <Users className="w-3 h-3 mr-1" />
-                        {channel.memberCount?.toLocaleString()} members
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-4 sm:mb-6">
+                      <div className="flex items-center min-w-0 flex-1">
+                        <Users className="w-3 h-3 mr-1 flex-shrink-0" />
+                        <span className="truncate">{channel.memberCount?.toLocaleString()} members</span>
                       </div>
-                      <div className="w-2 h-2 rounded-full bg-green-400" />
+                      <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0 ml-2" />
                     </div>
                     
                     <Button 
                       variant="outline" 
-                      className="w-full glass-effect border-white/10 hover:border-white/20 font-light group"
+                      className="w-full glass-effect border-white/10 hover:border-white/20 font-light group text-sm sm:text-base"
                       asChild
                     >
                       <Link href={`/payment?channel=${channel.slug}`}>
                         Subscribe Now
-                        <ArrowUpRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                        <ArrowUpRight className="ml-2 w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </Link>
                     </Button>
                   </div>
