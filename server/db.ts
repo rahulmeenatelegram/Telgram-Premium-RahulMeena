@@ -11,5 +11,24 @@ if (!databaseUrl) {
   );
 }
 
-export const pool = new Pool({ connectionString: databaseUrl });
-export const db = drizzle(pool, { schema });
+export const pool = new Pool({ 
+  connectionString: databaseUrl,
+  ssl: { rejectUnauthorized: false }
+});
+
+// Add query logging to identify the "No rows" issue
+pool.on('error', (err) => {
+  console.error('PostgreSQL pool error:', err);
+});
+
+export const db = drizzle(pool, { 
+  schema,
+  logger: {
+    logQuery: (query, params) => {
+      console.log('SQL Query:', query);
+      if (params && params.length > 0) {
+        console.log('SQL Params:', params);
+      }
+    }
+  }
+});

@@ -369,10 +369,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAdminWalletTransactions(limit: number = 50): Promise<AdminWalletTransaction[]> {
-    return await db.select()
-      .from(adminWalletTransactions)
-      .orderBy(desc(adminWalletTransactions.createdAt))
-      .limit(limit);
+    try {
+      console.log(`Fetching admin wallet transactions with limit ${limit}`);
+      const transactions = await db.select()
+        .from(adminWalletTransactions)
+        .orderBy(desc(adminWalletTransactions.createdAt))
+        .limit(limit);
+      console.log(`Found ${transactions.length} admin wallet transactions`);
+      return transactions;
+    } catch (error) {
+      console.error('Error fetching admin wallet transactions:', error);
+      throw error;
+    }
   }
 
   async createAdminWithdrawal(withdrawal: InsertAdminWithdrawal): Promise<AdminWithdrawal> {
