@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.CUSTOMER_DATABASE_URL;
 console.log('Database URL:', databaseUrl ? databaseUrl.substring(0, 50) + '...' : 'Not found');
 
 const pool = new Pool({ connectionString: databaseUrl });
