@@ -22,13 +22,5 @@ pool.on('error', (err) => {
 });
 
 export const db = drizzle(pool, { 
-  schema,
-  logger: {
-    logQuery: (query, params) => {
-      console.log('SQL Query:', query);
-      if (params && params.length > 0) {
-        console.log('SQL Params:', params);
-      }
-    }
-  }
+  schema
 });
