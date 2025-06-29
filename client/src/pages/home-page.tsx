@@ -1,159 +1,231 @@
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import Navbar from "@/components/navbar";
-import ChannelCard from "@/components/channel-card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Zap, Star } from "lucide-react";
-import { Channel } from "@shared/schema";
+import { ArrowRight, Play, Users, TrendingUp, Zap, Star, ArrowUpRight } from "lucide-react";
+import { BackgroundGlow } from "@/components/background-effects";
+import type { Channel } from "@shared/schema";
 
 export default function HomePage() {
-  const { user } = useAuth();
-  
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isVisible, setIsVisible] = useState(false);
+
   const { data: channels, isLoading } = useQuery<Channel[]>({
     queryKey: ["/api/channels"],
   });
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <section className="gradient-primary text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">Subscribe to Premium Telegram Channels</h1>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
-            Get continuous access to exclusive content, trading signals, and premium communities. 
-            Flexible monthly or yearly subscriptions with autopay. Cancel anytime.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
-              <Link href="#channels">View Subscriptions</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary">
-              Start Free Trial
-            </Button>
-          </div>
-        </div>
-      </section>
+  useEffect(() => {
+    setIsVisible(true);
+    
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
 
-      {/* Featured Channels */}
-      <section id="channels" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Premium Channels</h2>
-            <p className="text-lg text-gray-600">Choose from our curated selection of high-value Telegram channels</p>
-          </div>
-          
-          {isLoading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-xl p-6 animate-pulse">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                    <div className="ml-3 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-32"></div>
-                      <div className="h-3 bg-gray-200 rounded w-20"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-2 mb-4">
-                    <div className="h-3 bg-gray-200 rounded"></div>
-                    <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="h-6 bg-gray-200 rounded w-16"></div>
-                    <div className="h-8 bg-gray-200 rounded w-20"></div>
-                  </div>
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  const featuredChannels = channels?.slice(0, 3) || [];
+  const stats = [
+    { label: "Active Channels", value: "6+", icon: Zap },
+    { label: "Happy Users", value: "10K+", icon: Users },
+    { label: "Success Rate", value: "99%", icon: TrendingUp },
+  ];
+
+  return (
+    <div className="min-h-screen relative">
+      <BackgroundGlow />
+      
+      {/* Mouse follower */}
+      <div 
+        className="fixed w-6 h-6 border border-white/20 rounded-full pointer-events-none z-50 transition-transform duration-100 ease-out mix-blend-difference"
+        style={{
+          left: mousePosition.x - 12,
+          top: mousePosition.y - 12,
+          transform: `scale(${isVisible ? 1 : 0})`,
+        }}
+      />
+
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        {/* Background Grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(120,119,198,0.03)_1px,transparent_1px)] [background-size:32px_32px]" />
+        
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+          <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div className="mb-8">
+              <Badge variant="outline" className="glass-effect border-white/10 text-sm font-light px-4 py-2">
+                <Star className="w-3 h-3 mr-2" />
+                Premium Telegram Access
+              </Badge>
+            </div>
+            
+            <h1 className="text-6xl lg:text-8xl font-extralight tracking-tight mb-8 leading-[0.9]">
+              <span className="block">unlock</span>
+              <span className="block gradient-text">premium</span>
+              <span className="block">channels</span>
+            </h1>
+            
+            <p className="text-xl lg:text-2xl text-muted-foreground font-light max-w-2xl mx-auto mb-12 leading-relaxed">
+              Access exclusive telegram channels with recurring subscriptions. 
+              Professional content, delivered seamlessly.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+              <Button 
+                size="lg" 
+                className="bg-white text-black hover:bg-white/90 px-8 py-6 text-lg font-medium rounded-full group"
+                asChild
+              >
+                <Link href="#channels">
+                  Explore Channels
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="glass-effect border-white/10 hover:border-white/20 px-8 py-6 text-lg font-light rounded-full group"
+              >
+                <Play className="mr-2 h-5 w-5" />
+                Watch Demo
+              </Button>
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+              {stats.map((stat, index) => (
+                <div 
+                  key={stat.label}
+                  className={`glass-effect p-6 rounded-2xl border border-white/5 transition-all duration-700 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`}
+                  style={{ transitionDelay: `${index * 200}ms` }}
+                >
+                  <stat.icon className="w-6 h-6 text-primary mb-3 mx-auto" />
+                  <div className="text-2xl font-light mb-1">{stat.value}</div>
+                  <div className="text-sm text-muted-foreground font-light">{stat.label}</div>
                 </div>
               ))}
             </div>
-          ) : channels && channels.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {channels.map((channel) => (
-                <ChannelCard key={channel.id} channel={channel} />
+          </div>
+        </div>
+      </section>
+
+      {/* Channels Section */}
+      <section id="channels" className="py-32">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl lg:text-6xl font-extralight tracking-tight mb-6">
+              featured channels
+            </h2>
+            <p className="text-lg text-muted-foreground font-light max-w-2xl mx-auto">
+              Carefully curated premium content for professionals
+            </p>
+          </div>
+          
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="glass-effect p-8 rounded-3xl border border-white/5 animate-pulse">
+                  <div className="h-32 bg-white/5 rounded-2xl mb-6" />
+                  <div className="h-4 bg-white/5 rounded mb-3" />
+                  <div className="h-3 bg-white/5 rounded w-2/3 mb-6" />
+                  <div className="h-10 bg-white/5 rounded-full" />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No channels available at the moment.</p>
-              <p className="text-gray-400">Check back soon for premium content!</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredChannels.map((channel, index) => (
+                <Card 
+                  key={channel.id}
+                  className={`glass-effect border-white/5 rounded-3xl overflow-hidden group card-hover ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: `${index * 100}ms` }}
+                >
+                  <div className="p-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-primary flex items-center justify-center">
+                        <Zap className="w-6 h-6 text-white" />
+                      </div>
+                      <Badge variant="secondary" className="text-xs font-light">
+                        ₹{channel.price}/mo
+                      </Badge>
+                    </div>
+                    
+                    <h3 className="text-xl font-medium mb-3 group-hover:text-primary transition-colors">
+                      {channel.name}
+                    </h3>
+                    
+                    <p className="text-sm text-muted-foreground font-light mb-6 leading-relaxed">
+                      {channel.description}
+                    </p>
+                    
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-6">
+                      <div className="flex items-center">
+                        <Users className="w-3 h-3 mr-1" />
+                        {channel.memberCount?.toLocaleString()} members
+                      </div>
+                      <div className="w-2 h-2 rounded-full bg-green-400" />
+                    </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      className="w-full glass-effect border-white/10 hover:border-white/20 font-light group"
+                      asChild
+                    >
+                      <Link href={`/payment?channel=${channel.slug}`}>
+                        Subscribe Now
+                        <ArrowUpRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </Link>
+                    </Button>
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us?</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="text-green-600 w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Instant Access</h3>
-              <p className="text-gray-600">Get immediate access to premium channels after successful payment</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="text-blue-600 w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Secure Payments</h3>
-              <p className="text-gray-600">Razorpay integration ensures safe and secure transactions</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Star className="text-purple-600 w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Premium Content</h3>
-              <p className="text-gray-600">Curated high-quality content from verified experts</p>
-            </div>
+          
+          <div className="text-center mt-16">
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="glass-effect border-white/10 hover:border-white/20 px-8 py-4 font-light rounded-full"
+            >
+              View All Channels
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-dark text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <h3 className="text-xl font-bold mb-4">TeleChannels</h3>
-              <p className="text-gray-300 mb-4">
-                Your gateway to premium Telegram content. Access exclusive channels with instant activation and secure payments.
-              </p>
-              <div className="flex space-x-4">
-                <Badge variant="outline" className="text-gray-300 border-gray-600">Telegram</Badge>
-                <Badge variant="outline" className="text-gray-300 border-gray-600">Twitter</Badge>
-                <Badge variant="outline" className="text-gray-300 border-gray-600">Instagram</Badge>
-              </div>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Refund Policy</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Technical Support</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-300">
-            <p>&copy; 2024 TeleChannels. All rights reserved.</p>
+      {/* CTA Section */}
+      <section className="py-32">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8 text-center">
+          <div className="glass-effect p-16 rounded-3xl border border-white/5">
+            <h2 className="text-4xl lg:text-5xl font-extralight tracking-tight mb-6">
+              ready to get started?
+            </h2>
+            <p className="text-lg text-muted-foreground font-light mb-8 max-w-2xl mx-auto">
+              Join thousands of professionals accessing premium telegram content
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-black hover:bg-white/90 px-8 py-6 text-lg font-medium rounded-full"
+              asChild
+            >
+              <Link href="/auth">
+                Start Your Journey
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
-      </footer>
+      </section>
     </div>
   );
 }
