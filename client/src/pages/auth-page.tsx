@@ -1,27 +1,20 @@
 import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/use-auth";
-import { FaGoogle } from "react-icons/fa";
-import { useLocation } from "wouter";
-import { ArrowLeft, Shield, Zap, Star, Mail, Lock } from "lucide-react";
-import { Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { insertUserSchema } from "@shared/schema";
 import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Link } from "wouter";
+import { ArrowLeft, Shield, Zap, Star } from "lucide-react";
 
-const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-const registerSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+const loginSchema = insertUserSchema.pick({ email: true, password: true });
+const registerSchema = insertUserSchema.pick({ email: true, password: true }).extend({
   confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -32,9 +25,15 @@ type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { user, signInWithGoogle, signInWithEmail, registerWithEmail, isLoading } = useAuth();
+  const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("login");
+
+  // Redirect if already logged in
+  if (user) {
+    navigate("/");
+    return null;
+  }
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -53,39 +52,21 @@ export default function AuthPage() {
     },
   });
 
-  // Redirect if already authenticated
-  if (user) {
-    navigate(user.role === "admin" ? "/admin" : "/");
-    return null;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const onLogin = async (data: LoginFormData) => {
-    setIsSubmitting(true);
-    try {
-      await signInWithEmail(data.email, data.password);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onLogin = (data: LoginFormData) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        navigate("/");
+      },
+    });
   };
 
-  const onRegister = async (data: RegisterFormData) => {
-    setIsSubmitting(true);
-    try {
-      await registerWithEmail(data.email, data.password);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onRegister = (data: RegisterFormData) => {
+    const { confirmPassword, ...registerData } = data;
+    registerMutation.mutate(registerData, {
+      onSuccess: () => {
+        navigate("/");
+      },
+    });
   };
 
   return (
@@ -101,40 +82,19 @@ export default function AuthPage() {
 
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
-          {/* Left Column - Auth Form */}
+          {/* Left Column - Auth Forms */}
           <div className="w-full max-w-md mx-auto">
             <Card>
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl font-bold">Welcome to TeleChannels</CardTitle>
                 <CardDescription>
-                  Sign in to access premium Telegram channels
+                  Access premium Telegram channels with secure payments
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Google Sign-in Button */}
-                <Button
-                  onClick={signInWithGoogle}
-                  className="w-full flex items-center justify-center space-x-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                  size="lg"
-                  disabled={isSubmitting}
-                >
-                  <FaGoogle className="w-5 h-5 text-red-500" />
-                  <span>Continue with Google</span>
-                </Button>
-
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
-                  </div>
-                </div>
-
-                {/* Email/Password Tabs */}
-                <Tabs defaultValue="login" className="w-full">
+              <CardContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login">Sign In</TabsTrigger>
+                    <TabsTrigger value="login">Login</TabsTrigger>
                     <TabsTrigger value="register">Register</TabsTrigger>
                   </TabsList>
                   
@@ -146,17 +106,13 @@ export default function AuthPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Email</FormLabel>
+                              <FormLabel>Email Address</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    className="pl-10"
-                                    {...field}
-                                  />
-                                </div>
+                                <Input
+                                  type="email"
+                                  placeholder="your@email.com"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -169,15 +125,11 @@ export default function AuthPage() {
                             <FormItem>
                               <FormLabel>Password</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="pl-10"
-                                    {...field}
-                                  />
-                                </div>
+                                <Input
+                                  type="password"
+                                  placeholder="••••••••"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -186,9 +138,9 @@ export default function AuthPage() {
                         <Button
                           type="submit"
                           className="w-full"
-                          disabled={isSubmitting}
+                          disabled={loginMutation.isPending}
                         >
-                          {isSubmitting ? "Signing in..." : "Sign In"}
+                          {loginMutation.isPending ? "Logging in..." : "Login"}
                         </Button>
                       </form>
                     </Form>
@@ -202,17 +154,13 @@ export default function AuthPage() {
                           name="email"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Email</FormLabel>
+                              <FormLabel>Email Address</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    type="email"
-                                    placeholder="your@email.com"
-                                    className="pl-10"
-                                    {...field}
-                                  />
-                                </div>
+                                <Input
+                                  type="email"
+                                  placeholder="your@email.com"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -225,15 +173,11 @@ export default function AuthPage() {
                             <FormItem>
                               <FormLabel>Password</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="pl-10"
-                                    {...field}
-                                  />
-                                </div>
+                                <Input
+                                  type="password"
+                                  placeholder="••••••••"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -246,15 +190,11 @@ export default function AuthPage() {
                             <FormItem>
                               <FormLabel>Confirm Password</FormLabel>
                               <FormControl>
-                                <div className="relative">
-                                  <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="pl-10"
-                                    {...field}
-                                  />
-                                </div>
+                                <Input
+                                  type="password"
+                                  placeholder="••••••••"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -263,19 +203,14 @@ export default function AuthPage() {
                         <Button
                           type="submit"
                           className="w-full"
-                          disabled={isSubmitting}
+                          disabled={registerMutation.isPending}
                         >
-                          {isSubmitting ? "Creating account..." : "Create Account"}
+                          {registerMutation.isPending ? "Creating Account..." : "Create Account"}
                         </Button>
                       </form>
                     </Form>
                   </TabsContent>
                 </Tabs>
-                
-                <div className="text-center text-sm text-gray-600">
-                  <p>By signing in, you agree to our Terms of Service</p>
-                  <p className="mt-1">and Privacy Policy</p>
-                </div>
               </CardContent>
             </Card>
           </div>

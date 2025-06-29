@@ -1,18 +1,18 @@
-# TeleChannels - Firebase-Based Telegram Channel Access Platform
+# TeleChannels - Telegram Channel Access Platform
 
 ## Overview
 
-TeleChannels is a full-stack subscription-based web application that provides recurring access to premium Telegram channels. The platform now uses Firebase for authentication and database, with an integrated admin wallet system for payment management through Razorpay.
+TeleChannels is a full-stack subscription-based web application that provides recurring access to premium Telegram channels. The platform handles subscription billing with autopay through Razorpay, manages user authentication, and provides admin tools for subscription management and analytics.
 
 ## System Architecture
 
-The application follows a Firebase-first architecture with complete client-side data management:
+The application follows a monorepo structure with clear separation between client, server, and shared code:
 
 - **Frontend**: React with TypeScript, using Vite for development and build
-- **Authentication**: Firebase Authentication with Google OAuth
-- **Database**: Firebase Firestore for real-time data storage
-- **Admin Wallet**: Comprehensive wallet system for payment tracking and withdrawals
-- **Payment Processing**: Razorpay integration for handling transactions with wallet credits
+- **Backend**: Express.js with TypeScript for API and authentication
+- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
+- **Authentication**: Passport.js with local strategy and session management
+- **Payment Processing**: Razorpay integration for handling transactions
 - **UI Framework**: Tailwind CSS with Radix UI components via shadcn/ui
 
 ## Key Components
@@ -20,59 +20,57 @@ The application follows a Firebase-first architecture with complete client-side 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript and Vite bundler
 - **Routing**: Wouter for lightweight client-side routing
-- **State Management**: TanStack Query (React Query) for Firebase data management
+- **State Management**: TanStack Query (React Query) for server state management
 - **UI Components**: shadcn/ui component library built on Radix UI primitives
 - **Styling**: Tailwind CSS with custom design tokens and dark mode support
 - **Forms**: React Hook Form with Zod validation
 
-### Firebase Architecture
-- **Authentication**: Firebase Auth with Google OAuth provider
-- **Database**: Cloud Firestore for real-time document storage
-- **Security**: Firebase Security Rules for data access control
-- **Hosting**: Client-side only architecture with direct Firebase integration
+### Backend Architecture
+- **Runtime**: Node.js with Express.js framework
+- **Language**: TypeScript with ES modules
+- **Authentication**: Passport.js with local strategy using scrypt for password hashing
+- **Session Management**: Express sessions with PostgreSQL store
+- **Database Layer**: Drizzle ORM with Neon serverless PostgreSQL
+- **Payment Integration**: Razorpay for handling order creation and payment verification
 
-### Admin Wallet System
-- **Wallet Management**: Comprehensive balance tracking and transaction history
-- **Payment Integration**: Razorpay for payment processing with automatic wallet credits
-- **Withdrawal System**: Multiple withdrawal methods (UPI, Bank Transfer, Digital Wallet)
-- **Analytics**: Real-time revenue tracking and user metrics
-
-### Firestore Collections
-The application uses these main collections:
-- **users**: User profiles with role-based access (user/admin)
-- **channels**: Telegram channel definitions with subscription pricing
-- **payments**: Payment transaction records with Razorpay integration
-- **subscriptions**: Active recurring subscriptions with billing management
-- **adminWallet**: Central wallet for tracking admin earnings
-- **adminWalletTransactions**: Detailed transaction history for wallet operations
-- **adminWithdrawals**: Withdrawal requests and processing status
+### Database Schema
+The application uses six main tables:
+- **users**: User accounts with role-based access (user/admin)
+- **channels**: Telegram channel definitions with subscription pricing and billing periods
+- **subscriptions**: Active recurring subscriptions with billing schedules and autopay management
+- **payments**: Payment transaction records including subscription payments with Razorpay integration
+- **purchases**: User channel access records with generated access links
+- **withdrawals**: Admin withdrawal requests and processing
 
 ## Data Flow
 
-1. **User Authentication**: Google OAuth sign-in via Firebase Authentication
-2. **Channel Discovery**: Users browse available subscription channels stored in Firestore
-3. **Subscription Process**: Users select channels and initiate payment through Razorpay
-4. **Payment Processing**: Razorpay handles payment with webhook integration
-5. **Wallet Credit**: Successful payments automatically credit the admin wallet
-6. **Access Provisioning**: Users receive Telegram access links upon payment confirmation
-7. **Admin Dashboard**: Real-time analytics and wallet management through Firebase queries
-8. **Withdrawal System**: Admins can request withdrawals with multiple payment methods
+1. **Channel Discovery**: Users browse available subscription channels on the homepage
+2. **Subscription Process**: Users select a channel, choose billing period (monthly/yearly), provide email
+3. **Subscription Creation**: Backend creates subscription record with billing schedule
+4. **Payment Processing**: Frontend handles Razorpay payment modal with autopay setup
+5. **Payment Verification**: Backend verifies payment signature and activates subscription
+6. **Access Provisioning**: System provides unique Telegram access link with recurring billing
+7. **Autopay Management**: System tracks billing cycles and processes automatic renewals
+8. **Admin Management**: Admins can manage subscriptions, view analytics, and process withdrawals
 
 ## External Dependencies
-
-### Firebase Services
-- **Firebase Authentication**: Google OAuth provider for user authentication
-- **Cloud Firestore**: NoSQL document database for real-time data storage
-- Environment variables: `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_APP_ID`
 
 ### Payment Processing
 - **Razorpay**: Primary payment gateway for handling UPI and card transactions
 - Environment variables: `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`
 
+### Database
+- **Neon PostgreSQL**: Serverless PostgreSQL database
+- Environment variable: `DATABASE_URL`
+
+### Session Management
+- **PostgreSQL Session Store**: Sessions stored in database for persistence
+- Environment variable: `SESSION_SECRET`
+
 ### UI Components
 - **Radix UI**: Accessible component primitives
 - **Lucide React**: Icon library
-- **React Icons**: Additional icon sets including Font Awesome
+- **Font Awesome**: Icon classes for channel categorization
 
 ## Deployment Strategy
 
@@ -92,19 +90,11 @@ The application is configured for deployment on Replit with autoscaling:
 
 ## Changelog
 
+Changelog:
 - June 26, 2025. Initial setup
 - June 26, 2025. Fixed authentication system to use email-based login, resolved Razorpay payment integration, added test channel for 2 rupees
 - June 26, 2025. Enhanced admin dashboard with working withdrawal system, fixed validation errors, admin role assigned to main user
 - June 26, 2025. Converted to subscription-based autopay platform with recurring billing, monthly/yearly options, subscription management, and cancel-anytime functionality
-- June 29, 2025. **Major Architecture Migration**: Completely migrated from PostgreSQL to Firebase
-  - Implemented Firebase Authentication with Google OAuth
-  - Migrated all data storage to Cloud Firestore
-  - Built comprehensive admin wallet system with real-time balance tracking
-  - Added multi-method withdrawal system (UPI, Bank Transfer, Digital Wallet)
-  - Created Firebase-based analytics dashboard
-  - Simplified authentication flow with single Google sign-in
-  - Enhanced admin-only access controls
-  - Improved real-time data synchronization
 
 ## User Preferences
 
