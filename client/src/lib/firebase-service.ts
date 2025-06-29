@@ -176,7 +176,7 @@ export const createPayment = async (paymentData: InsertPayment): Promise<Payment
 };
 
 export const updatePayment = async (id: string, updates: Partial<Payment>): Promise<void> => {
-  const updateData = { ...updates };
+  const updateData: any = { ...updates };
   if (updateData.completedAt) {
     updateData.completedAt = serverTimestamp();
   }
@@ -430,7 +430,7 @@ export const getAdminWithdrawals = async (): Promise<AdminWithdrawal[]> => {
 };
 
 export const updateAdminWithdrawal = async (id: string, updates: Partial<AdminWithdrawal>): Promise<void> => {
-  const updateData = { ...updates };
+  const updateData: any = { ...updates };
   if (updateData.completedAt) {
     updateData.completedAt = serverTimestamp();
   }

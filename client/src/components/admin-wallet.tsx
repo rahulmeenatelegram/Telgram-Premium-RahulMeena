@@ -58,13 +58,28 @@ export default function AdminWalletComponent() {
     },
   });
 
-  // Create withdrawal mutation
-  const createWithdrawalMutation = useMutation({
-    mutationFn: createAdminWithdrawal,
-    onSuccess: () => {
+  // Instant withdrawal mutation
+  const instantWithdrawalMutation = useMutation({
+    mutationFn: async (data: WithdrawalFormData) => {
+      const response = await fetch("/api/admin/instant-withdrawal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Withdrawal failed");
+      }
+
+      return await response.json();
+    },
+    onSuccess: (result) => {
       toast({
-        title: "Withdrawal requested",
-        description: "Your withdrawal request has been submitted successfully.",
+        title: "Withdrawal Processed",
+        description: `Instant withdrawal successful! ${result.utr ? `UTR: ${result.utr}` : `Payout ID: ${result.payoutId}`}`,
       });
       setIsWithdrawModalOpen(false);
       form.reset();
@@ -73,28 +88,10 @@ export default function AdminWalletComponent() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Withdrawal failed",
+        title: "Withdrawal Failed",
         description: error.message,
         variant: "destructive",
       });
-    },
-  });
-
-  // Process withdrawal mutation (for demo purposes)
-  const processWithdrawalMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await updateAdminWithdrawal(id, { 
-        status: "completed", 
-        completedAt: new Date() 
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Withdrawal processed",
-        description: "Withdrawal has been marked as completed.",
-      });
-      refetchWithdrawals();
-      refetchWallet();
     },
   });
 
@@ -107,7 +104,7 @@ export default function AdminWalletComponent() {
       });
       return;
     }
-    createWithdrawalMutation.mutate(data);
+    instantWithdrawalMutation.mutate(data);
   };
 
   const getStatusBadge = (status: string) => {
@@ -316,8 +313,8 @@ export default function AdminWalletComponent() {
                     <Button type="button" variant="outline" onClick={() => setIsWithdrawModalOpen(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={createWithdrawalMutation.isPending}>
-                      {createWithdrawalMutation.isPending ? "Processing..." : "Request Withdrawal"}
+                    <Button type="submit" disabled={instantWithdrawalMutation.isPending}>
+                      {instantWithdrawalMutation.isPending ? "Processing..." : "Process Instant Withdrawal"}
                     </Button>
                   </div>
                 </form>
@@ -395,14 +392,10 @@ export default function AdminWalletComponent() {
                   <TableCell>{getStatusBadge(withdrawal.status)}</TableCell>
                   <TableCell>{new Date(withdrawal.requestedAt).toLocaleDateString()}</TableCell>
                   <TableCell>
-                    {withdrawal.status === "pending" && (
-                      <Button
-                        size="sm"
-                        onClick={() => processWithdrawalMutation.mutate(withdrawal.id)}
-                        disabled={processWithdrawalMutation.isPending}
-                      >
-                        Mark Complete
-                      </Button>
+                    {withdrawal.completedAt && (
+                      <span className="text-sm text-muted-foreground">
+                        {new Date(withdrawal.completedAt).toLocaleString()}
+                      </span>
                     )}
                   </TableCell>
                 </TableRow>

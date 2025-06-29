@@ -1,64 +1,67 @@
 import { createChannel } from "./firebase-service";
-import type { InsertChannel } from "@shared/firebase-types";
 
-const sampleChannels: InsertChannel[] = [
-  {
-    name: "Premium Trading Signals",
-    slug: "premium-trading-signals",
-    description: "Get exclusive trading signals from professional traders with 85% accuracy rate. Daily analysis and market insights.",
-    price: 299,
-    subscriptionType: "monthly",
-    telegramLink: "https://t.me/+premium_trading_signals_demo",
-    memberCount: 1250,
-    icon: "fas fa-chart-line",
-    isActive: true,
-  },
-  {
-    name: "Crypto Investment Club",
-    slug: "crypto-investment-club",
-    description: "Advanced cryptocurrency investment strategies and portfolio management from industry experts.",
-    price: 499,
-    subscriptionType: "monthly",
-    telegramLink: "https://t.me/+crypto_investment_club_demo",
-    memberCount: 890,
-    icon: "fab fa-bitcoin",
-    isActive: true,
-  },
-  {
-    name: "Stock Market Pro",
-    slug: "stock-market-pro",
-    description: "Professional stock market analysis, swing trading strategies, and market psychology insights.",
-    price: 2999,
-    subscriptionType: "yearly",
-    telegramLink: "https://t.me/+stock_market_pro_demo",
-    memberCount: 567,
-    icon: "fas fa-trending-up",
-    isActive: true,
-  },
-  {
-    name: "Options Trading Mastery",
-    slug: "options-trading-mastery",
-    description: "Learn advanced options trading strategies and risk management techniques from certified traders.",
-    price: 799,
-    subscriptionType: "monthly",
-    telegramLink: "https://t.me/+options_trading_mastery_demo",
-    memberCount: 423,
-    icon: "fas fa-cogs",
-    isActive: true,
-  },
-];
+// Seed data for testing the Firebase-based platform
+export async function seedTestData() {
+  try {
+    // Create test channels
+    const testChannels = [
+      {
+        name: "Premium Trading Signals",
+        slug: "premium-trading",
+        description: "Get exclusive trading signals and market analysis from expert traders. Join our community of successful traders!",
+        price: 299,
+        subscriptionType: "monthly" as const,
+        telegramLink: "https://t.me/+testlink1",
+        memberCount: 1500,
+        icon: "📈",
+        isActive: true,
+      },
+      {
+        name: "Crypto News VIP",
+        slug: "crypto-news-vip",
+        description: "Breaking crypto news, insider information, and market updates before anyone else.",
+        price: 499,
+        subscriptionType: "monthly" as const,
+        telegramLink: "https://t.me/+testlink2",
+        memberCount: 2300,
+        icon: "🚀",
+        isActive: true,
+      },
+      {
+        name: "Stock Market Mastery",
+        slug: "stock-mastery",
+        description: "Learn advanced stock trading strategies and get daily market insights from professionals.",
+        price: 1999,
+        subscriptionType: "yearly" as const,
+        telegramLink: "https://t.me/+testlink3",
+        memberCount: 850,
+        icon: "💹",
+        isActive: true,
+      },
+    ];
 
-export const seedChannels = async () => {
-  console.log("Seeding channels...");
-  
-  for (const channel of sampleChannels) {
-    try {
-      await createChannel(channel);
-      console.log(`Created channel: ${channel.name}`);
-    } catch (error) {
-      console.error(`Error creating channel ${channel.name}:`, error);
+    // Create channels (only if running in browser and user is authenticated)
+    if (typeof window !== "undefined") {
+      for (const channelData of testChannels) {
+        try {
+          await createChannel(channelData);
+          console.log(`Created test channel: ${channelData.name}`);
+        } catch (error) {
+          console.log(`Channel ${channelData.name} may already exist:`, error);
+        }
+      }
     }
+
+    console.log("Test data seeding completed!");
+  } catch (error) {
+    console.error("Error seeding test data:", error);
   }
-  
-  console.log("Channel seeding completed!");
-};
+}
+
+// Auto-seed data on first load for demo purposes
+if (typeof window !== "undefined") {
+  // Run seeding after a short delay to ensure Firebase is initialized
+  setTimeout(() => {
+    seedTestData();
+  }, 2000);
+}

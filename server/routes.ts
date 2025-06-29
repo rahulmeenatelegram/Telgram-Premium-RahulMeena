@@ -438,6 +438,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Process instant withdrawal with Razorpay Payouts
+  app.post("/api/admin/instant-withdrawal", async (req, res) => {
+    try {
+      const { amount, withdrawalMethod, accountDetails } = req.body;
+      
+      // Validate request data
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+      
+      if (!withdrawalMethod || !["bank_account", "upi"].includes(withdrawalMethod)) {
+        return res.status(400).json({ message: "Invalid withdrawal method" });
+      }
+      
+      if (!accountDetails) {
+        return res.status(400).json({ message: "Account details required" });
+      }
+
+      // Check if there's sufficient balance
+      const currentBalance = await storage.getAvailableBalance();
+      if (currentBalance < amount) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      // Import Razorpay service
+      const { RazorpayPayoutService } = await import("./razorpay");
+      const { FirebaseAdminService } = await import("./firebase-admin");
+      
+      // Generate reference ID
+      const referenceId = `withdrawal_${Date.now()}`;
+      
+      // Process instant withdrawal through Razorpay Payouts
+      const payoutResult = await RazorpayPayoutService.processInstantWithdrawal(
+        amount,
+        withdrawalMethod,
+        accountDetails,
+        "admin@telechannels.com", // Admin email
+        referenceId
+      );
+
+      if (!payoutResult.success) {
+        return res.status(400).json({ 
+          message: "Withdrawal failed", 
+          error: payoutResult.error 
+        });
+      }
+
+      // Debit the admin wallet
+      await FirebaseAdminService.updateWalletBalance(
+        amount,
+        "debit",
+        `Instant withdrawal - ${withdrawalMethod}`,
+        payoutResult.payoutId
+      );
+
+      // Create instant withdrawal record
+      const withdrawalId = await FirebaseAdminService.createInstantWithdrawal(
+        amount,
+        withdrawalMethod,
+        accountDetails,
+        payoutResult.payoutId!,
+        payoutResult.utr
+      );
+
+      res.json({
+        success: true,
+        message: "Withdrawal processed successfully",
+        withdrawalId,
+        payoutId: payoutResult.payoutId,
+        utr: payoutResult.utr,
+        amount,
+      });
+    } catch (error: any) {
+      console.error("Error processing instant withdrawal:", error);
+      res.status(500).json({ 
+        message: "Failed to process withdrawal", 
+        error: error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
