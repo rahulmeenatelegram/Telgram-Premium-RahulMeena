@@ -20,16 +20,39 @@ After deployment, your website will be available at: `[YOUR-REPL-NAME].replit.ap
 4. **Analytics**: Revenue tracking and user insights
 5. **Withdrawal System**: Admin can withdraw earnings
 
+## Database Setup Options
+
+Your customer has several options for the database:
+
+### Option 1: Neon (Recommended - Free Tier Available)
+- Sign up at https://neon.tech
+- Create a new PostgreSQL database
+- Copy the connection string as `DATABASE_URL`
+
+### Option 2: Supabase (Free Tier Available)
+- Sign up at https://supabase.com
+- Create a new project
+- Use the PostgreSQL connection string as `DATABASE_URL`
+
+### Option 3: Railway/Render/Other Hosting
+- Most hosting providers offer PostgreSQL databases
+- Get the connection string from your provider
+
+### Option 4: Self-hosted PostgreSQL
+- Install PostgreSQL on their server
+- Create database and connection string
+
 ## Environment Variables Required
 Your customer will need to set these in their hosting environment:
-- `DATABASE_URL`: PostgreSQL database connection
-- `RAZORPAY_KEY_ID`: Razorpay public key
-- `RAZORPAY_KEY_SECRET`: Razorpay secret key
-- `SESSION_SECRET`: Session encryption key
+- `DATABASE_URL`: PostgreSQL connection string (from chosen database provider)
+- `RAZORPAY_KEY_ID`: Razorpay public key (from Razorpay dashboard)
+- `RAZORPAY_KEY_SECRET`: Razorpay secret key (from Razorpay dashboard)
+- `SESSION_SECRET`: Random string for session encryption (generate any random 32+ character string)
 
-## Database
-- **Type**: PostgreSQL (Neon serverless)
-- **Setup**: Database tables are automatically created
+## Database Setup
+- **Type**: PostgreSQL (any provider)
+- **Auto-setup**: Database tables are created automatically when the app first runs
+- **Schema**: Defined in the code, no manual setup needed
 - **Management**: Use admin dashboard for content management
 
 ## Technical Support
