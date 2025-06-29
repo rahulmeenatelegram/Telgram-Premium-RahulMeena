@@ -43,8 +43,10 @@ Your customer has several options for the database:
 - Create database and connection string
 
 ## Environment Variables Required
-Your customer will need to set these in their hosting environment:
-- `DATABASE_URL`: PostgreSQL connection string (from chosen database provider)
+✅ **ALREADY CONFIGURED**: The system is now using your customer's database!
+
+When deploying to production, your customer will need:
+- `CUSTOMER_DATABASE_URL`: ✅ Already set and working
 - `RAZORPAY_KEY_ID`: Razorpay public key (from Razorpay dashboard)
 - `RAZORPAY_KEY_SECRET`: Razorpay secret key (from Razorpay dashboard)
 - `SESSION_SECRET`: Random string for session encryption (generate any random 32+ character string)
