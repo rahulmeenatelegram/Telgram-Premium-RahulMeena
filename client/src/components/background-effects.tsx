@@ -44,32 +44,37 @@ export function FloatingParticles() {
 export function BackgroundGlow() {
   return (
     <>
-      {/* Animated gradient orbs - Light mode colorful */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Pink gradient orb */}
+      {/* Light mode - subtle corner gradients */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden dark:hidden">
+        {/* Top left corner */}
         <div 
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-pink-300/12 via-rose-200/8 to-transparent rounded-full blur-3xl animate-pulse-slow"
+          className="absolute -top-32 -left-32 w-64 h-64 bg-gradient-to-br from-pink-300/8 to-transparent rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: '0s' }}
         />
-        {/* Blue gradient orb */}
+        {/* Top right corner */}
         <div 
-          className="absolute top-1/2 -left-40 w-96 h-96 bg-gradient-to-tr from-blue-300/10 via-sky-200/6 to-transparent rounded-full blur-3xl animate-pulse-slow"
+          className="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-bl from-blue-300/6 to-transparent rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: '2s' }}
         />
-        {/* Green gradient orb */}
+        {/* Bottom left corner */}
         <div 
-          className="absolute -bottom-40 right-1/3 w-72 h-72 bg-gradient-to-tl from-green-300/8 via-emerald-200/5 to-transparent rounded-full blur-3xl animate-pulse-slow"
+          className="absolute -bottom-32 -left-32 w-64 h-64 bg-gradient-to-tr from-green-300/5 to-transparent rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: '4s' }}
         />
-        {/* Orange gradient orb */}
+        {/* Bottom right corner */}
         <div 
-          className="absolute top-20 left-1/4 w-64 h-64 bg-gradient-to-br from-orange-300/6 via-amber-200/4 to-transparent rounded-full blur-3xl animate-pulse-slow"
+          className="absolute -bottom-32 -right-32 w-64 h-64 bg-gradient-to-tl from-orange-300/7 to-transparent rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: '1s' }}
         />
-        {/* Purple gradient orb */}
+        {/* Left side */}
         <div 
-          className="absolute bottom-32 left-10 w-80 h-80 bg-gradient-to-tr from-purple-300/7 via-violet-200/4 to-transparent rounded-full blur-3xl animate-pulse-slow"
+          className="absolute top-1/2 -left-24 w-48 h-48 bg-gradient-to-r from-purple-300/4 to-transparent rounded-full blur-3xl animate-pulse-slow"
           style={{ animationDelay: '3s' }}
+        />
+        {/* Right side */}
+        <div 
+          className="absolute top-1/3 -right-24 w-48 h-48 bg-gradient-to-l from-red-300/5 to-transparent rounded-full blur-3xl animate-pulse-slow"
+          style={{ animationDelay: '5s' }}
         />
       </div>
        
