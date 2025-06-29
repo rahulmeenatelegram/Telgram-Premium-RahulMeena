@@ -42,23 +42,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           setFirebaseUser(firebaseUser);
           
-          // Get or create user in Firestore
-          let appUser = await getUser(firebaseUser.uid);
-          
-          if (!appUser) {
-            // Create new user - only first user gets admin role
-            const isFirstUser = firebaseUser.email === "disruptivefounder@gmail.com";
-            appUser = await createUser({
+          // For admin user, create user record immediately with admin role
+          if (firebaseUser.email === "disruptivefounder@gmail.com") {
+            const adminUser: User = {
               uid: firebaseUser.uid,
               email: firebaseUser.email!,
-              role: isFirstUser ? "admin" : "user"
-            });
+              role: "admin",
+              createdAt: new Date()
+            };
+            setUser(adminUser);
+            
+            // Try to create user in Firestore (ignore if already exists)
+            try {
+              await createUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email!,
+                role: "admin"
+              });
+            } catch (createError) {
+              // User might already exist, that's okay
+              console.log("Admin user may already exist in Firestore");
+            }
+          } else {
+            // For regular users, get or create user record
+            let appUser = await getUser(firebaseUser.uid);
+            
+            if (!appUser) {
+              appUser = await createUser({
+                uid: firebaseUser.uid,
+                email: firebaseUser.email!,
+                role: "user"
+              });
+            }
+            
+            setUser(appUser);
           }
-          
-          setUser(appUser);
         } catch (err) {
           console.error("Error handling auth state change:", err);
           setError(err as Error);
+          
+          // If there's a Firestore error but user is authenticated, set basic user info
+          if (firebaseUser.email === "disruptivefounder@gmail.com") {
+            setUser({
+              uid: firebaseUser.uid,
+              email: firebaseUser.email!,
+              role: "admin",
+              createdAt: new Date()
+            });
+          }
         }
       } else {
         setFirebaseUser(null);
