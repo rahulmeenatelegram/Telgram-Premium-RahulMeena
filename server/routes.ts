@@ -6,6 +6,7 @@ import { z } from "zod";
 import { insertChannelSchema, insertPaymentSchema, insertWithdrawalSchema, insertSubscriptionSchema } from "@shared/schema";
 import { createHmac } from "crypto";
 import Razorpay from "razorpay";
+import { FirebaseAdminService } from "./firebase-admin";
 
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_KEY || "rzp_test_default";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || "razorpay_secret";
@@ -39,15 +40,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create subscription order
+  // Create subscription order with Firebase backend
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {
       const { channelId, email, paymentMethod, subscriptionType = "monthly" } = req.body;
       
-      const channel = await storage.getChannel(channelId);
-      if (!channel) {
+      // Get channel from Firebase Realtime Database
+      const admin = await import("firebase-admin");
+      const db = admin.database();
+      const channelSnapshot = await db.ref(`channels/${channelId}`).once('value');
+      
+      if (!channelSnapshot.exists()) {
         return res.status(404).json({ message: "Channel not found" });
       }
+      
+      const channel = channelSnapshot.val();
 
       // Calculate subscription period dates
       const currentPeriodStart = new Date();
@@ -63,33 +70,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Generate unique access link
-      const accessLink = `https://t.me/+${Math.random().toString(36).substring(2, 15)}`;
+      const accessLink = channel.telegramLink || `https://t.me/+${Math.random().toString(36).substring(2, 15)}`;
 
-      // Create subscription record
-      const subscription = await storage.createSubscription({
-        userId: req.user?.id,
+      // Create subscription record in Firebase
+      const subscriptionRef = db.ref('subscriptions').push();
+      const subscriptionData = {
+        id: subscriptionRef.key,
+        userId: req.user?.id || null,
         channelId,
         email,
         accessLink,
         status: "active",
         subscriptionType,
         amount: channel.price,
-        currentPeriodStart,
-        currentPeriodEnd,
-        nextBillingDate,
-      });
+        currentPeriodStart: currentPeriodStart.getTime(),
+        currentPeriodEnd: currentPeriodEnd.getTime(),
+        nextBillingDate: nextBillingDate.getTime(),
+        createdAt: Date.now(),
+      };
+      await subscriptionRef.set(subscriptionData);
 
-      // Create initial payment record
-      const payment = await storage.createPayment({
-        userId: req.user?.id,
+      // Create initial payment record in Firebase
+      const paymentRef = db.ref('payments').push();
+      const paymentData = {
+        id: paymentRef.key,
+        userId: req.user?.id || null,
         channelId,
-        subscriptionId: subscription.id,
+        subscriptionId: subscriptionRef.key,
         email,
         amount: channel.price,
         paymentType: "subscription",
         status: "pending",
         paymentMethod,
-      });
+        createdAt: Date.now(),
+      };
+      await paymentRef.set(paymentData);
 
       // Create Razorpay order
       const razorpay = new Razorpay({
@@ -98,16 +113,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const options = {
-        amount: Math.round(parseFloat(channel.price) * 100), // Amount in paise
+        amount: Math.round(channel.price * 100), // Amount in paise
         currency: "INR",
-        receipt: `sub_${subscription.id}_${payment.id}`,
+        receipt: `sub_${subscriptionRef.key}_${paymentRef.key}`,
         payment_capture: 1,
       };
 
       const order = await razorpay.orders.create(options);
       
-      // Update payment with Razorpay order ID
-      await storage.updatePayment(payment.id, {
+      // Update payment with Razorpay order ID in Firebase
+      await db.ref(`payments/${paymentRef.key}`).update({
         razorpayOrderId: order.id,
       });
 
@@ -116,8 +131,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: order.amount,
         currency: order.currency,
         keyId: RAZORPAY_KEY_ID,
-        paymentId: payment.id,
-        subscriptionId: subscription.id,
+        paymentId: paymentRef.key,
+        subscriptionId: subscriptionRef.key,
         subscriptionType,
         nextBillingDate: nextBillingDate.toISOString(),
       });
@@ -127,268 +142,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create Razorpay order (one-time payment - legacy)
-  app.post("/api/payments/create-order", async (req, res) => {
-    try {
-      const { channelId, email, paymentMethod } = req.body;
-      
-      const channel = await storage.getChannel(channelId);
-      if (!channel) {
-        return res.status(404).json({ message: "Channel not found" });
-      }
-
-      // Create payment record
-      const payment = await storage.createPayment({
-        userId: req.user?.id,
-        channelId,
-        email,
-        amount: channel.price,
-        status: "pending",
-        paymentMethod,
-      });
-
-      // Create Razorpay order
-      const razorpay = new Razorpay({
-        key_id: RAZORPAY_KEY_ID,
-        key_secret: RAZORPAY_KEY_SECRET,
-      });
-
-      const options = {
-        amount: Math.round(parseFloat(channel.price) * 100), // Amount in paise
-        currency: "INR",
-        receipt: `order_${payment.id}`,
-        payment_capture: 1,
-      };
-
-      const order = await razorpay.orders.create(options);
-      
-      // Update payment with Razorpay order ID
-      await storage.updatePayment(payment.id, {
-        razorpayOrderId: order.id,
-      });
-
-      res.json({
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        keyId: RAZORPAY_KEY_ID,
-        paymentId: payment.id,
-      });
-    } catch (error) {
-      console.error("Error creating order:", error);
-      res.status(500).json({ message: "Failed to create order" });
-    }
-  });
-
-  // Verify payment
+  // Payment verification with Firebase backend
   app.post("/api/payments/verify", async (req, res) => {
     try {
       const { razorpay_order_id, razorpay_payment_id, razorpay_signature, paymentId } = req.body;
-      
+
+      // Verify signature
+      const body = razorpay_order_id + "|" + razorpay_payment_id;
       const expectedSignature = createHmac("sha256", RAZORPAY_KEY_SECRET)
-        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .update(body.toString())
         .digest("hex");
 
-      if (expectedSignature !== razorpay_signature) {
-        return res.status(400).json({ message: "Invalid payment signature" });
-      }
+      const isAuthentic = expectedSignature === razorpay_signature;
 
-      // Update payment as successful
-      const payment = await storage.updatePayment(paymentId, {
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature,
-        status: "success",
-      });
+      if (isAuthentic) {
+        // Update payment status in Firebase
+        const admin = await import("firebase-admin");
+        const db = admin.database();
+        
+        await db.ref(`payments/${paymentId}`).update({
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature,
+          status: "success",
+          completedAt: Date.now(),
+        });
 
-      if (!payment) {
-        return res.status(404).json({ message: "Payment not found" });
-      }
+        // Get payment details for response
+        const paymentSnapshot = await db.ref(`payments/${paymentId}`).once('value');
+        const payment = paymentSnapshot.val();
 
-      // Get channel details
-      const channel = await storage.getChannel(payment.channelId);
-      if (!channel) {
-        return res.status(404).json({ message: "Channel not found" });
-      }
+        if (payment && payment.subscriptionId) {
+          const subscriptionSnapshot = await db.ref(`subscriptions/${payment.subscriptionId}`).once('value');
+          const subscription = subscriptionSnapshot.val();
 
-      let accessLink = channel.telegramLink;
-      let isSubscription = false;
+          // Update admin wallet balance
+          await FirebaseAdminService.updateWalletBalance(
+            payment.amount,
+            "credit",
+            `Payment for subscription ${payment.subscriptionId}`,
+            razorpay_payment_id
+          );
 
-      // Handle subscription payment
-      if (payment.subscriptionId) {
-        isSubscription = true;
-        // Get subscription details and use its access link
-        const subscription = await storage.getSubscription(payment.subscriptionId);
-        if (subscription) {
-          accessLink = subscription.accessLink;
+          // Get channel details for response
+          const channelSnapshot = await db.ref(`channels/${payment.channelId}`).once('value');
+          const channel = channelSnapshot.val();
+
+          res.json({
+            success: true,
+            accessLink: subscription?.accessLink,
+            channelName: channel?.name,
+            message: "Payment successful! Access link sent to your email."
+          });
+        } else {
+          res.json({
+            success: true,
+            message: "Payment successful!"
+          });
         }
+      } else {
+        res.status(400).json({ success: false, message: "Invalid signature" });
       }
-
-      // Create purchase record with access link
-      const purchase = await storage.createPurchase({
-        userId: payment.userId,
-        channelId: payment.channelId,
-        paymentId: payment.id,
-        email: payment.email,
-        accessLink,
-        isActive: true,
-      });
-
-      res.json({
-        success: true,
-        accessLink,
-        channelName: channel.name,
-        purchaseId: purchase.id,
-        isSubscription,
-        subscriptionId: payment.subscriptionId,
-      });
     } catch (error) {
       console.error("Error verifying payment:", error);
-      res.status(500).json({ message: "Failed to verify payment" });
+      res.status(500).json({ success: false, message: "Payment verification failed" });
     }
   });
 
-  // Get user subscriptions
-  app.get("/api/subscriptions", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
-      const subscriptions = await storage.getUserSubscriptions(req.user.id);
-      res.json(subscriptions);
-    } catch (error) {
-      console.error("Error fetching subscriptions:", error);
-      res.status(500).json({ message: "Failed to fetch subscriptions" });
-    }
-  });
-
-  // Cancel subscription
-  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
-      const subscriptionId = parseInt(req.params.id);
-      const subscription = await storage.getSubscription(subscriptionId);
-      
-      if (!subscription || subscription.userId !== req.user.id) {
-        return res.status(404).json({ message: "Subscription not found" });
-      }
-
-      const cancelledSubscription = await storage.cancelSubscription(subscriptionId);
-      res.json(cancelledSubscription);
-    } catch (error) {
-      console.error("Error cancelling subscription:", error);
-      res.status(500).json({ message: "Failed to cancel subscription" });
-    }
-  });
-
-  // Get user purchases
-  app.get("/api/purchases", async (req, res) => {
-    try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Authentication required" });
-      }
-
-      const purchases = await storage.getUserPurchases(req.user.id);
-      res.json(purchases);
-    } catch (error) {
-      console.error("Error fetching purchases:", error);
-      res.status(500).json({ message: "Failed to fetch purchases" });
-    }
-  });
-
-  // Admin routes
-  app.use("/api/admin/*", (req, res, next) => {
-    if (!req.isAuthenticated() || req.user.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-    next();
-  });
-
-  // Admin: Get all channels
-  app.get("/api/admin/channels", async (req, res) => {
-    try {
-      const channels = await storage.getAllChannels();
-      res.json(channels);
-    } catch (error) {
-      console.error("Error fetching admin channels:", error);
-      res.status(500).json({ message: "Failed to fetch channels" });
-    }
-  });
-
-  // Admin: Create channel
-  app.post("/api/admin/channels", async (req, res) => {
-    try {
-      const validatedData = insertChannelSchema.parse(req.body);
-      const channel = await storage.createChannel(validatedData);
-      res.status(201).json(channel);
-    } catch (error) {
-      console.error("Error creating channel:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid channel data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create channel" });
-    }
-  });
-
-  // Admin: Update channel
-  app.put("/api/admin/channels/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const updates = insertChannelSchema.partial().parse(req.body);
-      const channel = await storage.updateChannel(id, updates);
-      
-      if (!channel) {
-        return res.status(404).json({ message: "Channel not found" });
-      }
-      
-      res.json(channel);
-    } catch (error) {
-      console.error("Error updating channel:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid update data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to update channel" });
-    }
-  });
-
-  // Admin: Delete channel
-  app.delete("/api/admin/channels/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteChannel(id);
-      
-      if (!deleted) {
-        return res.status(404).json({ message: "Channel not found" });
-      }
-      
-      res.json({ message: "Channel deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting channel:", error);
-      res.status(500).json({ message: "Failed to delete channel" });
-    }
-  });
-
-  // Admin: Get analytics
+  // Admin routes with Firebase backend
   app.get("/api/admin/analytics", async (req, res) => {
     try {
-      const [totalUsers, totalRevenue, availableBalance, totalWithdrawn] = await Promise.all([
-        storage.getTotalUsers(),
-        storage.getTotalRevenue(),
-        storage.getAvailableBalance(),
-        storage.getTotalWithdrawn(),
-      ]);
+      const admin = await import("firebase-admin");
+      const db = admin.database();
 
-      const activeChannels = await storage.getActiveChannels();
-      
+      // Get total users
+      const usersSnapshot = await db.ref('users').once('value');
+      const users = usersSnapshot.val() || {};
+      const totalUsers = Object.keys(users).length;
+
+      // Get total revenue from payments
+      const paymentsSnapshot = await db.ref('payments').orderByChild('status').equalTo('success').once('value');
+      const payments = paymentsSnapshot.val() || {};
+      const totalRevenue = Object.values(payments).reduce((sum: number, payment: any) => sum + (payment.amount || 0), 0);
+
+      // Get admin wallet
+      const wallet = await FirebaseAdminService.getWalletBalance();
+
       res.json({
         totalUsers,
         totalRevenue,
-        availableBalance,
-        totalWithdrawn,
-        activeChannels: activeChannels.length,
+        availableBalance: wallet,
+        totalWithdrawn: 0, // Calculate from withdrawal records if needed
       });
     } catch (error) {
       console.error("Error fetching analytics:", error);
@@ -396,129 +239,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin: Get all payments
-  app.get("/api/admin/payments", async (req, res) => {
-    try {
-      const payments = await storage.getAllPayments();
-      res.json(payments);
-    } catch (error) {
-      console.error("Error fetching payments:", error);
-      res.status(500).json({ message: "Failed to fetch payments" });
-    }
-  });
-
-  // Admin: Request withdrawal
-  app.post("/api/admin/withdrawals", async (req, res) => {
-    try {
-      const validatedData = insertWithdrawalSchema.parse({
-        ...req.body,
-        amount: req.body.amount.toString(),
-        requestedBy: req.user!.id,
-      });
-      
-      const withdrawal = await storage.createWithdrawal(validatedData);
-      res.status(201).json(withdrawal);
-    } catch (error) {
-      console.error("Error creating withdrawal:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid withdrawal data", errors: error.errors });
-      }
-      res.status(500).json({ message: "Failed to create withdrawal" });
-    }
-  });
-
-  // Admin: Get all withdrawals
-  app.get("/api/admin/withdrawals", async (req, res) => {
-    try {
-      const withdrawals = await storage.getAllWithdrawals();
-      res.json(withdrawals);
-    } catch (error) {
-      console.error("Error fetching withdrawals:", error);
-      res.status(500).json({ message: "Failed to fetch withdrawals" });
-    }
-  });
-
-  // Admin: Process instant withdrawal with Razorpay Payouts
+  // Admin instant withdrawal with Razorpay Payouts
   app.post("/api/admin/instant-withdrawal", async (req, res) => {
     try {
       const { amount, withdrawalMethod, accountDetails } = req.body;
-      
-      // Validate request data
-      if (!amount || amount <= 0) {
-        return res.status(400).json({ message: "Invalid amount" });
-      }
-      
-      if (!withdrawalMethod || !["bank_account", "upi"].includes(withdrawalMethod)) {
-        return res.status(400).json({ message: "Invalid withdrawal method" });
-      }
-      
-      if (!accountDetails) {
-        return res.status(400).json({ message: "Account details required" });
+
+      // Validate admin user
+      if (!req.user || req.user.email !== 'disruptivefounder@gmail.com') {
+        return res.status(403).json({ message: "Unauthorized" });
       }
 
-      // Check if there's sufficient balance
-      const currentBalance = await storage.getAvailableBalance();
+      // Check wallet balance
+      const currentBalance = await FirebaseAdminService.getWalletBalance();
       if (currentBalance < amount) {
         return res.status(400).json({ message: "Insufficient balance" });
       }
 
-      // Import Razorpay service
-      const { RazorpayPayoutService } = await import("./razorpay");
-      const { FirebaseAdminService } = await import("./firebase-admin");
-      
-      // Generate reference ID
-      const referenceId = `withdrawal_${Date.now()}`;
-      
-      // Process instant withdrawal through Razorpay Payouts
-      const payoutResult = await RazorpayPayoutService.processInstantWithdrawal(
+      // Process instant withdrawal using Razorpay Payouts
+      const result = await FirebaseAdminService.createInstantWithdrawal(
         amount,
         withdrawalMethod,
         accountDetails,
-        "admin@telechannels.com", // Admin email
-        referenceId
+        req.user.email
       );
 
-      if (!payoutResult.success) {
-        return res.status(400).json({ 
-          message: "Withdrawal failed", 
-          error: payoutResult.error 
+      if (result.success) {
+        res.json({
+          success: true,
+          message: "Withdrawal processed successfully",
+          payoutId: result.payoutId,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.error || "Withdrawal failed",
         });
       }
-
-      // Debit the admin wallet
-      await FirebaseAdminService.updateWalletBalance(
-        amount,
-        "debit",
-        `Instant withdrawal - ${withdrawalMethod}`,
-        payoutResult.payoutId
-      );
-
-      // Create instant withdrawal record
-      const withdrawalId = await FirebaseAdminService.createInstantWithdrawal(
-        amount,
-        withdrawalMethod,
-        accountDetails,
-        payoutResult.payoutId!,
-        payoutResult.utr
-      );
-
-      res.json({
-        success: true,
-        message: "Withdrawal processed successfully",
-        withdrawalId,
-        payoutId: payoutResult.payoutId,
-        utr: payoutResult.utr,
-        amount,
-      });
-    } catch (error: any) {
-      console.error("Error processing instant withdrawal:", error);
-      res.status(500).json({ 
-        message: "Failed to process withdrawal", 
-        error: error.message 
-      });
+    } catch (error) {
+      console.error("Error processing withdrawal:", error);
+      res.status(500).json({ message: "Withdrawal processing failed" });
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  // Get recent payments
+  app.get("/api/admin/recent-payments", async (req, res) => {
+    try {
+      const admin = await import("firebase-admin");
+      const db = admin.database();
+      
+      const paymentsSnapshot = await db.ref('payments')
+        .orderByChild('createdAt')
+        .limitToLast(10)
+        .once('value');
+      
+      const payments = paymentsSnapshot.val() || {};
+      const recentPayments = Object.values(payments).reverse();
+
+      res.json(recentPayments);
+    } catch (error) {
+      console.error("Error fetching recent payments:", error);
+      res.status(500).json({ message: "Failed to fetch recent payments" });
+    }
+  });
+
+  // Get admin wallet transactions
+  app.get("/api/admin/wallet-transactions", async (req, res) => {
+    try {
+      const admin = await import("firebase-admin");
+      const db = admin.database();
+      
+      const transactionsSnapshot = await db.ref('adminWalletTransactions')
+        .orderByChild('createdAt')
+        .limitToLast(20)
+        .once('value');
+      
+      const transactions = transactionsSnapshot.val() || {};
+      const recentTransactions = Object.values(transactions).reverse();
+
+      res.json(recentTransactions);
+    } catch (error) {
+      console.error("Error fetching wallet transactions:", error);
+      res.status(500).json({ message: "Failed to fetch wallet transactions" });
+    }
+  });
+
+  // Get admin wallet balance
+  app.get("/api/admin/wallet", async (req, res) => {
+    try {
+      const balance = await FirebaseAdminService.getWalletBalance();
+      
+      res.json({
+        id: "main",
+        balance,
+        totalEarnings: balance,
+        totalWithdrawn: 0,
+        updatedAt: new Date(),
+      });
+    } catch (error) {
+      console.error("Error fetching wallet balance:", error);
+      res.status(500).json({ message: "Failed to fetch wallet balance" });
+    }
+  });
+
+  const server = createServer(app);
+  return server;
 }
