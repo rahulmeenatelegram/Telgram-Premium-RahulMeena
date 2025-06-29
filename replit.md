@@ -100,6 +100,8 @@ Changelog:
 - June 29, 2025. Connected to customer's specific Neon database endpoint "ep-falling-king-a5lefii6" with full SSL configuration and channel binding requirements
 - June 29, 2025. Implemented modern Awwwards-style UI with minimalistic design, background gradients, glass morphism effects, and floating particles for both light and dark modes
 - June 29, 2025. Renamed platform to "Onetapay" and implemented complete mobile responsiveness with optimized spacing, typography, and layout for all device sizes
+- June 29, 2025. Fixed mobile responsiveness issues - eliminated horizontal scrolling across all components, optimized tables, cards, and grid layouts for perfect mobile experience
+- June 29, 2025. Added About and Contact pages with modern design, FAQ section, contact form, and integrated navigation in navbar with active state indicators
 
 ## User Preferences
 

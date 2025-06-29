@@ -27,6 +27,31 @@ export default function Navbar() {
               </div>
             </Link>
           </div>
+
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link href="/">
+              <div className={`text-sm font-light transition-colors cursor-pointer ${
+                location === "/" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}>
+                Home
+              </div>
+            </Link>
+            <Link href="/about">
+              <div className={`text-sm font-light transition-colors cursor-pointer ${
+                location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}>
+                About
+              </div>
+            </Link>
+            <Link href="/contact">
+              <div className={`text-sm font-light transition-colors cursor-pointer ${
+                location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}>
+                Contact
+              </div>
+            </Link>
+          </div>
           
           <div className="flex items-center space-x-3 sm:space-x-6 lg:space-x-8">
             {/* Theme Toggle */}
