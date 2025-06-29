@@ -3,6 +3,8 @@ import {
   signInWithPopup, 
   signOut, 
   onAuthStateChanged, 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   User as FirebaseUser 
 } from "firebase/auth";
 import { auth, googleProvider } from "@/lib/firebase";
@@ -16,6 +18,8 @@ type AuthContextType = {
   isLoading: boolean;
   error: Error | null;
   signInWithGoogle: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<void>;
+  registerWithEmail: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
 };
@@ -82,6 +86,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithEmail = async (email: string, password: string) => {
+    try {
+      setError(null);
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error("Email sign-in failed:", err);
+      setError(err as Error);
+      toast({
+        title: "Sign-in failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const registerWithEmail = async (email: string, password: string) => {
+    try {
+      setError(null);
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error("Registration failed:", err);
+      setError(err as Error);
+      const errorMessage = err instanceof Error && err.message.includes('email-already-in-use') 
+        ? "Email is already registered. Please sign in instead."
+        : "Registration failed. Please try again.";
+      toast({
+        title: "Registration failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
+  };
+
   const logout = async () => {
     try {
       setError(null);
@@ -107,6 +144,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         error,
         signInWithGoogle,
+        signInWithEmail,
+        registerWithEmail,
         logout,
         isAdmin,
       }}
