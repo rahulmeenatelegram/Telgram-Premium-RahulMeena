@@ -97,6 +97,7 @@ Changelog:
 - June 26, 2025. Converted to subscription-based autopay platform with recurring billing, monthly/yearly options, subscription management, and cancel-anytime functionality
 - June 29, 2025. Fixed critical database connection issues - resolved "relation does not exist" errors by properly configuring Neon database connection with correct imports and WebSocket configuration
 - June 29, 2025. Successfully migrated application to use CUSTOMER_DATABASE_URL endpoint for proper handover, created all tables and sample data in customer's specified database
+- June 29, 2025. Connected to customer's specific Neon database endpoint "ep-falling-king-a5lefii6" with full SSL configuration and channel binding requirements
 
 ## User Preferences
 
