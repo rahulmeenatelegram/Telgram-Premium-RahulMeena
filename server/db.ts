@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
 
-// Use customer's database if provided, otherwise fall back to default
+// Use customer's database for handover
 const databaseUrl = process.env.CUSTOMER_DATABASE_URL;
 
 if (!databaseUrl) {
