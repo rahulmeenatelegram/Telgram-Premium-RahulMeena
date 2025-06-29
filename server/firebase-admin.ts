@@ -1,94 +1,83 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { getDatabase } from "firebase-admin/database";
 import { getAuth } from "firebase-admin/auth";
 
 // Initialize Firebase Admin SDK
 let app;
 if (getApps().length === 0) {
-  // For development, use default credentials
+  // For development, use default credentials with database URL
   app = initializeApp({
     projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID}-default-rtdb.firebaseio.com/`,
   });
 } else {
   app = getApps()[0];
 }
 
-export const adminDb = getFirestore(app);
+export const adminDb = getDatabase(app);
 export const adminAuth = getAuth(app);
 
 // Firebase service functions for server-side operations
 export class FirebaseAdminService {
   static async updateWalletBalance(amount: number, type: "credit" | "debit", description: string, reference?: string) {
-    const walletRef = adminDb.collection("adminWallet").doc("main");
+    const walletRef = adminDb.ref("adminWallet/main");
     
-    return await adminDb.runTransaction(async (transaction) => {
-      const walletDoc = await transaction.get(walletRef);
-      
-      let currentBalance = 0;
-      let totalEarnings = 0;
-      let totalWithdrawn = 0;
-      
-      if (walletDoc.exists) {
-        const data = walletDoc.data()!;
-        currentBalance = data.balance || 0;
-        totalEarnings = data.totalEarnings || 0;
-        totalWithdrawn = data.totalWithdrawn || 0;
-      }
-      
-      const newBalance = type === "credit" ? currentBalance + amount : currentBalance - amount;
-      const newTotalEarnings = type === "credit" ? totalEarnings + amount : totalEarnings;
-      const newTotalWithdrawn = type === "debit" ? totalWithdrawn + amount : totalWithdrawn;
-      
-      // Update wallet
-      transaction.set(walletRef, {
-        balance: newBalance,
-        totalEarnings: newTotalEarnings,
-        totalWithdrawn: newTotalWithdrawn,
-        updatedAt: new Date(),
-      });
-      
-      // Create transaction record
-      const transactionRef = adminDb.collection("adminWalletTransactions").doc();
-      transaction.set(transactionRef, {
-        type,
-        amount,
-        description,
-        reference,
-        balanceAfter: newBalance,
-        createdAt: new Date(),
-      });
-      
-      return {
-        balance: newBalance,
-        totalEarnings: newTotalEarnings,
-        totalWithdrawn: newTotalWithdrawn,
-      };
-    });
+    // Get current wallet data
+    const walletSnapshot = await walletRef.once('value');
+    let walletData = walletSnapshot.val() || {
+      id: "main",
+      balance: 0,
+      totalEarnings: 0,
+      totalWithdrawn: 0,
+      updatedAt: Date.now(),
+    };
+    
+    let currentBalance = walletData.balance || 0;
+    let totalEarnings = walletData.totalEarnings || 0;
+    let totalWithdrawn = walletData.totalWithdrawn || 0;
+    
+    const newBalance = type === "credit" ? currentBalance + amount : currentBalance - amount;
+    const newTotalEarnings = type === "credit" ? totalEarnings + amount : totalEarnings;
+    const newTotalWithdrawn = type === "debit" ? totalWithdrawn + amount : totalWithdrawn;
+    
+    // Update wallet
+    const updatedWallet = {
+      id: "main",
+      balance: newBalance,
+      totalEarnings: newTotalEarnings,
+      totalWithdrawn: newTotalWithdrawn,
+      updatedAt: Date.now(),
+    };
+    await walletRef.set(updatedWallet);
+    
+    // Create transaction record
+    const transactionRef = adminDb.ref("adminWalletTransactions").push();
+    const transaction = {
+      id: transactionRef.key,
+      type,
+      amount,
+      description,
+      reference,
+      balanceAfter: newBalance,
+      createdAt: Date.now(),
+    };
+    await transactionRef.set(transaction);
+    
+    return updatedWallet;
   }
 
   static async getWalletBalance(): Promise<number> {
-    const walletDoc = await adminDb.collection("adminWallet").doc("main").get();
-    
-    if (!walletDoc.exists) {
-      return 0;
-    }
-    
-    const data = walletDoc.data()!;
-    return data.balance || 0;
+    const walletRef = adminDb.ref("adminWallet/main");
+    const walletSnapshot = await walletRef.once('value');
+    const walletData = walletSnapshot.val();
+    return walletData ? walletData.balance || 0 : 0;
   }
 
   static async verifyAdminUser(uid: string): Promise<boolean> {
     try {
-      const userDoc = await adminDb.collection("users").doc(uid).get();
-      
-      if (!userDoc.exists) {
-        return false;
-      }
-      
-      const userData = userDoc.data()!;
-      return userData.role === "admin";
+      const userRecord = await adminAuth.getUser(uid);
+      return userRecord.email === 'disruptivefounder@gmail.com';
     } catch (error) {
-      console.error("Error verifying admin user:", error);
       return false;
     }
   }
@@ -97,22 +86,45 @@ export class FirebaseAdminService {
     amount: number,
     withdrawalMethod: string,
     accountDetails: any,
-    payoutId: string,
-    utr?: string
-  ) {
-    const withdrawalRef = adminDb.collection("instantWithdrawals").doc();
-    
-    await withdrawalRef.set({
-      amount,
-      withdrawalMethod,
-      accountDetails,
-      payoutId,
-      utr,
-      status: "processed",
-      requestedAt: new Date(),
-      completedAt: new Date(),
-    });
-    
-    return withdrawalRef.id;
+    adminEmail: string
+  ): Promise<{ success: boolean; payoutId?: string; error?: string }> {
+    try {
+      // Check current balance
+      const currentBalance = await this.getWalletBalance();
+      if (currentBalance < amount) {
+        return { success: false, error: "Insufficient balance" };
+      }
+
+      // For demo purposes, simulate successful withdrawal
+      // In production, integrate with actual Razorpay Payouts API
+      const mockPayoutId = `payout_${Date.now()}`;
+
+      // Debit from wallet
+      await this.updateWalletBalance(
+        amount,
+        "debit",
+        `Instant withdrawal via ${withdrawalMethod}`,
+        mockPayoutId
+      );
+
+      // Create withdrawal record
+      const withdrawalRef = adminDb.ref("adminWithdrawals").push();
+      const withdrawalData = {
+        id: withdrawalRef.key,
+        amount,
+        withdrawalMethod,
+        accountDetails,
+        status: "completed",
+        razorpayPayoutId: mockPayoutId,
+        requestedAt: Date.now(),
+        completedAt: Date.now(),
+      };
+      await withdrawalRef.set(withdrawalData);
+
+      return { success: true, payoutId: mockPayoutId };
+    } catch (error) {
+      console.error("Error creating instant withdrawal:", error);
+      return { success: false, error: "Withdrawal processing failed" };
+    }
   }
 }
