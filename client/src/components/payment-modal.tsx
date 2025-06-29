@@ -12,7 +12,7 @@ interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   channelName: string;
-  channelPrice: string;
+  channelPrice: number;
   subscriptionType?: string;
   onPayment: (data: { email: string; paymentMethod: "upi" | "card"; subscriptionType: string }) => void;
   isProcessing?: boolean;
@@ -36,11 +36,11 @@ export default function PaymentModal({
     onPayment({ email, paymentMethod, subscriptionType: selectedSubscriptionType });
   };
 
-  const formatCurrency = (amount: string) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
-    }).format(parseFloat(amount));
+    }).format(amount);
   };
 
   return (
@@ -58,8 +58,8 @@ export default function PaymentModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Channel Details */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Channel Info */}
           <div className="bg-gray-50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <h4 className="font-semibold text-gray-900">{channelName}</h4>
@@ -101,7 +101,7 @@ export default function PaymentModal({
                     <span>Yearly</span>
                     <Badge variant="outline" className="text-green-600 border-green-600">Save 16%</Badge>
                   </div>
-                  <span className="text-sm text-gray-500">{formatCurrency((parseFloat(channelPrice) * 12 * 0.84).toString())}/year</span>
+                  <span className="text-sm text-gray-500">{formatCurrency(Math.round(channelPrice * 12 * 0.84))}/year</span>
                 </Label>
               </div>
             </RadioGroup>
@@ -109,67 +109,77 @@ export default function PaymentModal({
 
           <Separator />
 
-          {/* Guest Checkout Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                required
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                No account required • We'll send your access link here
-              </p>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium mb-3 block">
-                Payment Method
-              </Label>
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={(value: "upi" | "card") => setPaymentMethod(value)}
-              >
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-primary transition-colors">
-                  <RadioGroupItem value="upi" id="upi" />
-                  <Label htmlFor="upi" className="flex items-center space-x-2 cursor-pointer flex-1">
-                    <Smartphone className="w-5 h-5" />
-                    <span>UPI Payment</span>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-primary transition-colors">
-                  <RadioGroupItem value="card" id="card" />
-                  <Label htmlFor="card" className="flex items-center space-x-2 cursor-pointer flex-1">
-                    <CreditCard className="w-5 h-5" />
-                    <span>Credit/Debit Card</span>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full py-3"
-              disabled={isProcessing}
-            >
-              {isProcessing ? "Processing..." : "Pay Now with Razorpay"}
-            </Button>
-          </form>
-
-          <div className="text-center">
-            <p className="text-xs text-gray-500 flex items-center justify-center space-x-1">
-              <Shield className="w-3 h-3" />
-              <span>Secured by Razorpay • SSL Encrypted</span>
+          {/* Email Input */}
+          <div>
+            <Label htmlFor="modal-email" className="text-sm font-medium">
+              Email Address
+            </Label>
+            <Input
+              id="modal-email"
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Access details will be sent to this email
             </p>
           </div>
-        </div>
+
+          {/* Payment Method */}
+          <div>
+            <Label className="text-sm font-medium">Payment Method</Label>
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={(value: "upi" | "card") => setPaymentMethod(value)}
+              className="mt-2"
+            >
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-primary transition-colors">
+                <RadioGroupItem value="upi" id="modal-upi" />
+                <Label htmlFor="modal-upi" className="flex items-center space-x-2 cursor-pointer flex-1">
+                  <Smartphone className="w-4 h-4 text-green-600" />
+                  <span>UPI Payment</span>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-3 p-3 border rounded-lg hover:border-primary transition-colors">
+                <RadioGroupItem value="card" id="modal-card" />
+                <Label htmlFor="modal-card" className="flex items-center space-x-2 cursor-pointer flex-1">
+                  <CreditCard className="w-4 h-4 text-blue-600" />
+                  <span>Credit/Debit Card</span>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* Security Notice */}
+          <div className="bg-blue-50 rounded-lg p-3">
+            <div className="flex items-center space-x-2 text-blue-800">
+              <Shield className="w-4 h-4" />
+              <span className="text-sm font-medium">Secure Payment</span>
+            </div>
+            <p className="text-blue-700 text-xs mt-1">
+              256-bit SSL encryption by Razorpay
+            </p>
+          </div>
+
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            className="w-full" 
+            disabled={isProcessing || !email}
+          >
+            {isProcessing ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              `Pay ${formatCurrency(selectedSubscriptionType === 'yearly' ? Math.round(channelPrice * 12 * 0.84) : channelPrice)}`
+            )}
+          </Button>
+        </form>
       </DialogContent>
     </Dialog>
   );

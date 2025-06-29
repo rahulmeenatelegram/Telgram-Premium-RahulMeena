@@ -11,7 +11,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Shield, CreditCard, Smartphone, Lock } from "lucide-react";
 import { Link } from "wouter";
-import { Channel } from "@shared/schema";
+import { Channel } from "@shared/firebase-types";
+import { getChannelBySlug } from "@/lib/firebase-service";
 import PaymentModal from "@/components/payment-modal";
 import SuccessModal from "@/components/success-modal";
 
@@ -27,42 +28,51 @@ export default function PaymentPage() {
   const [accessLink, setAccessLink] = useState("");
   const [channelName, setChannelName] = useState("");
 
-  const { data: channel, isLoading, error } = useQuery<Channel>({
-    queryKey: [`/api/channels/${channelSlug}`],
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency", 
+      currency: "INR",
+    }).format(amount);
+  };
+
+  const { data: channel, isLoading, error } = useQuery<Channel | null>({
+    queryKey: ["channel", channelSlug],
+    queryFn: () => channelSlug ? getChannelBySlug(channelSlug) : null,
     enabled: !!channelSlug,
   });
 
   const createSubscriptionMutation = useMutation({
-    mutationFn: async (data: { channelId: number; email: string; paymentMethod: string; subscriptionType: string }) => {
+    mutationFn: async (data: { channelId: string; email: string; paymentMethod: string; subscriptionType: string }) => {
       const res = await apiRequest("POST", "/api/subscriptions/create-order", data);
       return res.json();
     },
     onSuccess: (orderData) => {
       handleRazorpayPayment(orderData);
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Failed to create subscription order",
         variant: "destructive",
       });
     },
   });
 
   const verifyPaymentMutation = useMutation({
-    mutationFn: async (paymentData: any) => {
-      const res = await apiRequest("POST", "/api/payments/verify", paymentData);
+    mutationFn: async (data: any) => {
+      const res = await apiRequest("POST", "/api/payments/verify", data);
       return res.json();
     },
     onSuccess: (data) => {
       setAccessLink(data.accessLink);
       setChannelName(data.channelName);
+      setShowPaymentModal(false);
       setShowSuccessModal(true);
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast({
         title: "Payment Verification Failed",
-        description: error.message,
+        description: "Please contact support if payment was deducted",
         variant: "destructive",
       });
     },
@@ -87,25 +97,12 @@ export default function PaymentPage() {
       prefill: {
         email: email,
       },
-      method: {
-        upi: true,
-        card: true,
-        netbanking: true,
-        wallet: true,
-      },
       theme: {
-        color: "#1E40AF",
+        color: "#3B82F6",
       },
     };
 
     const rzp = new (window as any).Razorpay(options);
-    rzp.on("payment.failed", function (response: any) {
-      toast({
-        title: "Payment Failed",
-        description: response.error.description,
-        variant: "destructive",
-      });
-    });
     rzp.open();
   };
 
@@ -113,7 +110,7 @@ export default function PaymentPage() {
     if (!channel) {
       toast({
         title: "Error",
-        description: "Channel not found",
+        description: "Channel information not found",
         variant: "destructive",
       });
       return;
@@ -154,13 +151,6 @@ export default function PaymentPage() {
     );
   }
 
-  const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(parseFloat(amount));
-  };
-
   return (
     <>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -173,21 +163,22 @@ export default function PaymentPage() {
           </Button>
         </div>
 
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl">
-            <Card>
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl font-bold">Complete Your Purchase</CardTitle>
+        <div className="flex items-center justify-center min-h-screen p-4">
+          <div className="w-full max-w-md">
+            <Card className="shadow-xl border-0">
+              <CardHeader className="text-center pb-2">
+                <CardTitle className="text-2xl font-bold">Subscribe to Channel</CardTitle>
                 <CardDescription>
-                  Secure payment powered by Razorpay
+                  Get instant access to premium content
                 </CardDescription>
               </CardHeader>
+              
               <CardContent className="space-y-6">
-                {/* Channel Details */}
+                {/* Channel Info */}
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-center space-x-3 mb-3">
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <i className={`${channel.icon} text-blue-600 text-xl`}></i>
+                      <span className="text-blue-600 text-xl">{channel.icon}</span>
                     </div>
                     <div>
                       <h3 className="font-semibold text-lg">{channel.name}</h3>
@@ -211,43 +202,43 @@ export default function PaymentPage() {
                     <Input
                       id="email"
                       type="email"
+                      placeholder="your@email.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your@email.com"
-                      required
                       className="mt-1"
+                      required
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      We'll send your access link to this email
+                      You'll receive access details at this email
                     </p>
                   </div>
 
                   <div>
-                    <Label className="text-sm font-medium mb-3 block">
-                      Payment Method
-                    </Label>
+                    <Label className="text-sm font-medium">Payment Method</Label>
                     <RadioGroup
                       value={paymentMethod}
                       onValueChange={(value: "upi" | "card") => setPaymentMethod(value)}
+                      className="mt-2"
                     >
-                      <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="upi" id="upi" />
                         <Label htmlFor="upi" className="flex items-center space-x-2 cursor-pointer flex-1">
-                          <Smartphone className="w-5 h-5" />
+                          <Smartphone className="w-4 h-4 text-green-600" />
                           <span>UPI Payment</span>
                         </Label>
                       </div>
-                      <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50">
                         <RadioGroupItem value="card" id="card" />
                         <Label htmlFor="card" className="flex items-center space-x-2 cursor-pointer flex-1">
-                          <CreditCard className="w-5 h-5" />
+                          <CreditCard className="w-4 h-4 text-blue-600" />
                           <span>Credit/Debit Card</span>
                         </Label>
                       </div>
                     </RadioGroup>
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  {/* Security Info */}
+                  <div className="bg-blue-50 rounded-lg p-3">
                     <div className="flex items-center space-x-2 text-blue-800">
                       <Shield className="w-5 h-5" />
                       <span className="font-medium">Secure Payment</span>

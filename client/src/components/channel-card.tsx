@@ -2,18 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { Channel } from "@shared/schema";
+import { Channel } from "@shared/firebase-types";
 
 interface ChannelCardProps {
   channel: Channel;
 }
 
 export default function ChannelCard({ channel }: ChannelCardProps) {
-  const formatCurrency = (amount: string) => {
+  const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
-    }).format(parseFloat(amount));
+    }).format(amount);
   };
 
   const getIconColor = (icon: string) => {
