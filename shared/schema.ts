@@ -199,8 +199,6 @@ export const insertAdminWithdrawalSchema = createInsertSchema(adminWithdrawals).
   id: true,
   requestedAt: true,
   completedAt: true,
-  razorpayPayoutId: true,
-  failureReason: true,
 });
 
 export const insertAdminWalletTransactionSchema = createInsertSchema(adminWalletTransactions).omit({

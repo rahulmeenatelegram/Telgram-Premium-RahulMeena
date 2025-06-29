@@ -74,7 +74,7 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     this.sessionStore = new PostgresSessionStore({ 
-      pool, 
+      pool: pool as any, 
       createTableIfMissing: true 
     });
   }
@@ -438,15 +438,13 @@ export class DatabaseStorage implements IStorage {
       const payout = await razorpay.payouts.create(payoutData);
       
       await this.updateAdminWithdrawal(withdrawalId, {
-        status: 'processing',
-        razorpayPayoutId: payout.id
+        status: 'processing'
       });
 
       return { success: true, payoutId: payout.id };
     } catch (error: any) {
       await this.updateAdminWithdrawal(withdrawalId, {
-        status: 'failed',
-        failureReason: error.message || 'Unknown error occurred'
+        status: 'failed'
       });
       
       return { success: false, error: error.message || 'Payout failed' };

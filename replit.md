@@ -95,6 +95,7 @@ Changelog:
 - June 26, 2025. Fixed authentication system to use email-based login, resolved Razorpay payment integration, added test channel for 2 rupees
 - June 26, 2025. Enhanced admin dashboard with working withdrawal system, fixed validation errors, admin role assigned to main user
 - June 26, 2025. Converted to subscription-based autopay platform with recurring billing, monthly/yearly options, subscription management, and cancel-anytime functionality
+- June 29, 2025. Fixed critical database connection issues - resolved "relation does not exist" errors by properly configuring Neon database connection with correct imports and WebSocket configuration
 
 ## User Preferences
 
