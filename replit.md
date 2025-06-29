@@ -1,8 +1,8 @@
-# TeleChannels - Telegram Channel Access Platform
+# Onetapay - Telegram Channel Access Platform
 
 ## Overview
 
-TeleChannels is a full-stack subscription-based web application that provides recurring access to premium Telegram channels. The platform handles subscription billing with autopay through Razorpay, manages user authentication, and provides admin tools for subscription management and analytics.
+Onetapay is a full-stack subscription-based web application that provides recurring access to premium Telegram channels. The platform handles subscription billing with autopay through Razorpay, manages user authentication, and provides admin tools for subscription management and analytics.
 
 ## System Architecture
 
@@ -98,6 +98,8 @@ Changelog:
 - June 29, 2025. Fixed critical database connection issues - resolved "relation does not exist" errors by properly configuring Neon database connection with correct imports and WebSocket configuration
 - June 29, 2025. Successfully migrated application to use CUSTOMER_DATABASE_URL endpoint for proper handover, created all tables and sample data in customer's specified database
 - June 29, 2025. Connected to customer's specific Neon database endpoint "ep-falling-king-a5lefii6" with full SSL configuration and channel binding requirements
+- June 29, 2025. Implemented modern Awwwards-style UI with minimalistic design, background gradients, glass morphism effects, and floating particles for both light and dark modes
+- June 29, 2025. Renamed platform to "Onetapay" and implemented complete mobile responsiveness with optimized spacing, typography, and layout for all device sizes
 
 ## User Preferences
 
