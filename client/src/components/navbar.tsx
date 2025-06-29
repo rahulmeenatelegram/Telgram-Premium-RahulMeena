@@ -7,11 +7,11 @@ import { Link, useLocation } from "wouter";
 import { User, Settings, LogOut, Shield } from "lucide-react";
 
 export default function Navbar() {
-  const { user, logoutMutation } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [location] = useLocation();
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    logout();
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -82,7 +82,7 @@ export default function Navbar() {
                       Profile
                     </Link>
                   </DropdownMenuItem>
-                  {user.role === "admin" && (
+                  {isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin">
                         <Shield className="mr-2 h-4 w-4" />

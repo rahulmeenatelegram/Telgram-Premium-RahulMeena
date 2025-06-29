@@ -6,13 +6,15 @@ import ChannelCard from "@/components/channel-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Zap, Star } from "lucide-react";
-import { Channel } from "@shared/schema";
+import { getActiveChannels } from "@/lib/firebase-service";
+import type { Channel } from "@shared/firebase-types";
 
 export default function HomePage() {
   const { user } = useAuth();
   
-  const { data: channels, isLoading } = useQuery<Channel[]>({
-    queryKey: ["/api/channels"],
+  const { data: channels = [], isLoading } = useQuery<Channel[]>({
+    queryKey: ["active-channels"],
+    queryFn: getActiveChannels,
   });
 
   return (
