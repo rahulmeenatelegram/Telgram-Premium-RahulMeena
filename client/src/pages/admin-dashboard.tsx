@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useQuery } from "@tanstack/react-query";
 import { Users, DollarSign, TrendingUp, Download, Calendar } from "lucide-react";
 import AdminWalletComponent from "@/components/admin-wallet";
+import ChannelManagement from "@/components/channel-management";
 import { 
   getActiveChannels, 
   getTotalUsers, 
@@ -169,40 +170,7 @@ export default function AdminDashboard() {
         </TabsContent>
 
         <TabsContent value="channels">
-          <Card>
-            <CardHeader>
-              <CardTitle>Channel Management</CardTitle>
-              <CardDescription>Manage your Telegram channels</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Members</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {channels.map((channel) => (
-                    <TableRow key={channel.id}>
-                      <TableCell className="font-medium">{channel.name}</TableCell>
-                      <TableCell>{formatCurrency(channel.price)}</TableCell>
-                      <TableCell className="capitalize">{channel.subscriptionType}</TableCell>
-                      <TableCell>{channel.memberCount}</TableCell>
-                      <TableCell>
-                        <Badge variant={channel.isActive ? 'default' : 'secondary'}>
-                          {channel.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <ChannelManagement />
         </TabsContent>
       </Tabs>
     </div>

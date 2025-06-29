@@ -133,6 +133,30 @@ export const getChannel = async (id: string): Promise<Channel | null> => {
   return null;
 };
 
+export const updateChannel = async (id: string, updates: Partial<InsertChannel>): Promise<Channel | null> => {
+  const channelRef = ref(db, `${CHANNELS_PATH}/${id}`);
+  const updateData: any = { ...updates };
+  
+  await update(channelRef, updateData);
+  
+  // Return updated channel
+  const snapshot = await get(channelRef);
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    return {
+      ...data,
+      createdAt: timestampToDate(data.createdAt),
+    };
+  }
+  return null;
+};
+
+export const deleteChannel = async (id: string): Promise<boolean> => {
+  const channelRef = ref(db, `${CHANNELS_PATH}/${id}`);
+  await remove(channelRef);
+  return true;
+};
+
 // Payment operations
 export const createPayment = async (paymentData: InsertPayment): Promise<Payment> => {
   const paymentId = generateId();
