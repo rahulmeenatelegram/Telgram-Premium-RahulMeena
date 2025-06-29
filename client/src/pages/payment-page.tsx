@@ -29,10 +29,7 @@ export default function PaymentPage() {
   const [channelName, setChannelName] = useState("");
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency", 
-      currency: "INR",
-    }).format(amount);
+    return `Rs. ${amount.toLocaleString('en-IN')}`;
   };
 
   const { data: channel, isLoading, error } = useQuery<Channel | null>({

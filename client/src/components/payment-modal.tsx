@@ -37,10 +37,7 @@ export default function PaymentModal({
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(amount);
+    return `Rs. ${amount.toLocaleString('en-IN')}`;
   };
 
   return (

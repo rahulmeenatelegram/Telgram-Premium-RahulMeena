@@ -22,18 +22,21 @@ export default function HomePage() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="gradient-primary text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">Subscribe to Premium Telegram Channels</h1>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
+      <section className="gradient-bg text-white py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 animate-shimmer"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <h1 className="text-5xl font-bold mb-6 animate-fade-in">
+            Subscribe to Premium Telegram Channels
+          </h1>
+          <p className="text-xl mb-8 max-w-3xl mx-auto animate-slide-in opacity-90">
             Get continuous access to exclusive content, trading signals, and premium communities. 
             Flexible monthly or yearly subscriptions with autopay. Cancel anytime.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" asChild>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-scale-in">
+            <Button size="lg" variant="secondary" asChild className="hover-lift hover-glow">
               <Link href="#channels">View Subscriptions</Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary">
+            <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-primary hover-scale">
               Start Free Trial
             </Button>
           </div>
@@ -41,11 +44,13 @@ export default function HomePage() {
       </section>
 
       {/* Featured Channels */}
-      <section id="channels" className="py-16 bg-white">
+      <section id="channels" className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Premium Channels</h2>
-            <p className="text-lg text-gray-600">Choose from our curated selection of high-value Telegram channels</p>
+          <div className="text-center mb-12 animate-fade-in">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-4">
+              Premium Channels
+            </h2>
+            <p className="text-lg text-muted-foreground">Choose from our curated selection of high-value Telegram channels</p>
           </div>
           
           {isLoading ? (

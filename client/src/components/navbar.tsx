@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Link, useLocation } from "wouter";
 import { User, Settings, LogOut, Shield } from "lucide-react";
 
@@ -22,12 +23,14 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50 animate-fade-in">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link href="/">
-              <h1 className="text-2xl font-bold text-primary cursor-pointer">TeleChannels</h1>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent cursor-pointer hover-scale">
+                TeleChannels
+              </h1>
             </Link>
           </div>
           
@@ -35,26 +38,27 @@ export default function Navbar() {
             <div className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => scrollToSection("home")}
-                className="text-gray-700 hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-all duration-300 hover-scale"
               >
                 Home
               </button>
               <button
                 onClick={() => scrollToSection("channels")}
-                className="text-gray-700 hover:text-primary transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-all duration-300 hover-scale"
               >
                 Channels
               </button>
-              <a href="#about" className="text-gray-700 hover:text-primary transition-colors">
+              <a href="#about" className="text-muted-foreground hover:text-foreground transition-all duration-300 hover-scale">
                 About
               </a>
-              <a href="#contact" className="text-gray-700 hover:text-primary transition-colors">
+              <a href="#contact" className="text-muted-foreground hover:text-foreground transition-all duration-300 hover-scale">
                 Contact
               </a>
             </div>
           )}
           
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

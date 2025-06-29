@@ -12,7 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Wallet, ArrowUpRight, ArrowDownRight, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
+import { Wallet, ArrowUpRight, ArrowDownRight, Clock, CheckCircle, XCircle, AlertCircle, TrendingUp } from "lucide-react";
 import { 
   getAdminWallet, 
   getAdminWalletTransactions, 
@@ -121,7 +122,7 @@ export default function AdminWalletComponent() {
   };
 
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+    return formatCurrency(amount);
   };
 
   if (!wallet) {

@@ -5,10 +5,10 @@ import { getAuth } from "firebase-admin/auth";
 // Initialize Firebase Admin SDK
 let app;
 if (getApps().length === 0) {
-  // For development, use default credentials with database URL
+  // For development without service account, use minimal config
   app = initializeApp({
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-    databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID}-default-rtdb.firebaseio.com/`,
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID || "telegram-premium-8d722",
+    databaseURL: `https://${process.env.VITE_FIREBASE_PROJECT_ID || "telegram-premium-8d722"}-default-rtdb.firebaseio.com/`,
   });
 } else {
   app = getApps()[0];
