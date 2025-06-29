@@ -53,6 +53,7 @@ export const subscriptions = pgTable("subscriptions", {
   subscriptionType: text("subscription_type").notNull(), // monthly, yearly
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   razorpaySubscriptionId: text("razorpay_subscription_id"),
+  autopayEnabled: boolean("autopay_enabled").default(true),
   currentPeriodStart: timestamp("current_period_start").notNull(),
   currentPeriodEnd: timestamp("current_period_end").notNull(),
   nextBillingDate: timestamp("next_billing_date").notNull(),

@@ -39,10 +39,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create subscription order
+  // Create subscription order with autopay
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {
-      const { channelId, email, paymentMethod, subscriptionType = "monthly" } = req.body;
+      const { channelId, email, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
       
       const channel = await storage.getChannel(channelId);
       if (!channel) {

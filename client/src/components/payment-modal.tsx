@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Shield, CreditCard, Smartphone, X, RefreshCw, Clock } from "lucide-react";
+import { Shield, CreditCard, Smartphone, X, RefreshCw, Clock, Repeat } from "lucide-react";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -14,7 +14,12 @@ interface PaymentModalProps {
   channelName: string;
   channelPrice: string;
   subscriptionType?: string;
-  onPayment: (data: { email: string; paymentMethod: "upi" | "card"; subscriptionType: string }) => void;
+  onPayment: (data: { 
+    email: string; 
+    paymentMethod: "upi" | "card"; 
+    subscriptionType: string;
+    enableAutopay: boolean;
+  }) => void;
   isProcessing?: boolean;
 }
 
@@ -30,10 +35,11 @@ export default function PaymentModal({
   const [email, setEmail] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [selectedSubscriptionType, setSelectedSubscriptionType] = useState(subscriptionType);
+  const [enableAutopay, setEnableAutopay] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onPayment({ email, paymentMethod, subscriptionType: selectedSubscriptionType });
+    onPayment({ email, paymentMethod, subscriptionType: selectedSubscriptionType, enableAutopay });
   };
 
   const formatCurrency = (amount: string) => {
@@ -127,6 +133,28 @@ export default function PaymentModal({
               <p className="text-xs text-gray-500 mt-1">
                 No account required • We'll send your access link here
               </p>
+            </div>
+
+            {/* Autopay Toggle */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <input
+                  type="checkbox"
+                  id="autopay"
+                  checked={enableAutopay}
+                  onChange={(e) => setEnableAutopay(e.target.checked)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <Label htmlFor="autopay" className="font-medium text-blue-900 cursor-pointer">
+                    Enable Autopay <Repeat className="w-4 h-4 inline ml-1" />
+                  </Label>
+                  <p className="text-sm text-blue-700 mt-1">
+                    Automatically renew your subscription each {selectedSubscriptionType} to maintain access. 
+                    Cancel anytime from your account.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div>

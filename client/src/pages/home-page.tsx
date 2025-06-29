@@ -28,11 +28,6 @@ export default function HomePage() {
   }, []);
 
   const featuredChannels = channels?.slice(0, 3) || [];
-  const stats = [
-    { label: "Active Channels", value: "6+", icon: Zap },
-    { label: "Happy Users", value: "10K+", icon: Users },
-    { label: "Success Rate", value: "99%", icon: TrendingUp },
-  ];
 
   return (
     <div className="min-h-screen relative">
@@ -95,22 +90,7 @@ export default function HomePage() {
               </Button>
             </div>
             
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-              {stats.map((stat, index) => (
-                <div 
-                  key={stat.label}
-                  className={`glass-effect p-6 rounded-2xl border border-white/5 transition-all duration-700 ${
-                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                  }`}
-                  style={{ transitionDelay: `${index * 200}ms` }}
-                >
-                  <stat.icon className="w-6 h-6 text-primary mb-3 mx-auto" />
-                  <div className="text-2xl font-light mb-1">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground font-light">{stat.label}</div>
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
       </section>
