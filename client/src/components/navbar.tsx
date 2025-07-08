@@ -29,41 +29,29 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden"
-            >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-            
-            {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-              <Link href="/">
-                <div className={`text-sm font-light transition-colors cursor-pointer ${
-                  location === "/" ? "text-primary" : "text-foreground hover:text-primary"
-                }`}>
-                  Home
-                </div>
-              </Link>
-              <Link href="/about">
-                <div className={`text-sm font-light transition-colors cursor-pointer ${
-                  location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
-                }`}>
-                  About
-                </div>
-              </Link>
-              <Link href="/contact">
-                <div className={`text-sm font-light transition-colors cursor-pointer ${
-                  location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
-                }`}>
-                  Contact
-                </div>
-              </Link>
-            </div>
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            <Link href="/">
+              <div className={`text-sm font-light transition-colors cursor-pointer ${
+                location === "/" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}>
+                Home
+              </div>
+            </Link>
+            <Link href="/about">
+              <div className={`text-sm font-light transition-colors cursor-pointer ${
+                location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}>
+                About
+              </div>
+            </Link>
+            <Link href="/contact">
+              <div className={`text-sm font-light transition-colors cursor-pointer ${
+                location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}>
+                Contact
+              </div>
+            </Link>
           </div>
           
           <div className="flex items-center space-x-3 sm:space-x-6 lg:space-x-8">
@@ -95,7 +83,7 @@ export default function Navbar() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 hidden lg:flex">
                     <Avatar className="h-9 w-9 border border-white/10">
                       <AvatarFallback className="bg-primary/10 text-primary font-medium">
                         {user.email.charAt(0).toUpperCase()}
@@ -133,7 +121,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="hidden lg:flex items-center space-x-4">
                 <Button variant="ghost" asChild className="text-sm font-light">
                   <Link href="/auth">Sign in</Link>
                 </Button>
@@ -142,6 +130,16 @@ export default function Navbar() {
                 </Button>
               </div>
             )}
+            
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
           </div>
         </div>
 
@@ -200,7 +198,7 @@ export default function Navbar() {
                       </div>
                     </Link>
                     <Link href="/auth">
-                      <div className="block px-3 py-2 text-base font-light bg-white text-black hover:bg-white/90 transition-colors cursor-pointer rounded-md">
+                      <div className="block px-3 py-2 text-base font-light bg-white text-black hover:bg-white/90 transition-colors cursor-pointer rounded-md text-center">
                         Get Started
                       </div>
                     </Link>

@@ -123,11 +123,44 @@
 /* Prevent horizontal scrolling */
 html, body {
   overflow-x: hidden;
-  max-width: 100%;
+  max-width: 100vw;
+  width: 100%;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Fix white strip issue */
+.container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+  max-width: calc(100vw - 2rem);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 640px) {
+  .container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+    max-width: calc(100vw - 4rem);
+  }
+}
+
+/* Additional fixes for white strip */
+body, html {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.min-h-screen {
+  width: 100%;
+  max-width: 100vw;
 }
 
 @layer components {
