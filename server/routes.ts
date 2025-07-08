@@ -453,6 +453,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get all subscriptions with channel details
+  app.get("/api/admin/subscriptions", async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          s.*,
+          c.name as channel_name
+        FROM subscriptions s
+        JOIN channels c ON s.channel_id = c.id
+        ORDER BY s.created_at DESC
+        LIMIT 100
+      `);
+      
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching admin subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
   // Admin: Get all channels
   app.get("/api/admin/channels", async (req, res) => {
     try {

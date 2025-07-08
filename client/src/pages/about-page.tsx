@@ -47,7 +47,7 @@ export default function AboutPage() {
   const faqs = [
     {
       question: "How do subscriptions work?",
-      answer: "Choose your billing cycle (monthly or yearly), make a secure payment, and get instant access to premium Telegram channels. Subscriptions auto-renew unless cancelled."
+      answer: "Choose your billing cycle (monthly or yearly), make a secure payment, and get instant access to premium Telegram channels. Access is valid for exactly 30 days and requires manual renewal."
     },
     {
       question: "Can I cancel anytime?",

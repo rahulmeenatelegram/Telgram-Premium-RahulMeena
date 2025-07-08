@@ -51,8 +51,8 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
                 per {channel.subscriptionType || 'month'}
               </div>
             </div>
-            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs whitespace-nowrap flex-shrink-0">
-              Auto-renew
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs whitespace-nowrap flex-shrink-0">
+              30-day access
             </Badge>
           </div>
           
@@ -63,7 +63,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
           </Button>
           
           <p className="text-xs text-gray-400 text-center">
-            Cancel anytime • No hidden fees
+            30-day access • Manual renewal • No hidden fees
           </p>
         </div>
       </CardContent>

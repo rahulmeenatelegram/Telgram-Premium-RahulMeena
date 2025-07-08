@@ -48,6 +48,10 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/payments"],
   });
 
+  const { data: subscriptions } = useQuery<any[]>({
+    queryKey: ["/api/admin/subscriptions"],
+  });
+
   const { data: withdrawals } = useQuery<Withdrawal[]>({
     queryKey: ["/api/admin/withdrawals"],
   });
@@ -168,6 +172,15 @@ export default function AdminDashboard() {
     });
   };
 
+  const calculateDaysRemaining = (endDate: string | Date | null | undefined) => {
+    if (!endDate) return 0;
+    const end = new Date(endDate);
+    const now = new Date();
+    const diffTime = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -224,6 +237,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="channels" className="space-y-4">
           <TabsList>
             <TabsTrigger value="channels">Channels</TabsTrigger>
+            <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
           </TabsList>
@@ -318,6 +332,62 @@ export default function AdminDashboard() {
                           </TableCell>
                         </TableRow>
                       ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="subscriptions" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Active Subscriptions</h2>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[120px]">Email</TableHead>
+                        <TableHead className="min-w-[120px]">Telegram</TableHead>
+                        <TableHead className="min-w-[100px]">Channel</TableHead>
+                        <TableHead className="min-w-[80px]">Amount</TableHead>
+                        <TableHead className="min-w-[100px]">Days Left</TableHead>
+                        <TableHead className="min-w-[90px]">Expires</TableHead>
+                        <TableHead className="min-w-[80px]">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {subscriptions?.map((subscription) => {
+                        const daysLeft = calculateDaysRemaining(subscription.current_period_end);
+                        return (
+                          <TableRow key={subscription.id}>
+                            <TableCell className="max-w-[120px] truncate">{subscription.email}</TableCell>
+                            <TableCell className="max-w-[120px] truncate">@{subscription.telegram_username}</TableCell>
+                            <TableCell className="max-w-[100px] truncate">{subscription.channel_name}</TableCell>
+                            <TableCell>{formatCurrency(parseFloat(subscription.amount))}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "secondary" : "destructive"}
+                                className="text-xs"
+                              >
+                                {daysLeft > 0 ? `${daysLeft} days` : "Expired"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{formatDate(subscription.current_period_end)}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={subscription.status === "active" ? "default" : "secondary"}
+                                className="text-xs"
+                              >
+                                {subscription.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>

@@ -46,9 +46,8 @@ export default function SuccessModal({
               <Badge variant="secondary" className="text-sm">
                 {channelName}
               </Badge>
-              <Badge variant="secondary" className="bg-green-100 text-green-800 flex items-center gap-1">
-                <RefreshCw className="w-3 h-3" />
-                Auto-renew
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                30-day access
               </Badge>
             </div>
             <div className="flex items-center justify-center text-sm text-green-600">
@@ -70,8 +69,8 @@ export default function SuccessModal({
             <p className="text-sm text-gray-600 mb-2">
               Your Telegram channel access link (valid for 30 days):
             </p>
-            <div className="bg-gray-50 rounded p-2 text-xs font-mono break-all">
-              {accessLink}
+            <div className="bg-gray-50 rounded p-3 text-sm font-mono break-all border-2 border-gray-200">
+              <span className="text-blue-600 font-medium">{accessLink}</span>
             </div>
             <p className="text-xs text-gray-500 mt-2">
               Click "Join Channel Now" or use this link directly in Telegram

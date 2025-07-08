@@ -18,7 +18,6 @@ interface PaymentModalProps {
     email: string; 
     paymentMethod: "upi" | "card"; 
     subscriptionType: string;
-    enableAutopay: boolean;
   }) => void;
   isProcessing?: boolean;
 }
@@ -35,11 +34,9 @@ export default function PaymentModal({
   const [email, setEmail] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [selectedSubscriptionType, setSelectedSubscriptionType] = useState(subscriptionType);
-  const [enableAutopay, setEnableAutopay] = useState(true);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onPayment({ email, paymentMethod, subscriptionType: selectedSubscriptionType, enableAutopay });
+    onPayment({ email, paymentMethod, subscriptionType: selectedSubscriptionType });
   };
 
   const formatCurrency = (amount: string) => {
@@ -135,23 +132,16 @@ export default function PaymentModal({
               </p>
             </div>
 
-            {/* Autopay Toggle */}
+            {/* Subscription Period Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  id="autopay"
-                  checked={enableAutopay}
-                  onChange={(e) => setEnableAutopay(e.target.checked)}
-                  className="mt-1"
-                />
                 <div className="flex-1">
-                  <Label htmlFor="autopay" className="font-medium text-blue-900 cursor-pointer">
-                    Enable Autopay <Repeat className="w-4 h-4 inline ml-1" />
+                  <Label className="font-medium text-blue-900">
+                    30-Day Access Period
                   </Label>
                   <p className="text-sm text-blue-700 mt-1">
-                    Automatically renew your subscription each {selectedSubscriptionType} to maintain access. 
-                    Cancel anytime from your account.
+                    Your access will be valid for exactly 30 days from the payment date. 
+                    You can renew manually before expiry to continue access.
                   </p>
                 </div>
               </div>
