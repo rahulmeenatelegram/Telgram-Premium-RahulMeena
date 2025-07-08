@@ -31,8 +31,11 @@ export default function AdminDashboard() {
   const [isAddChannelOpen, setIsAddChannelOpen] = useState(false);
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
 
-  // Redirect if not admin - check for specific admin email
-  if (!user || user.email !== "disruptivefounder@gmail.com") {
+  // Admin emails array (expandable)
+  const adminEmails = ["disruptivefounder@gmail.com"];
+
+  // Redirect if not admin - check for any email in adminEmails
+  if (!user || !user.email || !adminEmails.includes(user.email)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
