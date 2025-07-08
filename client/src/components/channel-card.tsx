@@ -33,7 +33,7 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
           </div>
           <div className="ml-3 min-w-0 flex-1">
             <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{channel.name}</h3>
-            <p className="text-xs sm:text-sm text-gray-500">{channel.memberCount}+ members</p>
+
           </div>
         </div>
         

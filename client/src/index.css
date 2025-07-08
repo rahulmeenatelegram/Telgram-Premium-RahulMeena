@@ -81,6 +81,7 @@
       radial-gradient(ellipse at center right, rgba(239, 68, 68, 0.05) 0%, transparent 25%);
     min-height: 100vh;
     position: relative;
+    overflow-x: hidden;
   }
   
   .dark body {
@@ -108,6 +109,25 @@
   .text-dark {
     color: hsl(var(--dark));
   }
+  
+  .no-scrollbar {
+    overflow-x: hidden;
+  }
+  
+  .container-safe {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Prevent horizontal scrolling */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 @layer components {

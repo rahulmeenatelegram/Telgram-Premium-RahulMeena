@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Users, TrendingUp, Zap, Star, ArrowUpRight } from "lucide-react";
+import { ArrowRight, TrendingUp, Zap, Star, ArrowUpRight } from "lucide-react";
 import { BackgroundGlow } from "@/components/background-effects";
 import type { Channel } from "@shared/schema";
 
@@ -137,13 +137,7 @@ export default function HomePage() {
                       {channel.description}
                     </p>
                     
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-4 sm:mb-6">
-                      <div className="flex items-center min-w-0 flex-1">
-                        <Users className="w-3 h-3 mr-1 flex-shrink-0" />
-                        <span className="truncate">{channel.memberCount?.toLocaleString()} members</span>
-                      </div>
-                      <div className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0 ml-2" />
-                    </div>
+
                     
                     <Button 
                       variant="outline" 
@@ -166,9 +160,12 @@ export default function HomePage() {
               variant="outline" 
               size="lg"
               className="glass-effect border-white/10 hover:border-white/20 px-8 py-4 font-light rounded-full"
+              asChild
             >
-              View All Channels
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <Link href="/auth">
+                Get Started
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
             </Button>
           </div>
         </div>

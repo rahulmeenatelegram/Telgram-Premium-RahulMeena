@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Link, useLocation } from "wouter";
-import { User, Settings, LogOut, Shield, Moon, Sun, Monitor } from "lucide-react";
+import { User, Settings, LogOut, Shield, Moon, Sun, Monitor, Menu, X } from "lucide-react";
 import { useTheme } from "./theme-provider";
 
 export default function Navbar() {
   const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
   const { setTheme, theme } = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -28,29 +29,41 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Navigation Links */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            <Link href="/">
-              <div className={`text-sm font-light transition-colors cursor-pointer ${
-                location === "/" ? "text-primary" : "text-foreground hover:text-primary"
-              }`}>
-                Home
-              </div>
-            </Link>
-            <Link href="/about">
-              <div className={`text-sm font-light transition-colors cursor-pointer ${
-                location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
-              }`}>
-                About
-              </div>
-            </Link>
-            <Link href="/contact">
-              <div className={`text-sm font-light transition-colors cursor-pointer ${
-                location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
-              }`}>
-                Contact
-              </div>
-            </Link>
+          {/* Mobile Menu Button */}
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden"
+            >
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+            
+            {/* Desktop Navigation Links */}
+            <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+              <Link href="/">
+                <div className={`text-sm font-light transition-colors cursor-pointer ${
+                  location === "/" ? "text-primary" : "text-foreground hover:text-primary"
+                }`}>
+                  Home
+                </div>
+              </Link>
+              <Link href="/about">
+                <div className={`text-sm font-light transition-colors cursor-pointer ${
+                  location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
+                }`}>
+                  About
+                </div>
+              </Link>
+              <Link href="/contact">
+                <div className={`text-sm font-light transition-colors cursor-pointer ${
+                  location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
+                }`}>
+                  Contact
+                </div>
+              </Link>
+            </div>
           </div>
           
           <div className="flex items-center space-x-3 sm:space-x-6 lg:space-x-8">
@@ -131,6 +144,72 @@ export default function Navbar() {
             )}
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-white/5 bg-background/95 backdrop-blur-sm">
+            <div className="px-4 py-4 space-y-3">
+              <Link href="/">
+                <div className={`block px-3 py-2 text-base font-light transition-colors cursor-pointer ${
+                  location === "/" ? "text-primary" : "text-foreground hover:text-primary"
+                }`}>
+                  Home
+                </div>
+              </Link>
+              <Link href="/about">
+                <div className={`block px-3 py-2 text-base font-light transition-colors cursor-pointer ${
+                  location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
+                }`}>
+                  About
+                </div>
+              </Link>
+              <Link href="/contact">
+                <div className={`block px-3 py-2 text-base font-light transition-colors cursor-pointer ${
+                  location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
+                }`}>
+                  Contact
+                </div>
+              </Link>
+              
+              <div className="pt-4 border-t border-white/5">
+                {user ? (
+                  <div className="space-y-3">
+                    <div className="px-3 py-2">
+                      <p className="text-sm font-medium text-foreground">{user.email}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+                    </div>
+                    {user.role === "admin" && (
+                      <Link href="/admin">
+                        <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">
+                          Admin Panel
+                        </div>
+                      </Link>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-3 py-2 text-base font-light text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Link href="/auth">
+                      <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">
+                        Sign In
+                      </div>
+                    </Link>
+                    <Link href="/auth">
+                      <div className="block px-3 py-2 text-base font-light bg-white text-black hover:bg-white/90 transition-colors cursor-pointer rounded-md">
+                        Get Started
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
