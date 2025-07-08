@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { sendEmailVerification } from "firebase/auth";
 import { auth, signInWithEmail, registerWithEmail, signOutUser, resetPassword, signInWithGoogle, resendEmailVerification } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
@@ -90,7 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      await registerWithEmail(email, password);
+       const userCredential = await registerWithEmail(email, password);
+      // Send email verification after sign up
+      if (userCredential && userCredential.user) {
+        await sendEmailVerification(userCredential.user);
+      }
       
       toast({
         title: "Account created!",
