@@ -1,341 +1,385 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
-import { BackgroundGlow, FloatingParticles } from "@/components/background-effects";
-import Navbar from "@/components/navbar";
 import { Link } from "wouter";
-import { Calendar, Clock, AlertTriangle, ExternalLink, CreditCard, Bell, Zap, ArrowUpRight } from "lucide-react";
-import { format, differenceInDays, parseISO } from "date-fns";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import type { Channel } from "@shared/schema";
+import { Calendar, ExternalLink, AlertTriangle, CheckCircle, Clock, CreditCard, Zap, Mail } from "lucide-react";
+import Navbar from "@/components/navbar";
+import { BackgroundGlow, FloatingParticles } from "@/components/background-effects";
+import ChannelCard from "@/components/channel-card";
+import { format } from "date-fns";
 
-interface Subscription {
+interface Channel {
   id: number;
-  channelId: number;
-  channelName: string;
-  channelSlug: string;
-  accessLink: string;
-  status: 'active' | 'cancelled' | 'expired';
-  billingPeriod: 'monthly' | 'yearly';
+  name: string;
+  description: string;
   price: string;
-  nextBillingDate: string;
-  createdAt: string;
-  autopayEnabled: boolean;
+  category: string;
+  slug: string;
+  is_active: boolean;
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  const { data: subscriptions, isLoading: subscriptionsLoading } = useQuery<Subscription[]>({
-    queryKey: ["/api/user/subscriptions"],
-    enabled: !!user,
-  });
+  const { user, resendEmailVerification } = useAuth();
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const { data: channels, isLoading: channelsLoading } = useQuery<Channel[]>({
+  // Fetch available channels
+  const { data: channels = [], isLoading: channelsLoading } = useQuery<Channel[]>({
     queryKey: ["/api/channels"],
+    enabled: !!user?.emailVerified,
   });
 
-  const cancelSubscriptionMutation = useMutation({
-    mutationFn: async (subscriptionId: number) => {
-      const response = await apiRequest(`/api/subscriptions/${subscriptionId}/cancel`, {
-        method: "POST",
-      });
-      return response;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user/subscriptions"] });
-      toast({
-        title: "Subscription cancelled",
-        description: "Your subscription has been cancelled successfully",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to cancel subscription",
-        variant: "destructive",
-      });
-    },
-  });
+  // Mock data for Firebase user subscriptions (since we don't have backend user sync yet)
+  const mockSubscriptions = [
+    {
+      id: 1,
+      channel_name: "Premium Trading Signals",
+      status: "active",
+      expires_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 days from now
+      access_link: "https://t.me/premium_trading_signals",
+      subscription_type: "monthly",
+      next_billing_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
+    }
+  ];
 
-  const activeSubscriptions = subscriptions?.filter(sub => sub.status === 'active') || [];
-  const expiringSubscriptions = activeSubscriptions.filter(sub => {
-    const daysUntilBilling = differenceInDays(parseISO(sub.nextBillingDate), new Date());
-    return daysUntilBilling <= 3;
+  const activeSubscriptions = mockSubscriptions.filter(sub => sub.status === 'active');
+  const expiringSoon = mockSubscriptions.filter(sub => {
+    const daysUntilExpiry = Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return daysUntilExpiry <= 7 && sub.status === 'active';
   });
-
-  const formatCurrency = (amount: string) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-    }).format(parseFloat(amount));
-  };
 
   if (!user) {
     return null;
   }
 
+  if (!user.emailVerified) {
+    return (
+      <div className="min-h-screen relative">
+        <BackgroundGlow />
+        <FloatingParticles />
+        <Navbar />
+        
+        <div className="relative z-10 flex items-center justify-center min-h-screen pt-16 px-4">
+          <Card className="w-full max-w-md glass-effect border-white/5">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-8 h-8 text-yellow-500" />
+              </div>
+              <CardTitle className="text-xl font-light">Email Verification Required</CardTitle>
+              <CardDescription className="font-light">
+                Please verify your email address to access your dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert className="glass-effect border-yellow-500/20 bg-yellow-500/5">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  We sent a verification link to <strong>{user.email}</strong>. Please check your inbox and click the link to verify your account.
+                </AlertDescription>
+              </Alert>
+              <Button
+                onClick={resendEmailVerification}
+                className="w-full bg-white text-black hover:bg-white/90 font-medium"
+              >
+                Resend Verification Email
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen relative w-full overflow-x-hidden">
+    <div className="min-h-screen relative">
       <BackgroundGlow />
       <FloatingParticles />
       <Navbar />
       
       <div className="relative z-10 pt-16 sm:pt-20 lg:pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl sm:text-4xl font-light tracking-tight mb-2">
-              Welcome back, <span className="gradient-text">{user.email.split('@')[0]}</span>
+          <div className="mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-light mb-2 sm:mb-4">
+              Welcome back, <span className="text-primary">{user.email?.split('@')[0]}</span>
             </h1>
-            <p className="text-muted-foreground font-light">
-              Manage your subscriptions and access your premium channels
+            <p className="text-sm sm:text-base text-muted-foreground font-light">
+              Manage your subscriptions and discover new premium channels
             </p>
           </div>
 
-          {/* Notifications */}
-          {expiringSubscriptions.length > 0 && (
-            <Alert className="mb-8 glass-effect border-yellow-500/20 bg-yellow-500/5">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription className="text-sm">
-                {expiringSubscriptions.length} subscription{expiringSubscriptions.length > 1 ? 's' : ''} 
-                {expiringSubscriptions.length === 1 ? ' expires' : ' expire'} soon. 
-                Ensure your payment method is updated to avoid service interruption.
-              </AlertDescription>
-            </Alert>
-          )}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 sm:space-y-8">
+            <TabsList className="grid w-full grid-cols-3 glass-effect bg-white/5">
+              <TabsTrigger value="overview" className="font-light data-[state=active]:bg-white data-[state=active]:text-black">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="subscriptions" className="font-light data-[state=active]:bg-white data-[state=active]:text-black">
+                My Subscriptions
+              </TabsTrigger>
+              <TabsTrigger value="explore" className="font-light data-[state=active]:bg-white data-[state=active]:text-black">
+                Explore Channels
+              </TabsTrigger>
+            </TabsList>
 
-          {subscriptionsLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="glass-effect border-white/5 animate-pulse">
-                  <CardHeader>
-                    <div className="h-6 bg-white/5 rounded mb-2" />
-                    <div className="h-4 bg-white/5 rounded w-2/3" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-20 bg-white/5 rounded" />
+            <TabsContent value="overview" className="space-y-6 sm:space-y-8">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <Card className="glass-effect border-white/5">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-light">{activeSubscriptions.length}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Active Subscriptions</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          ) : subscriptions?.length === 0 ? (
-            <Card className="glass-effect border-white/5 text-center p-8">
-              <CardContent className="pt-0">
-                <Bell className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No subscriptions yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Start your journey with premium Telegram channels
-                </p>
-                <Button asChild className="bg-white text-black hover:bg-white/90">
-                  <Link href="/">Browse Channels</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              {/* Active Subscriptions */}
-              <div>
-                <h2 className="text-xl font-medium mb-4">Active Subscriptions</h2>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {activeSubscriptions.map((subscription) => {
-                    const daysUntilBilling = differenceInDays(parseISO(subscription.nextBillingDate), new Date());
-                    const isExpiringSoon = daysUntilBilling <= 3;
-                    
-                    return (
-                      <Card key={subscription.id} className="glass-effect border-white/5 hover:border-white/10 transition-colors">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg font-medium">
-                              {subscription.channelName}
-                            </CardTitle>
-                            <Badge 
-                              variant={isExpiringSoon ? "destructive" : "secondary"}
-                              className="text-xs"
-                            >
-                              {subscription.status}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <CreditCard className="h-4 w-4 mr-2" />
-                            {formatCurrency(subscription.price)} / {subscription.billingPeriod}
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="space-y-2 text-sm">
-                            <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">Next billing:</span>
-                              <div className="flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                <span className={isExpiringSoon ? "text-yellow-500" : ""}>
-                                  {format(parseISO(subscription.nextBillingDate), 'MMM dd, yyyy')}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-muted-foreground">Autopay:</span>
-                              <Badge variant={subscription.autopayEnabled ? "secondary" : "outline"} className="text-xs">
-                                {subscription.autopayEnabled ? "Enabled" : "Disabled"}
-                              </Badge>
-                            </div>
-                            {isExpiringSoon && (
-                              <div className="flex items-center text-yellow-500 text-xs">
-                                <Clock className="h-3 w-3 mr-1" />
-                                Expires in {daysUntilBilling} day{daysUntilBilling !== 1 ? 's' : ''}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <Separator className="bg-white/5" />
-                          
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 glass-effect border-white/10 hover:border-white/20"
-                              asChild
-                            >
-                              <a href={subscription.accessLink} target="_blank" rel="noopener noreferrer">
-                                <ExternalLink className="h-3 w-3 mr-2" />
-                                Access Channel
-                              </a>
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                              onClick={() => cancelSubscriptionMutation.mutate(subscription.id)}
-                              disabled={cancelSubscriptionMutation.isPending}
-                            >
-                              {cancelSubscriptionMutation.isPending ? "Cancelling..." : "Cancel"}
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
+
+                <Card className="glass-effect border-white/5">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-light">{channels.length}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Available Channels</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-effect border-white/5">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-yellow-500/20 rounded-lg flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-yellow-500" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-light">{expiringSoon.length}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Expiring Soon</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="glass-effect border-white/5">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <CreditCard className="w-5 h-5 text-purple-500" />
+                      </div>
+                      <div>
+                        <p className="text-xl sm:text-2xl font-light">₹{activeSubscriptions.length * 199}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground">Monthly Spend</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* Expired/Cancelled Subscriptions */}
-              {subscriptions?.filter(sub => sub.status !== 'active').length > 0 && (
-                <div>
-                  <h2 className="text-xl font-medium mb-4">Past Subscriptions</h2>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {subscriptions.filter(sub => sub.status !== 'active').map((subscription) => (
-                      <Card key={subscription.id} className="glass-effect border-white/5 opacity-60">
-                        <CardHeader>
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg font-medium">
-                              {subscription.channelName}
-                            </CardTitle>
-                            <Badge variant="outline" className="text-xs">
-                              {subscription.status}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            Ended on {format(parseISO(subscription.nextBillingDate), 'MMM dd, yyyy')}
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full glass-effect border-white/10 hover:border-white/20"
-                            asChild
-                          >
-                            <Link href={`/payment?channel=${subscription.channelSlug}`}>
-                              Resubscribe
-                            </Link>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ))}
+              {/* Quick Actions */}
+              <Card className="glass-effect border-white/5">
+                <CardHeader>
+                  <CardTitle className="text-lg sm:text-xl font-light">Quick Actions</CardTitle>
+                  <CardDescription className="font-light">
+                    Common tasks to manage your subscriptions
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <Button
+                      variant="outline"
+                      className="glass-effect border-white/10 hover:border-white/20 font-light justify-start"
+                      onClick={() => setActiveTab("explore")}
+                    >
+                      <Zap className="mr-2 h-4 w-4" />
+                      Browse Channels
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="glass-effect border-white/10 hover:border-white/20 font-light justify-start"
+                      onClick={() => setActiveTab("subscriptions")}
+                    >
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Manage Subscriptions
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="glass-effect border-white/10 hover:border-white/20 font-light justify-start"
+                      asChild
+                    >
+                      <Link href="/contact">
+                        <Mail className="mr-2 h-4 w-4" />
+                        Get Support
+                      </Link>
+                    </Button>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                </CardContent>
+              </Card>
 
-          {/* All Available Channels */}
-          <div className="mt-12">
-            <h2 className="text-xl font-medium mb-4">Available Channels</h2>
-            {channelsLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="glass-effect border-white/5 animate-pulse">
-                    <CardHeader>
-                      <div className="h-6 bg-white/5 rounded mb-2" />
-                      <div className="h-4 bg-white/5 rounded w-2/3" />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-16 bg-white/5 rounded mb-4" />
-                      <div className="h-8 bg-white/5 rounded" />
+              {/* Expiring Soon Alert */}
+              {expiringSoon.length > 0 && (
+                <Alert className="glass-effect border-yellow-500/20 bg-yellow-500/5">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    You have {expiringSoon.length} subscription{expiringSoon.length > 1 ? 's' : ''} expiring soon. 
+                    <Button variant="link" className="p-0 ml-2 h-auto text-yellow-600 hover:text-yellow-500" onClick={() => setActiveTab("subscriptions")}>
+                      View details
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+
+            <TabsContent value="subscriptions" className="space-y-6">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-light mb-4">My Subscriptions</h2>
+                  <p className="text-sm sm:text-base text-muted-foreground font-light mb-6">
+                    Manage your active subscriptions and access links
+                  </p>
+                </div>
+
+                {activeSubscriptions.length === 0 ? (
+                  <Card className="glass-effect border-white/5">
+                    <CardContent className="p-8 sm:p-12 text-center">
+                      <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Zap className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">No Active Subscriptions</h3>
+                      <p className="text-sm text-muted-foreground mb-6">
+                        Start your journey by subscribing to premium channels
+                      </p>
+                      <Button 
+                        className="bg-white text-black hover:bg-white/90 font-medium"
+                        onClick={() => setActiveTab("explore")}
+                      >
+                        Browse Channels
+                      </Button>
                     </CardContent>
                   </Card>
-                ))}
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {activeSubscriptions.map((subscription) => {
+                      const daysUntilExpiry = Math.ceil((new Date(subscription.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                      const isExpiringSoon = daysUntilExpiry <= 7;
+
+                      return (
+                        <Card key={subscription.id} className="glass-effect border-white/5">
+                          <CardHeader>
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <CardTitle className="text-lg font-light">{subscription.channel_name}</CardTitle>
+                                <CardDescription className="font-light">
+                                  {subscription.subscription_type} subscription
+                                </CardDescription>
+                              </div>
+                              <Badge 
+                                variant={subscription.status === 'active' ? 'default' : 'secondary'}
+                                className="glass-effect border-white/10"
+                              >
+                                {subscription.status}
+                              </Badge>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-muted-foreground mb-1">Expires on</p>
+                                <p className="font-medium flex items-center">
+                                  <Calendar className="w-4 h-4 mr-1" />
+                                  {format(new Date(subscription.expires_at), 'MMM dd, yyyy')}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground mb-1">Next billing</p>
+                                <p className="font-medium">
+                                  {format(new Date(subscription.next_billing_date), 'MMM dd, yyyy')}
+                                </p>
+                              </div>
+                            </div>
+
+                            {isExpiringSoon && (
+                              <Alert className="glass-effect border-yellow-500/20 bg-yellow-500/5">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertDescription className="text-xs">
+                                  Expires in {daysUntilExpiry} day{daysUntilExpiry > 1 ? 's' : ''}
+                                </AlertDescription>
+                              </Alert>
+                            )}
+
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex-1 glass-effect border-white/10 hover:border-white/20 font-light"
+                                asChild
+                              >
+                                <a href={subscription.access_link} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="w-4 h-4 mr-2" />
+                                  Access Channel
+                                </a>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="glass-effect border-white/10 hover:border-white/20 font-light"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {channels?.map((channel) => {
-                  const isSubscribed = activeSubscriptions.some(sub => sub.channelId === channel.id);
-                  
-                  return (
-                    <Card key={channel.id} className="glass-effect border-white/5 hover:border-white/10 transition-all group">
-                      <CardHeader>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center flex-shrink-0">
-                            <Zap className="w-5 h-5 text-white" />
-                          </div>
-                          <Badge variant="secondary" className="text-xs font-light">
-                            ₹{channel.price}/mo
-                          </Badge>
-                        </div>
-                        
-                        <CardTitle className="text-lg font-medium group-hover:text-primary transition-colors">
-                          {channel.name}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <p className="text-sm text-muted-foreground font-light leading-relaxed line-clamp-3">
-                          {channel.description}
-                        </p>
-                        
-                        {isSubscribed ? (
-                          <Button 
-                            variant="outline" 
-                            className="w-full glass-effect border-green-500/20 bg-green-500/5 text-green-400 hover:border-green-500/30"
-                            disabled
-                          >
-                            <ExternalLink className="mr-2 w-4 h-4" />
-                            Subscribed
-                          </Button>
-                        ) : (
-                          <Button 
-                            variant="outline" 
-                            className="w-full glass-effect border-white/10 hover:border-white/20 font-light group"
-                            asChild
-                          >
-                            <Link href={`/payment?channel=${channel.slug}`}>
-                              Subscribe Now
-                              <ArrowUpRight className="ml-2 w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                            </Link>
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+            </TabsContent>
+
+            <TabsContent value="explore" className="space-y-6">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-light mb-4">Explore Channels</h2>
+                <p className="text-sm sm:text-base text-muted-foreground font-light mb-6">
+                  Discover premium Telegram channels curated for you
+                </p>
               </div>
-            )}
-          </div>
+
+              {channelsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="glass-effect border-white/5 rounded-xl h-64 animate-pulse" />
+                  ))}
+                </div>
+              ) : channels.length === 0 ? (
+                <Card className="glass-effect border-white/5">
+                  <CardContent className="p-8 sm:p-12 text-center">
+                    <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Zap className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium mb-2">No Channels Available</h3>
+                    <p className="text-sm text-muted-foreground">
+                      New channels are being added soon. Check back later!
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {channels.map((channel) => (
+                    <ChannelCard key={channel.id} channel={channel} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
