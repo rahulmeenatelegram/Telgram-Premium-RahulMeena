@@ -112,6 +112,7 @@ Changelog:
 - July 8, 2025. Removed icon field from channel creation form in admin dashboard. System now automatically assigns default "fas fa-telegram" icon when creating new channels. Changed "Expires" column to "Subscribed" in admin dashboard to show subscription start date instead of end date.
 - July 8, 2025. Fixed security issue in admin dashboard access denied page - removed exposure of admin email address to unauthorized users. Added global CSS reset to prevent horizontal scrolling and white strips on all pages with overflow-x: hidden and max-width: 100vw constraints.
 - July 8, 2025. Updated payment page to automatically use authenticated user's email instead of manual input. Removed email input field and replaced with read-only display showing authenticated user's email with "Authenticated" badge. Users no longer need to re-enter their email during payment process.
+- July 8, 2025. Fixed critical security vulnerability in payment page - added proper authentication protection to prevent unauthenticated users from accessing payment page. Added loading state and automatic redirect to login for unauthenticated users. Payment page now properly requires authentication before showing any content.
 
 ## User Preferences
 

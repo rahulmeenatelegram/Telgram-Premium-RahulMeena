@@ -20,7 +20,7 @@ export default function PaymentPage() {
   const [, params] = useRoute("/payment/:slug?");
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
   const [telegramUsername, setTelegramUsername] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
@@ -31,8 +31,29 @@ export default function PaymentPage() {
   const [channelName, setChannelName] = useState("");
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
+  
   // Get email from authenticated user
   const email = user?.email || "";
+  
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+  
+  // Don't render payment page if user is not authenticated
+  if (!user) {
+    return null;
+  }
 
   // Get channel slug from URL params or route params
   const channelSlug = params?.slug || new URLSearchParams(window.location.search).get('channel');
@@ -346,9 +367,11 @@ export default function PaymentPage() {
                 <div className="space-y-2">
                   <div className="glass-effect border-white/10 rounded-xl h-12 px-4 py-3 bg-muted/5 flex items-center">
                     <span className="text-sm font-medium">{email}</span>
-                    <Badge variant="secondary" className="ml-auto text-xs">
-                      Authenticated
-                    </Badge>
+                    {user && (
+                      <Badge variant="secondary" className="ml-auto text-xs">
+                        Authenticated
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
