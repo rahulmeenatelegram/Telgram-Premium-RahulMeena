@@ -19,17 +19,17 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 glass-effect border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-20">
+        <div className="flex justify-between items-center h-14 sm:h-16 lg:h-20">
           <div className="flex items-center">
             <Link href="/">
-              <div className="text-xl sm:text-2xl font-light tracking-wide text-foreground hover:text-primary transition-colors cursor-pointer">
+              <div className="text-lg sm:text-xl lg:text-2xl font-light tracking-wide text-foreground hover:text-primary transition-colors cursor-pointer">
                 Onetapay
               </div>
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             <Link href="/">
               <div className={`text-sm font-light transition-colors cursor-pointer ${
                 location === "/" ? "text-primary" : "text-foreground hover:text-primary"

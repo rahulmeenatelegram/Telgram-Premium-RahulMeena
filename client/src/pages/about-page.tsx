@@ -25,12 +25,7 @@ export default function AboutPage() {
     }
   ];
 
-  const stats = [
-    { label: "Active Users", value: "10,000+" },
-    { label: "Premium Channels", value: "50+" },
-    { label: "Success Rate", value: "99.9%" },
-    { label: "Countries", value: "25+" }
-  ];
+
 
   const values = [
     {
@@ -57,7 +52,7 @@ export default function AboutPage() {
       <FloatingParticles />
       <Navbar />
       
-      <div className="relative z-10 pt-20 sm:pt-24 lg:pt-32">
+      <div className="relative z-10 pt-16 sm:pt-20 lg:pt-24">
         {/* About Hero Section */}
         <section className="py-16 sm:py-20 md:py-24 lg:py-32">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -86,23 +81,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-16 sm:py-20 md:py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-light text-primary mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs sm:text-sm text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+
 
         {/* Features Section */}
         <section className="py-16 sm:py-20 md:py-24">

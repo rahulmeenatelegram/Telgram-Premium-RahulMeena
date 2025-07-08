@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Play, Users, TrendingUp, Zap, Star, ArrowUpRight } from "lucide-react";
+import { ArrowRight, Users, TrendingUp, Zap, Star, ArrowUpRight } from "lucide-react";
 import { BackgroundGlow } from "@/components/background-effects";
 import type { Channel } from "@shared/schema";
 
@@ -44,7 +44,7 @@ export default function HomePage() {
       />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
         {/* Background Grid */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(120,119,198,0.03)_1px,transparent_1px)] [background-size:32px_32px]" />
         
@@ -68,25 +68,16 @@ export default function HomePage() {
               Professional content, delivered seamlessly.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center mb-12 sm:mb-16">
+            <div className="flex justify-center items-center mb-12 sm:mb-16">
               <Button 
                 size="lg" 
-                className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-medium rounded-full group w-full sm:w-auto"
+                className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-medium rounded-full group w-full sm:w-auto max-w-xs"
                 asChild
               >
                 <Link href="#channels">
                   Explore Channels
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="glass-effect border-white/10 hover:border-white/20 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-light rounded-full group w-full sm:w-auto"
-              >
-                <Play className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Watch Demo
               </Button>
             </div>
             
