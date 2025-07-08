@@ -109,8 +109,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChannel(id: number): Promise<Channel | undefined> {
-    const [channel] = await db.select().from(channels).where(eq(channels.id, id));
-    return channel || undefined;
+    // Use raw SQL to avoid column mapping issues
+    const result = await pool.query("SELECT * FROM channels WHERE id = $1", [id]);
+    return result.rows[0] || undefined;
   }
 
   async getChannelBySlug(slug: string): Promise<Channel | undefined> {
@@ -278,8 +279,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSubscription(id: number): Promise<Subscription | undefined> {
-    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
-    return subscription || undefined;
+    // Use raw SQL to avoid column mapping issues
+    const result = await pool.query("SELECT * FROM subscriptions WHERE id = $1", [id]);
+    return result.rows[0] || undefined;
   }
 
   async getSubscriptionByToken(token: string): Promise<Subscription | undefined> {

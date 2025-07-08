@@ -77,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get channel details
-      const channel = await storage.getChannel(subscription.channelId);
+      const channel = await storage.getChannel(subscription.channel_id || subscription.channelId);
       if (!channel) {
         return res.status(404).json({ message: "Channel not found" });
       }
@@ -85,7 +85,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return success response with access link
       res.json({
         success: true,
-        accessLink: subscription.accessLink,
+        accessLink: subscription.access_link || subscription.accessLink,
         channelName: channel.name,
         subscriptionId: subscription.id,
         message: "Payment verified successfully"
