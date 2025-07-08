@@ -74,8 +74,8 @@ export default function HomePage() {
                 className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-medium rounded-full group w-full sm:w-auto max-w-xs"
                 asChild
               >
-                <Link href="#channels">
-                  Explore Channels
+                <Link href="/auth">
+                  Get Started
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </Button>
