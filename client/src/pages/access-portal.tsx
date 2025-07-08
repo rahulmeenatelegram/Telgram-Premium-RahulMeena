@@ -308,29 +308,7 @@ export default function AccessPortal() {
               </CardContent>
             </Card>
 
-            {/* Renewal Instructions */}
-            <Card className="glass-effect border-white/5">
-              <CardHeader>
-                <CardTitle className="text-lg font-light">Important Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Manual Renewal Policy</h4>
-                  <p className="text-sm text-muted-foreground">
-                    • Subscriptions require manual renewal every 30 days
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    • You'll receive reminders 7 days before expiry
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    • {subscription.grace_period_days} days grace period after expiry
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    • Access is blocked immediately after grace period ends
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+  
           </div>
         </div>
       </div>
