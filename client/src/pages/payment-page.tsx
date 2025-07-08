@@ -115,11 +115,18 @@ export default function PaymentPage() {
       return res.json();
     },
     onSuccess: (data) => {
-      // Set access link from verification response or use stored link
-      if (data.accessLink) {
+      // Only show access link after successful payment verification
+      if (data.success && data.accessLink) {
         setAccessLink(data.accessLink);
+        setChannelName(data.channelName || selectedChannel?.name || "");
+        setShowSuccessModal(true);
+      } else {
+        toast({
+          title: "Payment Error", 
+          description: "Payment verification failed. Please contact support.",
+          variant: "destructive"
+        });
       }
-      setShowSuccessModal(true);
     },
     onError: (error: Error) => {
       toast({

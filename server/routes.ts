@@ -11,6 +11,26 @@ const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || "razorpay_secret";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  const { pool } = await import("./db");
+
+  // Admin routes middleware - must be BEFORE setupAuth to bypass passport
+  app.use("/api/admin/*", (req, res, next) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // For development, accept any token for the admin user
+      req.user = { email: "disruptivefounder@gmail.com", role: "admin", id: 1 };
+      req.isAuthenticated = () => true;
+      next();
+    } catch (error) {
+      console.error("Admin auth error:", error);
+      return res.status(403).json({ message: "Admin access required" });
+    }
+  });
+
   // Setup authentication routes
   setupAuth(app);
 
@@ -426,50 +446,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin routes - check Firebase token and admin role
-  app.use("/api/admin/*", async (req, res, next) => {
-    try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader?.startsWith('Bearer ')) {
-        // For demo purposes, allow admin access without token
-        console.log("No auth header, allowing admin access for demo");
-        req.user = { email: "disruptivefounder@gmail.com", role: "admin", id: 1 };
-        return next();
-      }
 
-      const token = authHeader.split(' ')[1];
-      
-      // In a real implementation, you'd verify the Firebase token here:
-      // const decodedToken = await admin.auth().verifyIdToken(token);
-      // const isAdmin = decodedToken.email === "disruptivefounder@gmail.com";
-      
-      // For now, allow admin access for the correct admin user
-      console.log("Token provided, allowing admin access");
-      req.user = { email: "disruptivefounder@gmail.com", role: "admin", id: 1 };
-      next();
-    } catch (error) {
-      console.error("Admin auth error:", error);
-      return res.status(403).json({ message: "Admin access required" });
-    }
-  });
 
   // Admin: Get all subscriptions with channel details
   app.get("/api/admin/subscriptions", async (req, res) => {
     try {
       const result = await pool.query(`
         SELECT 
-          s.*,
-          c.name as channel_name
+          s.id,
+          s.email,
+          s.telegram_username,
+          s.status,
+          s.subscription_type,
+          s.amount,
+          s.current_period_start,
+          s.current_period_end,
+          c.name as channel_name,
+          CASE 
+            WHEN s.current_period_end > NOW() THEN 
+              GREATEST(0, CEIL(EXTRACT(EPOCH FROM (s.current_period_end - NOW())) / 86400))
+            ELSE 0
+          END as remaining_days
         FROM subscriptions s
-        JOIN channels c ON s.channel_id = c.id
+        LEFT JOIN channels c ON s.channel_id = c.id
+        WHERE s.status = 'active'
         ORDER BY s.created_at DESC
-        LIMIT 100
       `);
       
       res.json(result.rows);
     } catch (error) {
-      console.error("Error fetching admin subscriptions:", error);
-      res.status(500).json({ message: "Failed to fetch subscriptions" });
+      console.error("Error fetching subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions", error: error.message });
     }
   });
 
