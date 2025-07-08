@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +20,8 @@ export default function PaymentPage() {
   const [, params] = useRoute("/payment/:slug?");
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  const [email, setEmail] = useState("");
   const [telegramUsername, setTelegramUsername] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [subscriptionType, setSubscriptionType] = useState("monthly");
@@ -29,6 +30,9 @@ export default function PaymentPage() {
   const [accessLink, setAccessLink] = useState("");
   const [channelName, setChannelName] = useState("");
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
+  
+  // Get email from authenticated user
+  const email = user?.email || "";
 
   // Get channel slug from URL params or route params
   const channelSlug = params?.slug || new URLSearchParams(window.location.search).get('channel');
@@ -152,11 +156,11 @@ export default function PaymentPage() {
       return;
     }
 
-    // Validate that both email and Telegram username are provided
+    // Validate that user is authenticated (email from auth)
     if (!email) {
       toast({
-        title: "Email Required",
-        description: "Please provide your email address",
+        title: "Authentication Required",
+        description: "Please sign in to continue with payment",
         variant: "destructive",
       });
       return;
@@ -334,21 +338,18 @@ export default function PaymentPage() {
                 </RadioGroup>
               </div>
 
-              {/* Email Address */}
+              {/* Authenticated Email Display */}
               <div className="space-y-4 mb-6">
                 <Label className="text-sm font-light">Email Address</Label>
-                <p className="text-xs text-muted-foreground">Enter your email address for subscription management</p>
+                <p className="text-xs text-muted-foreground">Subscription will be created for your authenticated account</p>
                 
                 <div className="space-y-2">
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    required
-                  />
+                  <div className="glass-effect border-white/10 rounded-xl h-12 px-4 py-3 bg-muted/5 flex items-center">
+                    <span className="text-sm font-medium">{email}</span>
+                    <Badge variant="secondary" className="ml-auto text-xs">
+                      Authenticated
+                    </Badge>
+                  </div>
                 </div>
               </div>
 
@@ -410,7 +411,7 @@ export default function PaymentPage() {
               {/* Subscribe Button */}
               <Button
                 onClick={handleSubscribe}
-                disabled={!email || !telegramUsername || createSubscriptionMutation.isPending}
+                disabled={!telegramUsername || createSubscriptionMutation.isPending}
                 className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
               >
                 {createSubscriptionMutation.isPending ? "Processing..." : "Subscribe Now"}
