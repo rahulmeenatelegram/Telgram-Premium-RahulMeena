@@ -32,6 +32,7 @@ export interface IStorage {
   // Subscription methods
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
   getSubscription(id: number): Promise<Subscription | undefined>;
+  getSubscriptionByToken(token: string): Promise<Subscription | undefined>;
   getUserSubscriptions(userId: number): Promise<Subscription[]>;
   getEmailSubscriptions(email: string): Promise<Subscription[]>;
   getActiveSubscriptions(): Promise<Subscription[]>;
@@ -227,6 +228,11 @@ export class DatabaseStorage implements IStorage {
 
   async getSubscription(id: number): Promise<Subscription | undefined> {
     const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return subscription || undefined;
+  }
+
+  async getSubscriptionByToken(token: string): Promise<Subscription | undefined> {
+    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.accessToken, token));
     return subscription || undefined;
   }
 

@@ -48,15 +48,19 @@ export const subscriptions = pgTable("subscriptions", {
   userId: integer("user_id"),
   channelId: integer("channel_id").notNull(),
   email: text("email").notNull(),
-  accessLink: text("access_link").notNull(),
-  status: text("status").notNull().default("active"), // active, paused, cancelled, expired
+  accessToken: text("access_token").notNull(), // Unique token for access portal
+  status: text("status").notNull().default("active"), // active, paused, cancelled, expired, payment_pending
   subscriptionType: text("subscription_type").notNull(), // monthly, yearly
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   razorpaySubscriptionId: text("razorpay_subscription_id"),
-  autopayEnabled: boolean("autopay_enabled").default(true),
+  autopayEnabled: boolean("autopay_enabled").default(false), // Manual renewal by default
+  accessBlocked: boolean("access_blocked").default(false),
+  gracePeriodDays: integer("grace_period_days").default(3),
   currentPeriodStart: timestamp("current_period_start").notNull(),
   currentPeriodEnd: timestamp("current_period_end").notNull(),
   nextBillingDate: timestamp("next_billing_date").notNull(),
+  renewalReminderSent: boolean("renewal_reminder_sent").default(false),
+  lastRenewalDate: timestamp("last_renewal_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   cancelledAt: timestamp("cancelled_at"),
 });

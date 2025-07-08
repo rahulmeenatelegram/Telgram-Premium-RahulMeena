@@ -504,6 +504,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Access portal endpoint - checks if user can access channel
+  app.get("/api/access-portal/:token", async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      // Find subscription by access token
+      const subscription = await storage.getSubscriptionByToken(token);
+      if (!subscription) {
+        return res.status(404).json({ error: "Invalid access token" });
+      }
+
+      const now = new Date();
+      const expiryDate = new Date(subscription.currentPeriodEnd);
+      const gracePeriodEnd = new Date(expiryDate.getTime() + (subscription.gracePeriodDays * 24 * 60 * 60 * 1000));
+      const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      
+      // Check if access should be blocked
+      const isExpired = now > expiryDate;
+      const isInGracePeriod = isExpired && now <= gracePeriodEnd;
+      const accessBlocked = subscription.accessBlocked || (isExpired && !isInGracePeriod);
+      
+      // Update subscription status if needed
+      if (isExpired && subscription.status === 'active') {
+        await storage.updateSubscription(subscription.id, { 
+          status: 'expired',
+          accessBlocked: !isInGracePeriod 
+        });
+      }
+
+      // Get channel details for Telegram link
+      const channel = await storage.getChannel(subscription.channelId);
+      
+      res.json({
+        subscription: {
+          id: subscription.id,
+          channel_name: channel?.name || 'Unknown Channel',
+          status: isExpired ? 'expired' : subscription.status,
+          current_period_end: subscription.currentPeriodEnd,
+          access_blocked: accessBlocked,
+          grace_period_days: subscription.gracePeriodDays,
+          telegram_invite_link: !accessBlocked ? channel?.telegramInviteLink : null,
+        },
+        access_granted: !accessBlocked,
+        days_until_expiry: Math.max(0, daysUntilExpiry),
+        renewal_required: isExpired || daysUntilExpiry <= 7
+      });
+    } catch (error) {
+      console.error("Access portal error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

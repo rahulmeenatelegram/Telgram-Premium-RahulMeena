@@ -13,6 +13,7 @@ import PaymentPage from "@/pages/payment-page";
 import Dashboard from "@/pages/dashboard";
 import AboutPage from "@/pages/about-page";
 import ContactPage from "@/pages/contact-page";
+import AccessPortal from "@/pages/access-portal";
 import NotFound from "@/pages/not-found";
 import { ProtectedRoute } from "./lib/protected-route";
 
@@ -31,6 +32,7 @@ function Router() {
         </Route>
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/access/:token" component={AccessPortal} />
         <Route path="/admin">
           <ProtectedRoute requireAdmin>
             <AdminDashboard />

@@ -40,9 +40,10 @@ export default function Dashboard() {
       channel_name: "Premium Trading Signals",
       status: "active",
       expires_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 days from now
-      access_link: "https://t.me/premium_trading_signals",
+      access_token: "abc123xyz789", // Access portal token instead of direct link
       subscription_type: "monthly",
       next_billing_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
+      manual_renewal_required: true,
     }
   ];
 
@@ -225,6 +226,15 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
+              {/* Manual Renewal Notice */}
+              <Alert className="glass-effect border-blue-500/20 bg-blue-500/5">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Manual Renewal Policy:</strong> All subscriptions require manual renewal every 30 days. 
+                  You'll receive reminders 7 days before expiry and have a 3-day grace period after expiration.
+                </AlertDescription>
+              </Alert>
+
               {/* Expiring Soon Alert */}
               {expiringSoon.length > 0 && (
                 <Alert className="glass-effect border-yellow-500/20 bg-yellow-500/5">
@@ -323,10 +333,10 @@ export default function Dashboard() {
                                 className="flex-1 glass-effect border-white/10 hover:border-white/20 font-light"
                                 asChild
                               >
-                                <a href={subscription.access_link} target="_blank" rel="noopener noreferrer">
+                                <Link href={`/access/${subscription.access_token}`}>
                                   <ExternalLink className="w-4 h-4 mr-2" />
-                                  Access Channel
-                                </a>
+                                  Access Portal
+                                </Link>
                               </Button>
                               <Button
                                 variant="outline"
