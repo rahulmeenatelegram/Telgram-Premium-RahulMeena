@@ -33,24 +33,16 @@ export default function Dashboard() {
     enabled: !!user?.emailVerified,
   });
 
-  // Mock data for Firebase user subscriptions (since we don't have backend user sync yet)
-  const mockSubscriptions = [
-    {
-      id: 1,
-      channel_name: "Premium Trading Signals",
-      status: "active",
-      expires_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 days from now
-      access_token: "demo_1_9a1dc58e", // Real access token from database
-      subscription_type: "monthly",
-      next_billing_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
-      manual_renewal_required: true,
-      days_until_expiry: 5, // Changed to 5 days to show renewal reminder
-    }
-  ];
+  // Fetch user subscriptions
+  const { data: subscriptions = [], isLoading: subscriptionsLoading } = useQuery<any[]>({
+    queryKey: ["/api/subscriptions", user?.email],
+    queryFn: () => fetch(`/api/subscriptions?email=${encodeURIComponent(user?.email || '')}`).then(res => res.json()),
+    enabled: !!user?.emailVerified && !!user?.email,
+  });
 
-  const activeSubscriptions = mockSubscriptions.filter(sub => sub.status === 'active');
-  const expiringSoon = mockSubscriptions.filter(sub => {
-    const daysUntilExpiry = Math.ceil((new Date(sub.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
+  const expiringSoon = subscriptions.filter(sub => {
+    const daysUntilExpiry = Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return daysUntilExpiry <= 7 && sub.status === 'active';
   });
 
@@ -228,8 +220,8 @@ export default function Dashboard() {
               </Card>
 
               {/* Subscription Reminders */}
-              {mockSubscriptions.map((subscription) => {
-                const daysLeft = subscription.days_until_expiry;
+              {subscriptions.map((subscription) => {
+                const daysLeft = Math.ceil((new Date(subscription.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                 const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
                 const isExpired = daysLeft <= 0;
                 
@@ -238,7 +230,7 @@ export default function Dashboard() {
                     <Alert key={subscription.id} className="glass-effect border-red-500/20 bg-red-500/5">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
-                        <strong>⚠️ EXPIRED:</strong> Your subscription to {subscription.channel_name} has expired. 
+                        <strong>⚠️ EXPIRED:</strong> Your subscription has expired. 
                         You have a 3-day grace period. <Link href={`/access/${subscription.access_token}`} className="underline font-medium">Renew now</Link> to avoid losing access.
                       </AlertDescription>
                     </Alert>
@@ -248,7 +240,7 @@ export default function Dashboard() {
                     <Alert key={subscription.id} className="glass-effect border-yellow-500/20 bg-yellow-500/5">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
-                        <strong>🔔 RENEWAL REMINDER:</strong> Your subscription to {subscription.channel_name} expires in {daysLeft} days. 
+                        <strong>🔔 RENEWAL REMINDER:</strong> Your subscription expires in {daysLeft} days. 
                         <Link href={`/access/${subscription.access_token}`} className="underline font-medium ml-1">Renew early</Link> to avoid interruption.
                       </AlertDescription>
                     </Alert>

@@ -39,6 +39,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user subscriptions by email
+  app.get("/api/subscriptions", async (req, res) => {
+    try {
+      const userEmail = req.query.email as string;
+      
+      if (!userEmail) {
+        return res.status(400).json({ message: "Email parameter is required" });
+      }
+
+      const subscriptions = await storage.getEmailSubscriptions(userEmail);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Error fetching subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
   // Create subscription order with autopay
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {

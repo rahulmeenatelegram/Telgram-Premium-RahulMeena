@@ -38,6 +38,7 @@ export default function AccessPortal() {
 
   const { data: accessData, isLoading, error, refetch } = useQuery<AccessPortalData>({
     queryKey: ["/api/access-portal", accessToken],
+    queryFn: () => fetch(`/api/access-portal/${accessToken}`).then(res => res.json()),
     enabled: !!accessToken,
   });
 
