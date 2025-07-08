@@ -36,8 +36,8 @@ export default function AdminDashboard() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">Admin privileges required. Please sign in with admin credentials.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Access Denied</h1>
+          <p className="text-gray-600 dark:text-gray-400">Admin privileges required. Please contact support if you believe this is an error.</p>
         </div>
       </div>
     );

@@ -110,6 +110,7 @@ Changelog:
 - July 8, 2025. Fixed critical JSON response issue in payment verification endpoint. API now returns proper JSON response with access link, channel name, and subscription details immediately after payment verification. Resolved database column mapping issues using raw SQL queries. Payment verification flow now works correctly with proper JSON parsing on frontend.
 - July 8, 2025. Completed admin dashboard functionality with working subscriptions endpoint. Fixed admin authentication middleware to properly bypass Passport.js for admin routes. Removed all auto-renew references and replaced with 30-day access messaging. Cleaned up test/dummy data from database. Access links now only shown after successful payment verification. Admin can view all active subscriptions with remaining days calculation.
 - July 8, 2025. Removed icon field from channel creation form in admin dashboard. System now automatically assigns default "fas fa-telegram" icon when creating new channels. Changed "Expires" column to "Subscribed" in admin dashboard to show subscription start date instead of end date.
+- July 8, 2025. Fixed security issue in admin dashboard access denied page - removed exposure of admin email address to unauthorized users. Added global CSS reset to prevent horizontal scrolling and white strips on all pages with overflow-x: hidden and max-width: 100vw constraints.
 
 ## User Preferences
 
