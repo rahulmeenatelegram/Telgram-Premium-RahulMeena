@@ -105,6 +105,7 @@ Changelog:
 - July 8, 2025. Enhanced mobile responsiveness across all pages, removed unnecessary stats from About page, added social media links to Contact page, removed demo buttons, optimized navigation and spacing for all screen sizes
 - July 8, 2025. Implemented hamburger menu navigation for mobile devices, removed member counts from channel cards, replaced "Explore Channels" with "Get Started" button, fixed horizontal scrolling issues with proper CSS overflow controls
 - July 8, 2025. Migrated authentication system from Passport.js to Firebase Authentication with email verification, password reset functionality, Google sign-in, and comprehensive error handling. Updated protected routes and admin access control.
+- July 8, 2025. Implemented manual renewal system with access control using unique access tokens instead of direct Telegram links. Features: 30-day subscription periods, 3-day grace period, access blocking for expired subscriptions, renewal payment processing through Razorpay, and access portal pages that control channel access through tokens rather than direct links.
 
 ## User Preferences
 

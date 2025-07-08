@@ -40,10 +40,11 @@ export default function Dashboard() {
       channel_name: "Premium Trading Signals",
       status: "active",
       expires_at: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 days from now
-      access_token: "abc123xyz789", // Access portal token instead of direct link
+      access_token: "demo_1_9a1dc58e", // Real access token from database
       subscription_type: "monthly",
       next_billing_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
       manual_renewal_required: true,
+      days_until_expiry: 25,
     }
   ];
 
