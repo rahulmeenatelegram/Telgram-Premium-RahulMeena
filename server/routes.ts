@@ -496,7 +496,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Create channel
   app.post("/api/admin/channels", async (req, res) => {
     try {
-      const validatedData = insertChannelSchema.parse(req.body);
+      const requestData = req.body;
+      const slug = requestData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      
+      const channelData = {
+        ...requestData,
+        slug,
+        icon: "fas fa-telegram" // Default icon since frontend no longer collects this
+      };
+      
+      const validatedData = insertChannelSchema.parse(channelData);
       const channel = await storage.createChannel(validatedData);
       res.status(201).json(channel);
     } catch (error) {

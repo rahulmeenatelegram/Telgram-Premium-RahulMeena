@@ -109,6 +109,7 @@ Changelog:
 - July 8, 2025. Simplified subscription system to username-only approach (removed user ID requirement) and implemented direct access link system. After subscription payment, users receive a direct Telegram channel access link valid for 30 days. Updated database schema to include telegram_username column and removed token-based access routes. System now uses only CUSTOMER_DATABASE_URL for consistent database operations.
 - July 8, 2025. Fixed critical JSON response issue in payment verification endpoint. API now returns proper JSON response with access link, channel name, and subscription details immediately after payment verification. Resolved database column mapping issues using raw SQL queries. Payment verification flow now works correctly with proper JSON parsing on frontend.
 - July 8, 2025. Completed admin dashboard functionality with working subscriptions endpoint. Fixed admin authentication middleware to properly bypass Passport.js for admin routes. Removed all auto-renew references and replaced with 30-day access messaging. Cleaned up test/dummy data from database. Access links now only shown after successful payment verification. Admin can view all active subscriptions with remaining days calculation.
+- July 8, 2025. Removed icon field from channel creation form in admin dashboard. System now automatically assigns default "fas fa-telegram" icon when creating new channels. Changed "Expires" column to "Subscribed" in admin dashboard to show subscription start date instead of end date.
 
 ## User Preferences
 

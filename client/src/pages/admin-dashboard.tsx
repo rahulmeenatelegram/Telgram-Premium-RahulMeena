@@ -287,10 +287,6 @@ export default function AdminDashboard() {
                       <Label htmlFor="memberCount">Member Count</Label>
                       <Input id="memberCount" name="memberCount" type="number" defaultValue="0" />
                     </div>
-                    <div>
-                      <Label htmlFor="icon">Icon (Font Awesome class)</Label>
-                      <Input id="icon" name="icon" placeholder="fas fa-chart-line" required />
-                    </div>
                     <Button type="submit" className="w-full" disabled={addChannelMutation.isPending}>
                       {addChannelMutation.isPending ? "Creating..." : "Create Channel"}
                     </Button>
