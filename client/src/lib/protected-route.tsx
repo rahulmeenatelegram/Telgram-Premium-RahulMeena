@@ -43,11 +43,17 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
           <h2 className="text-xl font-semibold">Access Denied</h2>
           <p className="text-muted-foreground">Admin privileges required.</p>
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>Current user: {user.email}</p>
+            <p>Current user: {user.email || 'No email'}</p>
+            <p>Email verified: {user.emailVerified ? 'Yes' : 'No'}</p>
             <p>Required: disruptivefounder@gmail.com</p>
+            <p>Debug: {JSON.stringify({
+              userEmail: user.email,
+              emailVerified: user.emailVerified,
+              uid: user.uid
+            })}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Please sign in with the admin account to access this page.
+            Please sign in with the admin account and ensure email is verified.
           </p>
         </div>
       </div>
