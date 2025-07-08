@@ -109,188 +109,73 @@ export default function ContactPage() {
           </div>
         </section>
 
-        {/* Social Media Links */}
+        {/* Contact Info */}
         <section className="py-12 sm:py-16 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl font-light mb-3 sm:mb-4">Connect with us</h2>
-              <p className="text-sm sm:text-base text-muted-foreground font-light">Follow us on social media and get in touch</p>
+              <h2 className="text-2xl sm:text-3xl font-light mb-3 sm:mb-4">Get in Touch</h2>
+              <p className="text-sm sm:text-base text-muted-foreground font-light">Reach out to us for support and assistance</p>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 mb-12 sm:mb-16 md:mb-20">
-              {socialLinks.map((social, index) => (
-                <a 
-                  key={index} 
-                  href={social.action}
-                  target={social.action.startsWith('http') ? '_blank' : '_self'}
-                  rel={social.action.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  className="block group"
-                >
-                  <Card className="glass-effect border-white/5 rounded-xl sm:rounded-2xl hover:border-white/10 transition-all duration-300 group-hover:scale-105">
-                    <CardContent className="p-4 sm:p-6 text-center">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl ${social.color} flex items-center justify-center mx-auto mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                        <social.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                      </div>
-                      <h3 className="text-sm sm:text-base font-medium mb-1 sm:mb-2">
-                        {social.title}
-                      </h3>
-                      <p className="text-xs text-muted-foreground font-light mb-2">
-                        {social.description}
-                      </p>
-                      <div className="text-xs sm:text-sm font-medium text-primary">
-                        {social.value}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </a>
-              ))}
+            <div className="max-w-md mx-auto">
+              <Card className="glass-effect border-white/5 rounded-xl sm:rounded-2xl">
+                <CardContent className="p-6 sm:p-8 text-center">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-blue-500 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <Mail className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-medium mb-2 sm:mb-3">Email Support</h3>
+                  <p className="text-sm text-muted-foreground font-light mb-4">
+                    Send us an email for any questions or support
+                  </p>
+                  <div className="text-base font-medium text-primary">
+                    support@onetapay.com
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
 
-        {/* Contact Form & FAQ */}
+        {/* FAQ Section */}
         <section className="py-12 sm:py-16 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
-              {/* Contact Form */}
-              <div>
-                <Card className="glass-effect border-white/5 rounded-xl sm:rounded-2xl">
-                  <CardHeader className="p-4 sm:p-6 lg:p-8">
-                    <CardTitle className="text-lg sm:text-xl lg:text-2xl font-light">Send us a message</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 sm:p-6 lg:p-8 pt-0">
-                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="firstName" className="text-sm font-light">First Name</Label>
-                          <Input 
-                            id="firstName" 
-                            name="firstName" 
-                            required 
-                            className="mt-1 glass-effect border-white/10"
-                            placeholder="John"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="lastName" className="text-sm font-light">Last Name</Label>
-                          <Input 
-                            id="lastName" 
-                            name="lastName" 
-                            required 
-                            className="mt-1 glass-effect border-white/10"
-                            placeholder="Doe"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="email" className="text-sm font-light">Email Address</Label>
-                        <Input 
-                          id="email" 
-                          name="email" 
-                          type="email" 
-                          required 
-                          className="mt-1 glass-effect border-white/10"
-                          placeholder="john@example.com"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="subject" className="text-sm font-light">Subject</Label>
-                        <Input 
-                          id="subject" 
-                          name="subject" 
-                          required 
-                          className="mt-1 glass-effect border-white/10"
-                          placeholder="How can we help you?"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="message" className="text-sm font-light">Message</Label>
-                        <Textarea 
-                          id="message" 
-                          name="message" 
-                          required 
-                          rows={5}
-                          className="mt-1 glass-effect border-white/10 resize-none"
-                          placeholder="Tell us more about your inquiry..."
-                        />
-                      </div>
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-white text-black hover:bg-white/90 font-medium"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          "Sending..."
-                        ) : (
-                          <>
-                            Send Message
-                            <Send className="ml-2 h-4 w-4" />
-                          </>
-                        )}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* FAQ Section */}
-              <div>
-                <div className="mb-6 sm:mb-8">
-                  <h2 className="text-2xl sm:text-3xl font-light mb-3 sm:mb-4">
-                    Frequently Asked Questions
-                  </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground font-light">
-                    Quick answers to common questions
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl font-light mb-3 sm:mb-4">Frequently Asked Questions</h2>
+              <p className="text-sm sm:text-base text-muted-foreground font-light">Find answers to common questions</p>
+            </div>
+            
+            <div className="space-y-4 sm:space-y-6">
+              <Card className="glass-effect border-white/5 rounded-xl sm:rounded-2xl">
+                <CardContent className="p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3">
+                    How do I access my subscribed channels?
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                    After successful payment, you'll receive an access link that allows you to join the premium Telegram channel.
                   </p>
-                </div>
-                
-                <div className="space-y-4 sm:space-y-6">
-                  {faqs.map((faq, index) => (
-                    <Card key={index} className="glass-effect border-white/5 rounded-2xl">
-                      <CardContent className="p-4 sm:p-6">
-                        <h3 className="text-sm sm:text-base font-medium mb-2 sm:mb-3">
-                          {faq.question}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground font-light leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Business Hours */}
-                <Card className="glass-effect border-white/5 rounded-2xl mt-6 sm:mt-8">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center mb-3 sm:mb-4">
-                      <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-primary mr-3" />
-                      <h3 className="text-sm sm:text-base font-medium">Business Hours</h3>
-                    </div>
-                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-muted-foreground font-light">
-                      <div className="flex justify-between">
-                        <span>Monday - Friday</span>
-                        <span>9:00 AM - 6:00 PM IST</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Saturday</span>
-                        <span>10:00 AM - 4:00 PM IST</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Sunday</span>
-                        <span>Closed</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/10">
-                      <p className="text-xs sm:text-sm text-muted-foreground font-light">
-                        For urgent issues, please email us and we'll respond within 2 hours.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-effect border-white/5 rounded-xl sm:rounded-2xl">
+                <CardContent className="p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3">
+                    Can I cancel my subscription anytime?
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                    Yes, you can cancel your subscription at any time through your dashboard. Your access will continue until the end of your current billing period.
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card className="glass-effect border-white/5 rounded-xl sm:rounded-2xl">
+                <CardContent className="p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-medium mb-2 sm:mb-3">
+                    What payment methods do you accept?
+                  </h3>
+                  <p className="text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                    We accept UPI, credit cards, debit cards, and other payment methods through our secure Razorpay integration.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>

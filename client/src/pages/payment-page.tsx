@@ -20,7 +20,6 @@ export default function PaymentPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   
-  const [email, setEmail] = useState("");
   const [telegramUsername, setTelegramUsername] = useState("");
   const [telegramUserId, setTelegramUserId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
@@ -51,7 +50,6 @@ export default function PaymentPage() {
   const createSubscriptionMutation = useMutation({
     mutationFn: async (data: { 
       channelId: number; 
-      email: string; 
       telegramUsername?: string;
       telegramUserId?: string;
       paymentMethod: string; 
@@ -89,7 +87,7 @@ export default function PaymentPage() {
         });
       },
       prefill: {
-        email: email,
+        email: telegramUsername || telegramUserId || `user_${Date.now()}`,
       },
       theme: {
         color: "#8b5cf6"
@@ -132,10 +130,10 @@ export default function PaymentPage() {
   };
 
   const handleSubscribe = () => {
-    if (!selectedChannel || !email) {
+    if (!selectedChannel) {
       toast({
         title: "Missing Information",
-        description: "Please select a channel and enter your email",
+        description: "Please select a channel",
         variant: "destructive",
       });
       return;
@@ -153,7 +151,6 @@ export default function PaymentPage() {
 
     createSubscriptionMutation.mutate({
       channelId: selectedChannel.id,
-      email,
       telegramUsername: telegramUsername || undefined,
       telegramUserId: telegramUserId || undefined,
       paymentMethod,
@@ -315,19 +312,6 @@ export default function PaymentPage() {
                 </RadioGroup>
               </div>
 
-              {/* Email */}
-              <div className="space-y-2 mb-6">
-                <Label htmlFor="email" className="text-sm font-light">Email Address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                />
-              </div>
-
               {/* Telegram Information */}
               <div className="space-y-4 mb-6">
                 <Label className="text-sm font-light">Telegram Information</Label>
@@ -403,7 +387,7 @@ export default function PaymentPage() {
               {/* Subscribe Button */}
               <Button
                 onClick={handleSubscribe}
-                disabled={!email || (!telegramUsername && !telegramUserId) || createSubscriptionMutation.isPending}
+                disabled={(!telegramUsername && !telegramUserId) || createSubscriptionMutation.isPending}
                 className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
               >
                 {createSubscriptionMutation.isPending ? "Processing..." : "Subscribe Now"}
