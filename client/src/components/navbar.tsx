@@ -86,7 +86,7 @@ export default function Navbar() {
                   <span className="sr-only">Toggle theme</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="glass-effect border-white/10">
+              <DropdownMenuContent align="end" className="glass-effect border-gray-200 dark:border-white/10">
                 <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
                   <Sun className="mr-2 h-4 w-4" />
                   Light
@@ -107,13 +107,13 @@ export default function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-white/10 text-white text-xs">
+                      <AvatarFallback className="bg-black/80 text-white dark:bg-white/10 dark:text-white text-xs">
                         {user.email?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 glass-effect border-white/10" align="end" forceMount>
+                <DropdownMenuContent className="w-56 glass-effect border-gray-200 dark:border-white/10" align="end" forceMount>
                   <div className="flex items-center justify-start gap-2 p-3">
                     <div className="flex flex-col space-y-1 leading-none">
                       <p className="font-medium text-sm">{user.email}</p>
@@ -122,7 +122,7 @@ export default function Navbar() {
                       </p>
                     </div>
                   </div>
-                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-white/5" />
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard">
                       <User className="mr-2 h-4 w-4" />
@@ -137,7 +137,7 @@ export default function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-white/5" />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
@@ -165,7 +165,7 @@ export default function Navbar() {
                   <span className="sr-only">Toggle theme</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="glass-effect border-white/10">
+              <DropdownMenuContent align="end" className="glass-effect border-gray-200 dark:border-white/10">
                 <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
                   <Sun className="mr-2 h-4 w-4" />
                   Light

@@ -114,6 +114,7 @@ Changelog:
 - July 8, 2025. Updated payment page to automatically use authenticated user's email instead of manual input. Removed email input field and replaced with read-only display showing authenticated user's email with "Authenticated" badge. Users no longer need to re-enter their email during payment process.
 - July 8, 2025. Fixed critical security vulnerability in payment page - added proper authentication protection to prevent unauthenticated users from accessing payment page. Added loading state and automatic redirect to login for unauthenticated users. Payment page now properly requires authentication before showing any content.
 - July 8, 2025. Implemented proper authentication flow with return URL handling. Unauthenticated users accessing payment page are redirected to /auth with returnUrl parameter. After successful authentication, users are automatically redirected back to their intended payment page with all URL parameters preserved.
+- July 8, 2025. Fixed user button visibility issues in light mode. Updated avatar fallback to use dark background (bg-black/80) in light mode and white background (bg-white/10) in dark mode. Fixed dropdown menu borders and separators to properly display in both light and dark themes with appropriate contrast.
 
 ## User Preferences
 
