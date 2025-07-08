@@ -83,7 +83,7 @@ The application is configured for deployment on both Replit and Vercel:
 - **Environment**: Uses Replit's built-in PostgreSQL and web hosting
 
 ### Production (Vercel)
-- **GitHub Integration**: Connect Replit to GitHub, then fork to client's account
+- **GitHub Integration**: Private repository with client as collaborator
 - **Build Command**: `npm run build` (Vite + esbuild)
 - **Output Directory**: `dist` (frontend in `dist/public`, backend in `dist/index.js`)
 - **Serverless Functions**: Express API routes deployed as Vercel functions
