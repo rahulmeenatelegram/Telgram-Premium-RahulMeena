@@ -258,14 +258,7 @@ export default function Dashboard() {
                 return null;
               })}
 
-              {/* Manual Renewal Policy */}
-              <Alert className="glass-effect border-blue-500/20 bg-blue-500/5">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Manual Renewal Policy:</strong> All subscriptions require manual renewal every 30 days. 
-                  Reminders appear here 7 days before expiry. You have a 3-day grace period after expiration.
-                </AlertDescription>
-              </Alert>
+
 
               {/* Expiring Soon Alert */}
               {expiringSoon.length > 0 && (
