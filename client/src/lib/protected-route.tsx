@@ -51,12 +51,8 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
         <div className="text-center space-y-4">
           <h2 className="text-xl font-semibold">Access Denied</h2>
           <p className="text-muted-foreground">Admin privileges required.</p>
-          <div className="text-sm text-muted-foreground space-y-1">
-            <p>Current user: {user.email || 'No email'}</p>
-            <p>Required: disruptivefounder@gmail.com</p>
-          </div>
           <p className="text-xs text-muted-foreground">
-            Please sign in with the admin account to access this page.
+            Please contact support if you believe this is an error.
           </p>
         </div>
       </div>
