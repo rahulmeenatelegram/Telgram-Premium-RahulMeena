@@ -21,7 +21,8 @@ function Router() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <Switch>
+      <div className="pt-16">
+        <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
         <Route path="/payment/:slug?" component={PaymentPage} />
@@ -40,7 +41,8 @@ function Router() {
           </ProtectedRoute>
         </Route>
         <Route component={NotFound} />
-      </Switch>
+        </Switch>
+      </div>
     </div>
   );
 }

@@ -44,7 +44,7 @@ export default function HomePage() {
       />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 sm:pt-20">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-4 sm:pt-8">
         {/* Background Grid */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(120,119,198,0.03)_1px,transparent_1px)] [background-size:32px_32px]" />
         

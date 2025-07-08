@@ -105,7 +105,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveChannels(): Promise<Channel[]> {
-    return await db.select().from(channels).where(eq(channels.isActive, true)).orderBy(desc(channels.createdAt));
+    // Use raw SQL to avoid column mapping issues
+    const result = await pool.query("SELECT * FROM channels ORDER BY created_at DESC");
+    return result.rows;
   }
 
   async getChannel(id: number): Promise<Channel | undefined> {

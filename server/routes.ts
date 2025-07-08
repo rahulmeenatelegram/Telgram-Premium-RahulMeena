@@ -37,8 +37,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all active channels
   app.get("/api/channels", async (req, res) => {
     try {
-      const channels = await storage.getActiveChannels();
-      res.json(channels);
+      const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
+      res.json(result.rows);
     } catch (error) {
       console.error("Error fetching channels:", error);
       res.status(500).json({ message: "Failed to fetch channels" });
@@ -118,10 +118,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {
-      const { channelId, telegramUsername, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
+      const { channelId, email, telegramUsername, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
       
-      // Use telegram username as email placeholder for now
-      const email = telegramUsername || `user_${Date.now()}`;
+      // Validate required fields
+      if (!email || !telegramUsername) {
+        return res.status(400).json({ message: "Email and Telegram username are required" });
+      }
       
       const channel = await storage.getChannel(channelId);
       if (!channel) {

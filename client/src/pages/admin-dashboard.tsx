@@ -362,7 +362,7 @@ export default function AdminDashboard() {
                         <TableHead className="min-w-[100px]">Channel</TableHead>
                         <TableHead className="min-w-[80px]">Amount</TableHead>
                         <TableHead className="min-w-[100px]">Days Left</TableHead>
-                        <TableHead className="min-w-[90px]">Expires</TableHead>
+                        <TableHead className="min-w-[90px]">Subscribed</TableHead>
                         <TableHead className="min-w-[80px]">Status</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                                 {daysLeft > 0 ? `${daysLeft} days` : "Expired"}
                               </Badge>
                             </TableCell>
-                            <TableCell>{formatDate(subscription.current_period_end)}</TableCell>
+                            <TableCell>{formatDate(subscription.current_period_start)}</TableCell>
                             <TableCell>
                               <Badge 
                                 variant={subscription.status === "active" ? "default" : "secondary"}

@@ -20,6 +20,7 @@ export default function PaymentPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   
+  const [email, setEmail] = useState("");
   const [telegramUsername, setTelegramUsername] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [subscriptionType, setSubscriptionType] = useState("monthly");
@@ -89,7 +90,7 @@ export default function PaymentPage() {
         });
       },
       prefill: {
-        email: telegramUsername || `user_${Date.now()}`,
+        email: email || `user_${Date.now()}`,
       },
       theme: {
         color: "#8b5cf6"
@@ -151,10 +152,19 @@ export default function PaymentPage() {
       return;
     }
 
-    // Validate that Telegram username is provided
+    // Validate that both email and Telegram username are provided
+    if (!email) {
+      toast({
+        title: "Email Required",
+        description: "Please provide your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!telegramUsername) {
       toast({
-        title: "Telegram Username Required",
+        title: "Telegram Username Required", 
         description: "Please provide your Telegram username for channel access",
         variant: "destructive",
       });
@@ -163,6 +173,7 @@ export default function PaymentPage() {
 
     createSubscriptionMutation.mutate({
       channelId: selectedChannel.id,
+      email,
       telegramUsername,
       paymentMethod,
       subscriptionType
@@ -171,7 +182,7 @@ export default function PaymentPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20">
+      <div className="min-h-screen flex items-center justify-center pt-4">
         <div className="text-center">
           <div className="animate-pulse">
             <div className="h-8 bg-white/5 rounded w-48 mx-auto mb-4" />
@@ -184,7 +195,7 @@ export default function PaymentPage() {
 
   if (!selectedChannel) {
     return (
-      <div className="min-h-screen flex items-center justify-center pt-20 px-6">
+      <div className="min-h-screen flex items-center justify-center pt-4 px-6">
         <div className="text-center max-w-md">
           <h1 className="text-2xl font-light mb-4">Channel not found</h1>
           <p className="text-muted-foreground mb-8">The channel you're looking for doesn't exist.</p>
@@ -204,7 +215,7 @@ export default function PaymentPage() {
   const currentPrice = subscriptionType === "monthly" ? monthlyPrice : yearlyPrice;
 
   return (
-    <div className="min-h-screen pt-20 pb-12 px-6">
+    <div className="min-h-screen pt-4 pb-12 px-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-12">
@@ -323,6 +334,24 @@ export default function PaymentPage() {
                 </RadioGroup>
               </div>
 
+              {/* Email Address */}
+              <div className="space-y-4 mb-6">
+                <Label className="text-sm font-light">Email Address</Label>
+                <p className="text-xs text-muted-foreground">Enter your email address for subscription management</p>
+                
+                <div className="space-y-2">
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
+                    required
+                  />
+                </div>
+              </div>
+
               {/* Telegram Username */}
               <div className="space-y-4 mb-6">
                 <Label className="text-sm font-light">Telegram Username</Label>
@@ -381,7 +410,7 @@ export default function PaymentPage() {
               {/* Subscribe Button */}
               <Button
                 onClick={handleSubscribe}
-                disabled={!telegramUsername || createSubscriptionMutation.isPending}
+                disabled={!email || !telegramUsername || createSubscriptionMutation.isPending}
                 className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
               >
                 {createSubscriptionMutation.isPending ? "Processing..." : "Subscribe Now"}
