@@ -174,16 +174,16 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16 sm:py-20 md:py-24 lg:py-32">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="glass-effect p-6 sm:p-8 md:p-12 lg:p-16 rounded-2xl sm:rounded-3xl border border-white/5">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extralight tracking-tight mb-4 sm:mb-6">
+          <div className="glass-effect p-8 sm:p-10 md:p-16 lg:p-20 rounded-2xl sm:rounded-3xl border border-white/5 mx-4 sm:mx-6 md:mx-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extralight tracking-tight mb-6 sm:mb-8">
               ready to get started?
             </h2>
-            <p className="text-base sm:text-lg text-muted-foreground font-light mb-6 sm:mb-8 max-w-2xl mx-auto px-2 sm:px-0">
+            <p className="text-base sm:text-lg text-muted-foreground font-light mb-8 sm:mb-10 max-w-2xl mx-auto px-2 sm:px-0">
               Join thousands of professionals accessing premium telegram content
             </p>
             <Button 
               size="lg" 
-              className="bg-white text-black hover:bg-white/90 px-6 sm:px-8 py-4 sm:py-6 text-base sm:text-lg font-medium rounded-full w-full sm:w-auto"
+              className="bg-white text-black hover:bg-white/90 px-8 sm:px-10 py-5 sm:py-6 text-base sm:text-lg font-medium rounded-full w-full sm:w-auto shadow-sm"
               asChild
             >
               <Link href="/auth">

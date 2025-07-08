@@ -25,8 +25,8 @@ export default function ChannelCard({ channel }: ChannelCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow w-full max-w-full">
-      <CardContent className="p-4 sm:p-6">
+    <Card className="hover:shadow-lg transition-shadow w-full max-w-full card-hover">
+      <CardContent className="p-6 sm:p-8">
         <div className="flex items-center mb-4">
           <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${getIconColor(channel.icon)}`}>
             <i className={`${channel.icon} text-lg sm:text-xl`}></i>
