@@ -1,97 +1,202 @@
-import { createContext, ReactNode, useContext } from "react";
-import {
-  useQuery,
-  useMutation,
-  UseMutationResult,
-} from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
+import { auth, signInWithEmail, registerWithEmail, signOutUser, resetPassword, signInWithGoogle, resendEmailVerification } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 type AuthContextType = {
-  user: SelectUser | null;
+  user: FirebaseUser | null;
   isLoading: boolean;
-  error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  resendEmailVerification: () => Promise<void>;
+  isEmailVerified: boolean;
 };
 
-type LoginData = Pick<InsertUser, "email" | "password">;
-
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useQuery<SelectUser | undefined, Error>({
-    queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
-  });
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
-    },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
-    },
-    onError: (error: Error) => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      await signInWithEmail(email, password);
+      
+      if (auth.currentUser && !auth.currentUser.emailVerified) {
+        toast({
+          title: "Email not verified",
+          description: "Please check your email and click the verification link before signing in.",
+          variant: "destructive",
+        });
+        await signOutUser();
+        return;
+      }
+      
       toast({
-        title: "Login failed",
-        description: error.message,
+        title: "Welcome back!",
+        description: "You've successfully signed in.",
+      });
+    } catch (error: any) {
+      let message = "Failed to sign in";
+      if (error.code === "auth/user-not-found") {
+        message = "No account found with this email";
+      } else if (error.code === "auth/wrong-password") {
+        message = "Incorrect password";
+      } else if (error.code === "auth/invalid-email") {
+        message = "Invalid email address";
+      } else if (error.code === "auth/too-many-requests") {
+        message = "Too many failed attempts. Please try again later";
+      }
+      
+      toast({
+        title: "Sign in failed",
+        description: message,
         variant: "destructive",
       });
-    },
-  });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
-    },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
-    },
-    onError: (error: Error) => {
+  const signUp = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      await registerWithEmail(email, password);
+      
+      toast({
+        title: "Account created!",
+        description: "Please check your email and click the verification link to complete your registration.",
+      });
+      
+      // Sign out immediately after registration to force email verification
+      await signOutUser();
+    } catch (error: any) {
+      let message = "Failed to create account";
+      if (error.code === "auth/email-already-in-use") {
+        message = "An account with this email already exists";
+      } else if (error.code === "auth/weak-password") {
+        message = "Password should be at least 6 characters";
+      } else if (error.code === "auth/invalid-email") {
+        message = "Invalid email address";
+      }
+      
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
-    },
-  });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
-    },
-    onError: (error: Error) => {
+  const signOut = async () => {
+    try {
+      await signOutUser();
       toast({
-        title: "Logout failed",
-        description: error.message,
+        title: "Signed out",
+        description: "You've been successfully signed out.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
+
+  const handleResetPassword = async (email: string) => {
+    try {
+      await resetPassword(email);
+      toast({
+        title: "Password reset sent",
+        description: "Check your email for password reset instructions.",
+      });
+    } catch (error: any) {
+      let message = "Failed to send password reset email";
+      if (error.code === "auth/user-not-found") {
+        message = "No account found with this email";
+      } else if (error.code === "auth/invalid-email") {
+        message = "Invalid email address";
+      }
+      
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const handleSignInWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      await signInWithGoogle();
+      toast({
+        title: "Welcome!",
+        description: "You've successfully signed in with Google.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Google sign in failed",
+        description: error.message || "Failed to sign in with Google",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendEmailVerification = async () => {
+    try {
+      await resendEmailVerification();
+      toast({
+        title: "Verification email sent",
+        description: "Please check your email for the verification link.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to send verification email",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const value: AuthContextType = {
+    user,
+    isLoading,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword: handleResetPassword,
+    signInWithGoogle: handleSignInWithGoogle,
+    resendEmailVerification: handleResendEmailVerification,
+    isEmailVerified: user?.emailVerified || false,
+  };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user: user ?? null,
-        isLoading,
-        error,
-        loginMutation,
-        logoutMutation,
-        registerMutation,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

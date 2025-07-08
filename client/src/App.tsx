@@ -24,10 +24,18 @@ function Router() {
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
         <Route path="/payment" component={PaymentPage} />
-        <ProtectedRoute path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard">
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        </Route>
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
-        <ProtectedRoute path="/admin" component={AdminDashboard} />
+        <Route path="/admin">
+          <ProtectedRoute requireAdmin>
+            <AdminDashboard />
+          </ProtectedRoute>
+        </Route>
         <Route component={NotFound} />
       </Switch>
     </div>

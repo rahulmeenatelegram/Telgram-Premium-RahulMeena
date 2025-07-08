@@ -8,14 +8,16 @@ import { User, Settings, LogOut, Shield, Moon, Sun, Monitor, Menu, X } from "luc
 import { useTheme } from "./theme-provider";
 
 export default function Navbar() {
-  const { user, logoutMutation } = useAuth();
+  const { user, signOut } = useAuth();
   const [location] = useLocation();
   const { setTheme, theme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    signOut();
   };
+
+  const isAdmin = user?.email === "disruptivefounder@gmail.com";
 
   return (
     <nav className="fixed top-0 w-full z-50 glass-effect border-b border-white/5">
@@ -53,40 +55,40 @@ export default function Navbar() {
               </div>
             </Link>
           </div>
-          
-          <div className="flex items-center space-x-3 sm:space-x-6 lg:space-x-8">
-            {/* Theme Toggle */}
+
+          {/* Desktop Actions */}
+          <div className="hidden lg:flex items-center space-x-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9 p-0">
-                  <Sun className="h-3 w-3 sm:h-4 sm:w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-3 w-3 sm:h-4 sm:w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <Button variant="ghost" size="icon" className="w-8 h-8">
+                  <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                   <span className="sr-only">Toggle theme</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="glass-effect border-white/10">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
+                <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
                   <Sun className="mr-2 h-4 w-4" />
                   Light
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">
                   <Moon className="mr-2 h-4 w-4" />
                   Dark
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
+                <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">
                   <Monitor className="mr-2 h-4 w-4" />
                   System
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {user ? (
+            {user && user.emailVerified ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0 hidden lg:flex">
-                    <Avatar className="h-9 w-9 border border-white/10">
-                      <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                        {user.email.charAt(0).toUpperCase()}
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="bg-white/10 text-white text-xs">
+                        {user.email?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -95,8 +97,8 @@ export default function Navbar() {
                   <div className="flex items-center justify-start gap-2 p-3">
                     <div className="flex flex-col space-y-1 leading-none">
                       <p className="font-medium text-sm">{user.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {user.role}
+                      <p className="text-xs text-muted-foreground">
+                        {user.emailVerified ? "Verified" : "Unverified"}
                       </p>
                     </div>
                   </div>
@@ -107,68 +109,69 @@ export default function Navbar() {
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  {user.role === "admin" && (
+                  {isAdmin && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin">
                         <Shield className="mr-2 h-4 w-4" />
-                        Admin Dashboard
+                        Admin
                       </Link>
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    Settings
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator className="bg-white/5" />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-400">
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="hidden lg:flex items-center space-x-4">
-                <Button variant="ghost" asChild className="text-sm font-light">
-                  <Link href="/auth">Sign in</Link>
-                </Button>
-                <Button asChild className="bg-white text-black hover:bg-white/90 text-sm font-medium">
-                  <Link href="/auth">Get Started</Link>
-                </Button>
+              <div className="flex items-center space-x-2">
+                <Link href="/auth">
+                  <Button className="bg-white text-black hover:bg-white/90 text-sm px-4 py-2 font-medium">
+                    Get Started
+                  </Button>
+                </Link>
               </div>
             )}
-            
-            {/* Mobile Menu Button */}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
             <Button
               variant="ghost"
               size="icon"
+              className="h-8 w-8"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden"
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </Button>
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-white/5 bg-background/95 backdrop-blur-sm">
-            <div className="px-4 py-4 space-y-3">
-              <Link href="/">
-                <div className={`block px-3 py-2 text-base font-light transition-colors cursor-pointer ${
+          <div className="lg:hidden border-t border-white/5">
+            <div className="py-4 space-y-3">
+              <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className={`block px-3 py-2 text-sm font-light transition-colors ${
                   location === "/" ? "text-primary" : "text-foreground hover:text-primary"
                 }`}>
                   Home
                 </div>
               </Link>
-              <Link href="/about">
-                <div className={`block px-3 py-2 text-base font-light transition-colors cursor-pointer ${
+              <Link href="/about" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className={`block px-3 py-2 text-sm font-light transition-colors ${
                   location === "/about" ? "text-primary" : "text-foreground hover:text-primary"
                 }`}>
                   About
                 </div>
               </Link>
-              <Link href="/contact">
-                <div className={`block px-3 py-2 text-base font-light transition-colors cursor-pointer ${
+              <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className={`block px-3 py-2 text-sm font-light transition-colors ${
                   location === "/contact" ? "text-primary" : "text-foreground hover:text-primary"
                 }`}>
                   Contact
@@ -176,42 +179,45 @@ export default function Navbar() {
               </Link>
               
               <div className="pt-4 border-t border-white/5">
-                {user ? (
+                {user && user.emailVerified ? (
                   <div className="space-y-3">
                     <div className="px-3 py-2">
                       <p className="text-sm font-medium text-foreground">{user.email}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.emailVerified ? "Verified" : "Unverified"}
+                      </p>
                     </div>
-                    <Link href="/dashboard">
-                      <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">
+                    <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)}>
+                      <div className="flex items-center px-3 py-2 text-sm font-light text-foreground hover:text-primary transition-colors">
+                        <User className="mr-2 h-4 w-4" />
                         Dashboard
                       </div>
                     </Link>
-                    {user.role === "admin" && (
-                      <Link href="/admin">
-                        <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">
-                          Admin Panel
+                    {isAdmin && (
+                      <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)}>
+                        <div className="flex items-center px-3 py-2 text-sm font-light text-foreground hover:text-primary transition-colors">
+                          <Shield className="mr-2 h-4 w-4" />
+                          Admin
                         </div>
                       </Link>
                     )}
                     <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-3 py-2 text-base font-light text-red-400 hover:text-red-300 transition-colors"
+                      onClick={() => {
+                        handleLogout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center px-3 py-2 text-sm font-light text-foreground hover:text-primary transition-colors w-full text-left"
                     >
-                      Sign Out
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Logout
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <Link href="/auth">
-                      <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">
-                        Sign In
-                      </div>
-                    </Link>
-                    <Link href="/auth">
-                      <div className="block px-3 py-2 text-base font-light bg-white text-black hover:bg-white/90 transition-colors cursor-pointer rounded-md text-center">
+                  <div className="px-3 py-2">
+                    <Link href="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Button className="bg-white text-black hover:bg-white/90 text-sm px-4 py-2 font-medium w-full">
                         Get Started
-                      </div>
+                      </Button>
                     </Link>
                   </div>
                 )}

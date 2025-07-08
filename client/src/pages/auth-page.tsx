@@ -1,33 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { Link } from "wouter";
+import { BackgroundGlow, FloatingParticles } from "@/components/background-effects";
+import Navbar from "@/components/navbar";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Mail, Eye, EyeOff, ArrowLeft, Chrome } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  role: z.enum(["user", "admin"]).default("user"),
+  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+const resetPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
+type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const { user, isLoading, signIn, signUp, resetPassword, signInWithGoogle } = useAuth();
+  const [, navigate] = useLocation();
   const [showPassword, setShowPassword] = useState(false);
-  const { loginMutation, registerMutation } = useAuth();
+  const [showResetForm, setShowResetForm] = useState(false);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (user && user.emailVerified) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
 
   const loginForm = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -42,180 +62,348 @@ export default function AuthPage() {
     defaultValues: {
       email: "",
       password: "",
-      role: "user",
+      confirmPassword: "",
     },
   });
 
-  const onLogin = (data: LoginFormData) => {
-    loginMutation.mutate(data);
+  const resetForm = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
+  const onLogin = async (data: LoginFormData) => {
+    try {
+      await signIn(data.email, data.password);
+      if (user?.emailVerified) {
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      // Error is handled in the auth context
+    }
   };
 
-  const onRegister = (data: RegisterFormData) => {
-    registerMutation.mutate(data);
+  const onRegister = async (data: RegisterFormData) => {
+    try {
+      await signUp(data.email, data.password);
+      // After successful registration, user will be signed out and needs to verify email
+      registerForm.reset();
+    } catch (error) {
+      // Error is handled in the auth context
+    }
   };
+
+  const onResetPassword = async (data: ResetPasswordFormData) => {
+    try {
+      await resetPassword(data.email);
+      setShowResetForm(false);
+      resetForm.reset();
+    } catch (error) {
+      // Error is handled in the auth context
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      navigate("/dashboard");
+    } catch (error) {
+      // Error is handled in the auth context
+    }
+  };
+
+  if (showResetForm) {
+    return (
+      <div className="min-h-screen relative">
+        <BackgroundGlow />
+        <FloatingParticles />
+        <Navbar />
+        
+        <div className="relative z-10 flex items-center justify-center min-h-screen pt-16 px-4">
+          <Card className="w-full max-w-md glass-effect border-white/5">
+            <CardHeader className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-fit mb-4"
+                onClick={() => setShowResetForm(false)}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Sign In
+              </Button>
+              <CardTitle className="text-2xl font-light">Reset Password</CardTitle>
+              <CardDescription className="font-light">
+                Enter your email to receive reset instructions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...resetForm}>
+                <form onSubmit={resetForm.handleSubmit(onResetPassword)} className="space-y-4">
+                  <FormField
+                    control={resetForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-light">Email</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="your@email.com"
+                              className="pl-10 glass-effect border-white/10 focus:border-white/20"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full bg-white text-black hover:bg-white/90 font-medium"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Sending..." : "Send Reset Link"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-20 pb-12 px-6">
-      <div className="max-w-md w-full">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-extralight tracking-tight mb-4">
-            {isLogin ? "welcome back" : "join us"}
-          </h1>
-          <p className="text-muted-foreground font-light">
-            {isLogin 
-              ? "Sign in to access your premium channels" 
-              : "Create an account to get started"
-            }
-          </p>
-        </div>
+    <div className="min-h-screen relative">
+      <BackgroundGlow />
+      <FloatingParticles />
+      <Navbar />
+      
+      <div className="relative z-10 flex items-center justify-center min-h-screen pt-16 px-4">
+        <Card className="w-full max-w-md glass-effect border-white/5">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-light">Welcome to Onetapay</CardTitle>
+            <CardDescription className="font-light">
+              Sign in to access your premium channels
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="login" className="space-y-4">
+              <TabsList className="grid w-full grid-cols-2 glass-effect bg-white/5">
+                <TabsTrigger value="login" className="font-light data-[state=active]:bg-white data-[state=active]:text-black">
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger value="register" className="font-light data-[state=active]:bg-white data-[state=active]:text-black">
+                  Sign Up
+                </TabsTrigger>
+              </TabsList>
 
-        {/* Auth Card */}
-        <Card className="glass-effect border-white/10 p-8 rounded-3xl">
-          {isLogin ? (
-            <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-light">
-                  Email
-                </Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="pl-10 glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    {...loginForm.register("email")}
-                  />
-                </div>
-                {loginForm.formState.errors.email && (
-                  <p className="text-xs text-red-400 font-light">
-                    {loginForm.formState.errors.email.message}
-                  </p>
+              <TabsContent value="login" className="space-y-4">
+                {user && !user.emailVerified && (
+                  <Alert className="glass-effect border-yellow-500/20 bg-yellow-500/5">
+                    <Mail className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      Please verify your email before signing in. Check your inbox for the verification link.
+                    </AlertDescription>
+                  </Alert>
                 )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-light">
-                  Password
-                </Label>
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-light">Email</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="your@email.com"
+                                className="pl-10 glass-effect border-white/10 focus:border-white/20"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-light">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                {...field}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="••••••••"
+                                className="pr-10 glass-effect border-white/10 focus:border-white/20"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? (
+                                  <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                  <Eye className="h-4 w-4 text-muted-foreground" />
+                                )}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="px-0 font-light text-sm text-muted-foreground hover:text-white"
+                        onClick={() => setShowResetForm(true)}
+                      >
+                        Forgot password?
+                      </Button>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-white text-black hover:bg-white/90 font-medium"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Signing in..." : "Sign In"}
+                    </Button>
+                  </form>
+                </Form>
+
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10 glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    {...loginForm.register("password")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                  </div>
                 </div>
-                {loginForm.formState.errors.password && (
-                  <p className="text-xs text-red-400 font-light">
-                    {loginForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? "Signing in..." : "Sign In"}
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </form>
-          ) : (
-            <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="register-email" className="text-sm font-light">
-                  Email
-                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full glass-effect border-white/10 hover:border-white/20 font-light"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                >
+                  <Chrome className="mr-2 h-4 w-4" />
+                  Sign in with Google
+                </Button>
+              </TabsContent>
+
+              <TabsContent value="register" className="space-y-4">
+                <Form {...registerForm}>
+                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
+                    <FormField
+                      control={registerForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-light">Email</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="your@email.com"
+                                className="pl-10 glass-effect border-white/10 focus:border-white/20"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-light">Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              className="glass-effect border-white/10 focus:border-white/20"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-light">Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type={showPassword ? "text" : "password"}
+                              placeholder="••••••••"
+                              className="glass-effect border-white/10 focus:border-white/20"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="submit"
+                      className="w-full bg-white text-black hover:bg-white/90 font-medium"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Creating account..." : "Create Account"}
+                    </Button>
+                  </form>
+                </Form>
+
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="register-email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="pl-10 glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    {...registerForm.register("email")}
-                  />
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-white/10" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                  </div>
                 </div>
-                {registerForm.formState.errors.email && (
-                  <p className="text-xs text-red-400 font-light">
-                    {registerForm.formState.errors.email.message}
-                  </p>
-                )}
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="register-password" className="text-sm font-light">
-                  Password
-                </Label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="register-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="pl-10 pr-10 glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    {...registerForm.register("password")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {registerForm.formState.errors.password && (
-                  <p className="text-xs text-red-400 font-light">
-                    {registerForm.formState.errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
-                disabled={registerMutation.isPending}
-              >
-                {registerMutation.isPending ? "Creating account..." : "Create Account"}
-                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </form>
-          )}
-
-          {/* Toggle */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-muted-foreground font-light">
-              {isLogin ? "Don't have an account?" : "Already have an account?"}
-            </p>
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:text-primary/80 font-medium mt-1 transition-colors"
-            >
-              {isLogin ? "Sign up" : "Sign in"}
-            </button>
-          </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full glass-effect border-white/10 hover:border-white/20 font-light"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                >
+                  <Chrome className="mr-2 h-4 w-4" />
+                  Sign up with Google
+                </Button>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
         </Card>
-
-        {/* Back to Home */}
-        <div className="text-center mt-8">
-          <Link href="/">
-            <Button variant="ghost" className="text-sm font-light">
-              ← Back to Home
-            </Button>
-          </Link>
-        </div>
       </div>
     </div>
   );

@@ -1,33 +1,44 @@
 import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
-import { Redirect, Route } from "wouter";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
 
-export function ProtectedRoute({
-  path,
-  component: Component,
-}: {
-  path: string;
-  component: () => React.JSX.Element;
-}) {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  requireAdmin?: boolean;
+}
+
+export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user || !user.emailVerified) {
+        navigate("/auth");
+      } else if (requireAdmin && user.email !== "disruptivefounder@gmail.com") {
+        navigate("/dashboard");
+      }
+    }
+  }, [user, isLoading, navigate, requireAdmin]);
 
   if (isLoading) {
     return (
-      <Route path={path}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-border" />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
-      </Route>
+      </div>
     );
   }
 
-  if (!user) {
-    return (
-      <Route path={path}>
-        <Redirect to="/auth" />
-      </Route>
-    );
+  if (!user || !user.emailVerified) {
+    return null;
   }
 
-  return <Component />
+  if (requireAdmin && user.email !== "disruptivefounder@gmail.com") {
+    return null;
+  }
+
+  return <>{children}</>;
 }
