@@ -21,6 +21,8 @@ export default function PaymentPage() {
   const { toast } = useToast();
   
   const [email, setEmail] = useState("");
+  const [telegramUsername, setTelegramUsername] = useState("");
+  const [telegramUserId, setTelegramUserId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [subscriptionType, setSubscriptionType] = useState("monthly");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -47,7 +49,14 @@ export default function PaymentPage() {
   }, [channels, channelSlug]);
 
   const createSubscriptionMutation = useMutation({
-    mutationFn: async (data: { channelId: number; email: string; paymentMethod: string; subscriptionType: string }) => {
+    mutationFn: async (data: { 
+      channelId: number; 
+      email: string; 
+      telegramUsername?: string;
+      telegramUserId?: string;
+      paymentMethod: string; 
+      subscriptionType: string 
+    }) => {
       const res = await apiRequest("POST", "/api/subscriptions/create-order", data);
       return res.json();
     },
@@ -132,9 +141,21 @@ export default function PaymentPage() {
       return;
     }
 
+    // Validate that at least one Telegram identifier is provided
+    if (!telegramUsername && !telegramUserId) {
+      toast({
+        title: "Telegram Information Required",
+        description: "Please provide either your Telegram username or user ID for channel access",
+        variant: "destructive",
+      });
+      return;
+    }
+
     createSubscriptionMutation.mutate({
       channelId: selectedChannel.id,
       email,
+      telegramUsername: telegramUsername || undefined,
+      telegramUserId: telegramUserId || undefined,
       paymentMethod,
       subscriptionType
     });
@@ -307,6 +328,48 @@ export default function PaymentPage() {
                 />
               </div>
 
+              {/* Telegram Information */}
+              <div className="space-y-4 mb-6">
+                <Label className="text-sm font-light">Telegram Information</Label>
+                <p className="text-xs text-muted-foreground">Provide either your username or user ID for channel access</p>
+                
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="telegramUsername" className="text-xs text-muted-foreground">Telegram Username (optional)</Label>
+                    <Input
+                      id="telegramUsername"
+                      type="text"
+                      placeholder="@yourusername"
+                      value={telegramUsername}
+                      onChange={(e) => setTelegramUsername(e.target.value)}
+                      className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
+                    />
+                  </div>
+                  
+                  <div className="text-center text-xs text-muted-foreground">OR</div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="telegramUserId" className="text-xs text-muted-foreground">Telegram User ID (optional)</Label>
+                    <Input
+                      id="telegramUserId"
+                      type="text"
+                      placeholder="123456789"
+                      value={telegramUserId}
+                      onChange={(e) => setTelegramUserId(e.target.value)}
+                      className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
+                    />
+                  </div>
+                </div>
+                
+                <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                  <p className="text-xs text-blue-300">
+                    <strong>How to find your info:</strong><br/>
+                    • Username: Found in Telegram Settings → Edit Profile<br/>
+                    • User ID: Message @userinfobot on Telegram to get your ID
+                  </p>
+                </div>
+              </div>
+
               {/* Payment Method */}
               <div className="space-y-4 mb-8">
                 <Label className="text-sm font-light">Payment Method</Label>
@@ -340,7 +403,7 @@ export default function PaymentPage() {
               {/* Subscribe Button */}
               <Button
                 onClick={handleSubscribe}
-                disabled={!email || createSubscriptionMutation.isPending}
+                disabled={!email || (!telegramUsername && !telegramUserId) || createSubscriptionMutation.isPending}
                 className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
               >
                 {createSubscriptionMutation.isPending ? "Processing..." : "Subscribe Now"}

@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create subscription order with autopay
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {
-      const { channelId, email, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
+      const { channelId, email, telegramUsername, telegramUserId, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
       
       const channel = await storage.getChannel(channelId);
       if (!channel) {
@@ -79,15 +79,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
       }
 
-      // Generate unique access link
+      // Generate unique access link and token
       const accessLink = `https://t.me/+${Math.random().toString(36).substring(2, 15)}`;
+      const accessToken = `sub_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
       // Create subscription record
       const subscription = await storage.createSubscription({
         userId: req.user?.id,
         channelId,
         email,
+        telegramUsername,
+        telegramUserId,
         accessLink,
+        accessToken,
         status: "active",
         subscriptionType,
         amount: channel.price,
