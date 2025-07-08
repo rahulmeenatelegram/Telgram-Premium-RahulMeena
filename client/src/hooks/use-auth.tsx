@@ -164,9 +164,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       await signInWithGoogle();
+      
+      // Check if this is the admin user and provide appropriate welcome message
+      const isAdmin = auth.currentUser?.email === "disruptivefounder@gmail.com";
+      
       toast({
-        title: "Welcome!",
-        description: "You've successfully signed in with Google.",
+        title: isAdmin ? "Welcome Admin!" : "Welcome!",
+        description: isAdmin ? "You've successfully signed in with admin privileges." : "You've successfully signed in with Google.",
       });
     } catch (error: any) {
       toast({
