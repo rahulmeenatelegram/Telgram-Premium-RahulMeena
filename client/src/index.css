@@ -164,33 +164,46 @@ body, html {
   overflow-x: hidden;
 }
 
-/* Force full width for main containers */
-.min-h-screen.relative {
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  left: 0;
-  right: 0;
+/* Complete fix for white strip issue */
+html {
+  overflow-x: hidden;
 }
 
-/* Fix for specific hero section */
-section.relative {
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
-/* Specific fix for mobile white strip */
-@media (max-width: 1024px) {
+* {
+  box-sizing: border-box;
+}
+
+/* Prevent any element from exceeding viewport width */
+*:not(html):not(body) {
+  max-width: 100vw;
+}
+
+/* Specific mobile fixes */
+@media (max-width: 768px) {
   .min-h-screen {
-    width: 100vw !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    width: 100vw;
+    overflow-x: hidden;
   }
   
-  body {
-    width: 100vw !important;
-    overflow-x: hidden !important;
+  nav {
+    width: 100vw;
+    max-width: 100vw;
+  }
+  
+  section {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl {
+    max-width: calc(100vw - 2rem);
   }
 }
 

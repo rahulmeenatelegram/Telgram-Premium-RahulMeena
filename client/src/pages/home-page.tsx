@@ -30,7 +30,7 @@ export default function HomePage() {
   const featuredChannels = channels?.slice(0, 3) || [];
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative w-full overflow-x-hidden">
       <BackgroundGlow />
       
       {/* Mouse follower */}
