@@ -222,8 +222,23 @@ export class DatabaseStorage implements IStorage {
 
   // Subscription methods
   async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
-    const [newSubscription] = await db.insert(subscriptions).values(subscription).returning();
-    return newSubscription;
+    // Use raw SQL to avoid column mapping issues temporarily
+    const result = await db.execute(sql`
+      INSERT INTO subscriptions (
+        user_id, channel_id, email, telegram_username, access_token, 
+        status, subscription_type, amount, razorpay_subscription_id,
+        autopay_enabled, access_blocked, grace_period_days,
+        current_period_start, current_period_end, next_billing_date
+      ) VALUES (
+        ${subscription.userId}, ${subscription.channelId}, ${subscription.email}, 
+        ${subscription.telegramUsername}, ${subscription.accessToken},
+        ${subscription.status}, ${subscription.subscriptionType}, ${subscription.amount},
+        ${subscription.razorpaySubscriptionId}, ${subscription.autopayEnabled || false},
+        ${subscription.accessBlocked || false}, ${subscription.gracePeriodDays || 3},
+        ${subscription.currentPeriodStart}, ${subscription.currentPeriodEnd}, ${subscription.nextBillingDate}
+      ) RETURNING *
+    `);
+    return result.rows[0] as any;
   }
 
   async getSubscription(id: number): Promise<Subscription | undefined> {
@@ -245,7 +260,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getActiveSubscriptions(): Promise<Subscription[]> {
-    return await db.select().from(subscriptions).where(eq(subscriptions.status, 'active')).orderBy(desc(subscriptions.createdAt));
+    // Use raw SQL to avoid column mapping issues temporarily
+    const result = await db.execute(sql`SELECT * FROM subscriptions WHERE status = 'active' ORDER BY created_at DESC`);
+    return result.rows as any[];
   }
 
   async updateSubscription(id: number, updates: Partial<InsertSubscription>): Promise<Subscription | undefined> {
