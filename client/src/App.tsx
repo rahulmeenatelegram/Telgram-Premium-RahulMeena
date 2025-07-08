@@ -33,6 +33,7 @@ function Router() {
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
         <Route path="/access/:token" component={AccessPortal} />
+        <Route path="/debug-auth" component={() => import("./pages/debug-auth").then(m => m.default)} />
         <Route path="/admin">
           <ProtectedRoute requireAdmin>
             <AdminDashboard />

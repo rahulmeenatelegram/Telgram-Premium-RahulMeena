@@ -36,12 +36,21 @@ export default function Dashboard() {
   // Fetch user subscriptions
   const { data: subscriptions = [], isLoading: subscriptionsLoading } = useQuery<any[]>({
     queryKey: ["/api/subscriptions", user?.email],
-    queryFn: () => fetch(`/api/subscriptions?email=${encodeURIComponent(user?.email || '')}`).then(res => res.json()),
+    queryFn: async () => {
+      const res = await fetch(`/api/subscriptions?email=${encodeURIComponent(user?.email || '')}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch subscriptions');
+      }
+      return res.json();
+    },
     enabled: !!user?.emailVerified && !!user?.email,
   });
 
-  const activeSubscriptions = subscriptions.filter(sub => sub.status === 'active');
-  const expiringSoon = subscriptions.filter(sub => {
+  // Ensure subscriptions and channels are always arrays
+  const subscriptionsArray = Array.isArray(subscriptions) ? subscriptions : [];
+  const channelsArray = Array.isArray(channels) ? channels : [];
+  const activeSubscriptions = subscriptionsArray.filter(sub => sub.status === 'active');
+  const expiringSoon = subscriptionsArray.filter(sub => {
     const daysUntilExpiry = Math.ceil((new Date(sub.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return daysUntilExpiry <= 7 && sub.status === 'active';
   });
@@ -143,7 +152,7 @@ export default function Dashboard() {
                         <CheckCircle className="w-5 h-5 text-green-500" />
                       </div>
                       <div>
-                        <p className="text-xl sm:text-2xl font-light">{channels.length}</p>
+                        <p className="text-xl sm:text-2xl font-light">{channelsArray.length}</p>
                         <p className="text-xs sm:text-sm text-muted-foreground">Available Channels</p>
                       </div>
                     </div>
@@ -220,7 +229,7 @@ export default function Dashboard() {
               </Card>
 
               {/* Subscription Reminders */}
-              {subscriptions.map((subscription) => {
+              {subscriptionsArray.map((subscription) => {
                 const daysLeft = Math.ceil((new Date(subscription.current_period_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
                 const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
                 const isExpired = daysLeft <= 0;
@@ -406,7 +415,7 @@ export default function Dashboard() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {channels.map((channel) => (
+                  {channelsArray.map((channel) => (
                     <ChannelCard key={channel.id} channel={channel} />
                   ))}
                 </div>
