@@ -36,6 +36,39 @@ export default function AccessPortal() {
   // Extract access token from URL
   const accessToken = location.split('/access/')[1];
 
+  // If no access token, show error immediately
+  if (!accessToken || accessToken === 'undefined') {
+    return (
+      <div className="min-h-screen relative">
+        <BackgroundGlow />
+        <FloatingParticles />
+        <Navbar />
+        
+        <div className="relative z-10 flex items-center justify-center min-h-screen pt-16 px-4">
+          <Card className="w-full max-w-md glass-effect border-red-500/20">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+              <CardTitle className="text-xl font-light">Access Denied</CardTitle>
+              <CardDescription className="font-light">
+                No access token provided
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                className="w-full bg-white text-black hover:bg-white/90 font-medium"
+                onClick={() => window.location.href = '/'}
+              >
+                Return to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const { data: accessData, isLoading, error, refetch } = useQuery<AccessPortalData>({
     queryKey: ["/api/access-portal", accessToken],
     queryFn: () => fetch(`/api/access-portal/${accessToken}`).then(res => res.json()),
@@ -120,6 +153,40 @@ export default function AccessPortal() {
   }
 
   const { subscription, access_granted, days_until_expiry, renewal_required } = accessData;
+  
+  // Add safety checks for subscription data
+  if (!subscription) {
+    return (
+      <div className="min-h-screen relative">
+        <BackgroundGlow />
+        <FloatingParticles />
+        <Navbar />
+        
+        <div className="relative z-10 flex items-center justify-center min-h-screen pt-16 px-4">
+          <Card className="w-full max-w-md glass-effect border-red-500/20">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="w-8 h-8 text-red-500" />
+              </div>
+              <CardTitle className="text-xl font-light">Access Denied</CardTitle>
+              <CardDescription className="font-light">
+                Invalid subscription data
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                className="w-full bg-white text-black hover:bg-white/90 font-medium"
+                onClick={() => window.location.href = '/'}
+              >
+                Return to Home
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+  
   const isExpired = subscription.status === 'expired';
   const isNearExpiry = days_until_expiry <= 7;
 

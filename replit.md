@@ -117,6 +117,7 @@ Changelog:
 - July 8, 2025. Fixed user button visibility issues in light mode. Updated avatar fallback to use dark background (bg-black/80) in light mode and white background (bg-white/10) in dark mode. Fixed dropdown menu borders and separators to properly display in both light and dark themes with appropriate contrast.
 - July 8, 2025. Fixed overwhelming shadow effects by reducing glass-effect shadows from 32px to 12px blur, decreased neon glow intensity, reduced card hover shadow effects, and simplified background gradients. Added proper padding to CTA section (p-8 to p-20) and channel cards (p-6 to p-8) for better visual spacing and more professional appearance.
 - July 8, 2025. Fixed critical runtime error "Invalid time value" in dashboard and access-portal pages. Added proper date validation for subscription expiry dates, handling both snake_case (expires_at) and camelCase (currentPeriodEnd) field variations. Dashboard and access pages now display "N/A" or "Manual renewal" for invalid dates instead of crashing.
+- July 8, 2025. Fixed access-portal runtime error "Cannot read properties of undefined (reading 'status')". Added proper null checks for missing access tokens and undefined subscription data. Page now shows appropriate error messages instead of crashing when accessed without valid tokens.
 
 ## User Preferences
 
