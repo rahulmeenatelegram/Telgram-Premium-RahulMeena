@@ -292,14 +292,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserSubscriptions(userId: number): Promise<Subscription[]> {
-    // Use raw SQL to avoid column mapping issues temporarily
-    const result = await db.execute(sql`SELECT * FROM subscriptions WHERE user_id = ${userId} ORDER BY created_at DESC`);
+    // Only return active subscriptions that are not expired (within 30 days)
+    const result = await db.execute(sql`
+      SELECT s.*, c.name as channel_name, c.telegram_invite_link 
+      FROM subscriptions s 
+      JOIN channels c ON s.channel_id = c.id 
+      WHERE s.user_id = ${userId} 
+      AND s.status = 'active' 
+      AND s.current_period_end > NOW() 
+      ORDER BY s.created_at DESC
+    `);
     return result.rows as any[];
   }
 
   async getEmailSubscriptions(email: string): Promise<Subscription[]> {
-    // Use raw SQL to avoid column mapping issues temporarily
-    const result = await db.execute(sql`SELECT * FROM subscriptions WHERE email = ${email} ORDER BY created_at DESC`);
+    // Only return active subscriptions that are not expired (within 30 days)
+    const result = await db.execute(sql`
+      SELECT s.*, c.name as channel_name, c.telegram_invite_link 
+      FROM subscriptions s 
+      JOIN channels c ON s.channel_id = c.id 
+      WHERE s.email = ${email} 
+      AND s.status = 'active' 
+      AND s.current_period_end > NOW() 
+      ORDER BY s.created_at DESC
+    `);
     return result.rows as any[];
   }
 

@@ -316,14 +316,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isActive: true,
       });
 
-      res.json({
-        success: true,
-        accessLink,
-        channelName: channel.name,
-        purchaseId: purchase.id,
-        isSubscription,
-        subscriptionId: payment.subscriptionId,
-      });
+      // For subscriptions, return subscription details instead of access link
+      if (isSubscription) {
+        const subscription = await storage.getSubscription(payment.subscriptionId);
+        
+        res.json({
+          success: true,
+          isSubscription: true,
+          subscription: {
+            id: subscription?.id,
+            channelName: channel.name,
+            telegramLink: channel.telegramInviteLink,
+            expiresAt: subscription?.currentPeriodEnd,
+            subscriptionType: subscription?.subscriptionType
+          },
+          message: "Subscription activated successfully! Access your channel from the dashboard.",
+        });
+      } else {
+        res.json({
+          success: true,
+          accessLink,
+          channelName: channel.name,
+          purchaseId: purchase.id,
+          isSubscription: false,
+        });
+      }
     } catch (error) {
       console.error("Error verifying payment:", error);
       res.status(500).json({ message: "Failed to verify payment" });
@@ -337,8 +354,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const subscriptions = await storage.getUserSubscriptions(req.user.id);
-      res.json(subscriptions);
+      // Get subscriptions by email since user might not have ID if authenticated via Firebase
+      const subscriptions = req.user.id 
+        ? await storage.getUserSubscriptions(req.user.id)
+        : await storage.getEmailSubscriptions(req.user.email);
+      
+      // Filter only active subscriptions and add channel info
+      const activeSubscriptions = [];
+      for (const sub of subscriptions) {
+        if (sub.status === 'active') {
+          const channel = await storage.getChannel(sub.channelId);
+          activeSubscriptions.push({
+            ...sub,
+            channelName: channel?.name,
+            telegramInviteLink: channel?.telegramInviteLink
+          });
+        }
+      }
+      
+      res.json(activeSubscriptions);
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
       res.status(500).json({ message: "Failed to fetch subscriptions" });

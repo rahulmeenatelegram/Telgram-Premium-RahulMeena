@@ -311,7 +311,8 @@ export default function Dashboard() {
                 ) : (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {activeSubscriptions.map((subscription) => {
-                      const daysUntilExpiry = Math.ceil((new Date(subscription.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+                      const expiryDate = subscription.current_period_end || subscription.expires_at;
+                      const daysUntilExpiry = expiryDate ? Math.ceil((new Date(expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0;
                       const isExpiringSoon = daysUntilExpiry <= 7;
 
                       return (
@@ -319,9 +320,9 @@ export default function Dashboard() {
                           <CardHeader>
                             <div className="flex items-start justify-between">
                               <div>
-                                <CardTitle className="text-lg font-light">{subscription.channel_name}</CardTitle>
+                                <CardTitle className="text-lg font-light">{subscription.channelName}</CardTitle>
                                 <CardDescription className="font-light">
-                                  {subscription.subscription_type} subscription
+                                  {subscription.subscriptionType} subscription
                                 </CardDescription>
                               </div>
                               <Badge 
@@ -338,9 +339,8 @@ export default function Dashboard() {
                                 <p className="text-muted-foreground mb-1">Expires on</p>
                                 <p className="font-medium flex items-center">
                                   <Calendar className="w-4 h-4 mr-1" />
-                                  {(subscription.expires_at || subscription.currentPeriodEnd) && 
-                                   !isNaN(new Date(subscription.expires_at || subscription.currentPeriodEnd).getTime()) 
-                                    ? format(new Date(subscription.expires_at || subscription.currentPeriodEnd), 'MMM dd, yyyy')
+                                  {expiryDate && !isNaN(new Date(expiryDate).getTime()) 
+                                    ? format(new Date(expiryDate), 'MMM dd, yyyy')
                                     : 'N/A'
                                   }
                                 </p>
@@ -348,11 +348,7 @@ export default function Dashboard() {
                               <div>
                                 <p className="text-muted-foreground mb-1">Next billing</p>
                                 <p className="font-medium">
-                                  {(subscription.next_billing_date || subscription.nextBillingDate) && 
-                                   !isNaN(new Date(subscription.next_billing_date || subscription.nextBillingDate).getTime())
-                                    ? format(new Date(subscription.next_billing_date || subscription.nextBillingDate), 'MMM dd, yyyy')
-                                    : 'Manual renewal'
-                                  }
+                                  Manual renewal
                                 </p>
                               </div>
                             </div>
@@ -366,24 +362,30 @@ export default function Dashboard() {
                               </Alert>
                             )}
 
+                            {subscription.telegramInviteLink && (
+                              <div className="space-y-3">
+                                <div className="p-3 glass-effect border-green-500/20 bg-green-500/5 rounded-lg">
+                                  <p className="text-sm text-green-700 dark:text-green-300 mb-2 font-medium">
+                                    🎉 Active Subscription - Access Your Channel
+                                  </p>
+                                  <Button
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
+                                    onClick={() => window.open(subscription.telegramInviteLink, '_blank')}
+                                  >
+                                    <ExternalLink className="w-4 h-4 mr-2" />
+                                    Join Telegram Channel
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                            
                             <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 glass-effect border-white/10 hover:border-white/20 font-light"
-                                asChild
-                              >
-                                <Link href={`/access/${subscription.access_token}`}>
-                                  <ExternalLink className="w-4 h-4 mr-2" />
-                                  Access Portal
-                                </Link>
-                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
                                 className="glass-effect border-white/10 hover:border-white/20 font-light"
                               >
-                                Cancel
+                                Cancel Subscription
                               </Button>
                             </div>
                           </CardContent>

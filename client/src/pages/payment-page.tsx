@@ -142,11 +142,23 @@ export default function PaymentPage() {
       return res.json();
     },
     onSuccess: (data) => {
-      // Only show access link after successful payment verification
-      if (data.success && data.accessLink) {
-        setAccessLink(data.accessLink);
-        setChannelName(data.channelName || selectedChannel?.name || "");
-        setShowSuccessModal(true);
+      if (data.success) {
+        if (data.isSubscription) {
+          // For subscriptions, redirect to dashboard
+          toast({
+            title: "Subscription Activated!",
+            description: data.message || "Your subscription has been activated successfully. Access your channel from the dashboard.",
+            variant: "default",
+          });
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 2000);
+        } else {
+          // For one-time purchases, show access link
+          setAccessLink(data.accessLink);
+          setChannelName(data.channelName || selectedChannel?.name || "");
+          setShowSuccessModal(true);
+        }
       } else {
         toast({
           title: "Payment Error", 
