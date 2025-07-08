@@ -42,7 +42,7 @@ body {
 }
 
 :root {
-  --background: hsl(0, 0%, 100%);
+  --background: hsl(278, 31%, 31%);
   --foreground: hsl(224, 71.4%, 4.1%);
   --muted: hsl(220, 14.3%, 95.9%);
   --muted-foreground: hsl(220, 8.9%, 46.1%);

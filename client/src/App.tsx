@@ -19,7 +19,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
+    <div className="min-h-screen w-[100vw] overflow-x-hidden">
       <Navbar />
       <div className="pt-16 w-full">
         <Switch>
