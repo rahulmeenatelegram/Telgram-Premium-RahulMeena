@@ -161,7 +161,10 @@ export default function AccessPortal() {
                     <p className="text-sm text-muted-foreground">Current Period Ends</p>
                     <p className="font-medium flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {format(new Date(subscription.current_period_end), 'MMM dd, yyyy')}
+                      {subscription.current_period_end && !isNaN(new Date(subscription.current_period_end).getTime())
+                        ? format(new Date(subscription.current_period_end), 'MMM dd, yyyy')
+                        : 'N/A'
+                      }
                     </p>
                   </div>
                   <div className="space-y-2">

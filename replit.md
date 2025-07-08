@@ -116,6 +116,7 @@ Changelog:
 - July 8, 2025. Implemented proper authentication flow with return URL handling. Unauthenticated users accessing payment page are redirected to /auth with returnUrl parameter. After successful authentication, users are automatically redirected back to their intended payment page with all URL parameters preserved.
 - July 8, 2025. Fixed user button visibility issues in light mode. Updated avatar fallback to use dark background (bg-black/80) in light mode and white background (bg-white/10) in dark mode. Fixed dropdown menu borders and separators to properly display in both light and dark themes with appropriate contrast.
 - July 8, 2025. Fixed overwhelming shadow effects by reducing glass-effect shadows from 32px to 12px blur, decreased neon glow intensity, reduced card hover shadow effects, and simplified background gradients. Added proper padding to CTA section (p-8 to p-20) and channel cards (p-6 to p-8) for better visual spacing and more professional appearance.
+- July 8, 2025. Fixed critical runtime error "Invalid time value" in dashboard and access-portal pages. Added proper date validation for subscription expiry dates, handling both snake_case (expires_at) and camelCase (currentPeriodEnd) field variations. Dashboard and access pages now display "N/A" or "Manual renewal" for invalid dates instead of crashing.
 
 ## User Preferences
 

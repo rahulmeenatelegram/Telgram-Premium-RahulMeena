@@ -338,13 +338,21 @@ export default function Dashboard() {
                                 <p className="text-muted-foreground mb-1">Expires on</p>
                                 <p className="font-medium flex items-center">
                                   <Calendar className="w-4 h-4 mr-1" />
-                                  {format(new Date(subscription.expires_at), 'MMM dd, yyyy')}
+                                  {(subscription.expires_at || subscription.currentPeriodEnd) && 
+                                   !isNaN(new Date(subscription.expires_at || subscription.currentPeriodEnd).getTime()) 
+                                    ? format(new Date(subscription.expires_at || subscription.currentPeriodEnd), 'MMM dd, yyyy')
+                                    : 'N/A'
+                                  }
                                 </p>
                               </div>
                               <div>
                                 <p className="text-muted-foreground mb-1">Next billing</p>
                                 <p className="font-medium">
-                                  {format(new Date(subscription.next_billing_date), 'MMM dd, yyyy')}
+                                  {(subscription.next_billing_date || subscription.nextBillingDate) && 
+                                   !isNaN(new Date(subscription.next_billing_date || subscription.nextBillingDate).getTime())
+                                    ? format(new Date(subscription.next_billing_date || subscription.nextBillingDate), 'MMM dd, yyyy')
+                                    : 'Manual renewal'
+                                  }
                                 </p>
                               </div>
                             </div>
