@@ -19,9 +19,9 @@ import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full overflow-x-hidden">
       <Navbar />
-      <div className="pt-16">
+      <div className="pt-16 w-full">
         <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />

@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global reset to prevent horizontal scrolling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#root {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* Additional safety for all containers */
+.container, .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl, .max-w-2xl, .max-w-xl {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* Fix for table overflow */
+.overflow-x-auto {
+  max-width: 100vw !important;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(224, 71.4%, 4.1%);

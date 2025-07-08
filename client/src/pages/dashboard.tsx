@@ -98,13 +98,13 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative w-full overflow-x-hidden">
       <BackgroundGlow />
       <FloatingParticles />
       <Navbar />
       
-      <div className="relative z-10 pt-16 sm:pt-20 lg:pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="relative z-10 pt-16 sm:pt-20 lg:pt-24 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full">
           {/* Header */}
           <div className="mb-8 sm:mb-12">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-light mb-2 sm:mb-4">
