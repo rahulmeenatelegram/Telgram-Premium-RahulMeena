@@ -16,7 +16,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
       if (!user || !user.emailVerified) {
         navigate("/auth");
       } else if (requireAdmin && user.email !== "disruptivefounder@gmail.com") {
-        navigate("/dashboard");
+        navigate("/");
       }
     }
   }, [user, isLoading, navigate, requireAdmin]);
