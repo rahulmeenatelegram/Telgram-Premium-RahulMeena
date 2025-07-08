@@ -44,7 +44,7 @@ export default function Dashboard() {
       subscription_type: "monthly",
       next_billing_date: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
       manual_renewal_required: true,
-      days_until_expiry: 25,
+      days_until_expiry: 5, // Changed to 5 days to show renewal reminder
     }
   ];
 
@@ -227,12 +227,42 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
 
-              {/* Manual Renewal Notice */}
+              {/* Subscription Reminders */}
+              {mockSubscriptions.map((subscription) => {
+                const daysLeft = subscription.days_until_expiry;
+                const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
+                const isExpired = daysLeft <= 0;
+                
+                if (isExpired) {
+                  return (
+                    <Alert key={subscription.id} className="glass-effect border-red-500/20 bg-red-500/5">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        <strong>⚠️ EXPIRED:</strong> Your subscription to {subscription.channel_name} has expired. 
+                        You have a 3-day grace period. <Link href={`/access/${subscription.access_token}`} className="underline font-medium">Renew now</Link> to avoid losing access.
+                      </AlertDescription>
+                    </Alert>
+                  );
+                } else if (isExpiringSoon) {
+                  return (
+                    <Alert key={subscription.id} className="glass-effect border-yellow-500/20 bg-yellow-500/5">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        <strong>🔔 RENEWAL REMINDER:</strong> Your subscription to {subscription.channel_name} expires in {daysLeft} days. 
+                        <Link href={`/access/${subscription.access_token}`} className="underline font-medium ml-1">Renew early</Link> to avoid interruption.
+                      </AlertDescription>
+                    </Alert>
+                  );
+                }
+                return null;
+              })}
+
+              {/* Manual Renewal Policy */}
               <Alert className="glass-effect border-blue-500/20 bg-blue-500/5">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   <strong>Manual Renewal Policy:</strong> All subscriptions require manual renewal every 30 days. 
-                  You'll receive reminders 7 days before expiry and have a 3-day grace period after expiration.
+                  Reminders appear here 7 days before expiry. You have a 3-day grace period after expiration.
                 </AlertDescription>
               </Alert>
 

@@ -37,7 +37,21 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   if (requireAdmin && user.email !== "disruptivefounder@gmail.com") {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h2 className="text-xl font-semibold">Access Denied</h2>
+          <p className="text-muted-foreground">Admin privileges required.</p>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p>Current user: {user.email}</p>
+            <p>Required: disruptivefounder@gmail.com</p>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Please sign in with the admin account to access this page.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;
