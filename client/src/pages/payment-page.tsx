@@ -21,7 +21,6 @@ export default function PaymentPage() {
   const { toast } = useToast();
   
   const [telegramUsername, setTelegramUsername] = useState("");
-  const [telegramUserId, setTelegramUserId] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"upi" | "card">("upi");
   const [subscriptionType, setSubscriptionType] = useState("monthly");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -50,8 +49,7 @@ export default function PaymentPage() {
   const createSubscriptionMutation = useMutation({
     mutationFn: async (data: { 
       channelId: number; 
-      telegramUsername?: string;
-      telegramUserId?: string;
+      telegramUsername: string;
       paymentMethod: string; 
       subscriptionType: string 
     }) => {
@@ -87,7 +85,7 @@ export default function PaymentPage() {
         });
       },
       prefill: {
-        email: telegramUsername || telegramUserId || `user_${Date.now()}`,
+        email: telegramUsername || `user_${Date.now()}`,
       },
       theme: {
         color: "#8b5cf6"
@@ -139,11 +137,11 @@ export default function PaymentPage() {
       return;
     }
 
-    // Validate that at least one Telegram identifier is provided
-    if (!telegramUsername && !telegramUserId) {
+    // Validate that Telegram username is provided
+    if (!telegramUsername) {
       toast({
-        title: "Telegram Information Required",
-        description: "Please provide either your Telegram username or user ID for channel access",
+        title: "Telegram Username Required",
+        description: "Please provide your Telegram username for channel access",
         variant: "destructive",
       });
       return;
@@ -151,8 +149,7 @@ export default function PaymentPage() {
 
     createSubscriptionMutation.mutate({
       channelId: selectedChannel.id,
-      telegramUsername: telegramUsername || undefined,
-      telegramUserId: telegramUserId || undefined,
+      telegramUsername,
       paymentMethod,
       subscriptionType
     });
@@ -312,44 +309,27 @@ export default function PaymentPage() {
                 </RadioGroup>
               </div>
 
-              {/* Telegram Information */}
+              {/* Telegram Username */}
               <div className="space-y-4 mb-6">
-                <Label className="text-sm font-light">Telegram Information</Label>
-                <p className="text-xs text-muted-foreground">Provide either your username or user ID for channel access</p>
+                <Label className="text-sm font-light">Telegram Username</Label>
+                <p className="text-xs text-muted-foreground">Enter your Telegram username for channel access</p>
                 
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="telegramUsername" className="text-xs text-muted-foreground">Telegram Username (optional)</Label>
-                    <Input
-                      id="telegramUsername"
-                      type="text"
-                      placeholder="@yourusername"
-                      value={telegramUsername}
-                      onChange={(e) => setTelegramUsername(e.target.value)}
-                      className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    />
-                  </div>
-                  
-                  <div className="text-center text-xs text-muted-foreground">OR</div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="telegramUserId" className="text-xs text-muted-foreground">Telegram User ID (optional)</Label>
-                    <Input
-                      id="telegramUserId"
-                      type="text"
-                      placeholder="123456789"
-                      value={telegramUserId}
-                      onChange={(e) => setTelegramUserId(e.target.value)}
-                      className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Input
+                    id="telegramUsername"
+                    type="text"
+                    placeholder="@yourusername"
+                    value={telegramUsername}
+                    onChange={(e) => setTelegramUsername(e.target.value)}
+                    className="glass-effect border-white/10 focus:border-white/20 rounded-xl h-12"
+                    required
+                  />
                 </div>
                 
                 <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
                   <p className="text-xs text-blue-300">
-                    <strong>How to find your info:</strong><br/>
-                    • Username: Found in Telegram Settings → Edit Profile<br/>
-                    • User ID: Message @userinfobot on Telegram to get your ID
+                    <strong>How to find your username:</strong><br/>
+                    Go to Telegram Settings → Edit Profile → Username
                   </p>
                 </div>
               </div>
@@ -387,7 +367,7 @@ export default function PaymentPage() {
               {/* Subscribe Button */}
               <Button
                 onClick={handleSubscribe}
-                disabled={(!telegramUsername && !telegramUserId) || createSubscriptionMutation.isPending}
+                disabled={!telegramUsername || createSubscriptionMutation.isPending}
                 className="w-full bg-white text-black hover:bg-white/90 h-12 rounded-xl font-medium group"
               >
                 {createSubscriptionMutation.isPending ? "Processing..." : "Subscribe Now"}

@@ -48,8 +48,7 @@ export const subscriptions = pgTable("subscriptions", {
   userId: integer("user_id"),
   channelId: integer("channel_id").notNull(),
   email: text("email").notNull(),
-  telegramUsername: text("telegram_username"), // Telegram username for access
-  telegramUserId: text("telegram_user_id"), // Telegram user ID for access  
+  telegramUsername: text("telegram_username"), // Telegram username for access  
   accessToken: text("access_token").notNull(), // Unique token for access portal
   status: text("status").notNull().default("active"), // active, paused, cancelled, expired, payment_pending
   subscriptionType: text("subscription_type").notNull(), // monthly, yearly

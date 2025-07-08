@@ -59,10 +59,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create subscription order with autopay
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {
-      const { channelId, telegramUsername, telegramUserId, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
+      const { channelId, telegramUsername, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
       
-      // Use telegram identifier as email placeholder for now
-      const email = telegramUsername || telegramUserId || `user_${Date.now()}`;
+      // Use telegram username as email placeholder for now
+      const email = telegramUsername || `user_${Date.now()}`;
       
       const channel = await storage.getChannel(channelId);
       if (!channel) {
@@ -92,7 +92,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         channelId,
         email,
         telegramUsername,
-        telegramUserId,
         accessLink,
         accessToken,
         status: "active",
