@@ -222,22 +222,58 @@ export class DatabaseStorage implements IStorage {
 
   // Subscription methods
   async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
-    // Use raw SQL to avoid column mapping issues temporarily
-    const result = await db.execute(sql`
+    console.log('Creating subscription with data:', subscription);
+    
+    // Check for null required fields and set defaults
+    const currentPeriodStart = subscription.currentPeriodStart || new Date();
+    const currentPeriodEnd = subscription.currentPeriodEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const nextBillingDate = subscription.nextBillingDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    
+    // First check if telegram_username column exists and add it if needed
+    const columnCheck = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_name = 'subscriptions' AND column_name = 'telegram_username'");
+    console.log('Column check result:', columnCheck.rows);
+    
+    if (columnCheck.rows.length === 0) {
+      console.log('Adding telegram_username column to subscriptions table...');
+      await pool.query("ALTER TABLE subscriptions ADD COLUMN telegram_username text");
+      console.log('Column added successfully');
+    }
+
+    // Also make access_link optional since we're not using token-based access
+    try {
+      await pool.query("ALTER TABLE subscriptions ALTER COLUMN access_link DROP NOT NULL");
+      console.log('Made access_link column optional');
+    } catch (error) {
+      console.log('access_link column might already be optional or not exist');
+    }
+    
+    // Simplified query with access_link set to a default value
+    const query = `
       INSERT INTO subscriptions (
-        user_id, channel_id, email, telegram_username, access_token, 
-        status, subscription_type, amount, razorpay_subscription_id,
-        autopay_enabled, access_blocked, grace_period_days,
+        channel_id, email, telegram_username, access_link,
+        status, subscription_type, amount, 
         current_period_start, current_period_end, next_billing_date
-      ) VALUES (
-        ${subscription.userId}, ${subscription.channelId}, ${subscription.email}, 
-        ${subscription.telegramUsername}, ${subscription.accessToken},
-        ${subscription.status}, ${subscription.subscriptionType}, ${subscription.amount},
-        ${subscription.razorpaySubscriptionId}, ${subscription.autopayEnabled || false},
-        ${subscription.accessBlocked || false}, ${subscription.gracePeriodDays || 3},
-        ${subscription.currentPeriodStart}, ${subscription.currentPeriodEnd}, ${subscription.nextBillingDate}
-      ) RETURNING *
-    `);
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *
+    `;
+    
+    const accessLink = `https://t.me/+${Math.random().toString(36).substring(2, 15)}`;
+    
+    const values = [
+      subscription.channelId,
+      subscription.email, 
+      subscription.telegramUsername,
+      accessLink,
+      subscription.status,
+      subscription.subscriptionType,
+      subscription.amount,
+      currentPeriodStart,
+      currentPeriodEnd,
+      nextBillingDate
+    ];
+    
+    console.log('Executing query with values:', values);
+    const result = await pool.query(query, values);
+    console.log('Query result:', result.rows[0]);
     return result.rows[0] as any;
   }
 
@@ -247,16 +283,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSubscriptionByToken(token: string): Promise<Subscription | undefined> {
-    const [subscription] = await db.select().from(subscriptions).where(eq(subscriptions.accessToken, token));
-    return subscription || undefined;
+    // Token-based access no longer used, return undefined
+    return undefined;
   }
 
   async getUserSubscriptions(userId: number): Promise<Subscription[]> {
-    return await db.select().from(subscriptions).where(eq(subscriptions.userId, userId)).orderBy(desc(subscriptions.createdAt));
+    // Use raw SQL to avoid column mapping issues temporarily
+    const result = await db.execute(sql`SELECT * FROM subscriptions WHERE user_id = ${userId} ORDER BY created_at DESC`);
+    return result.rows as any[];
   }
 
   async getEmailSubscriptions(email: string): Promise<Subscription[]> {
-    return await db.select().from(subscriptions).where(eq(subscriptions.email, email)).orderBy(desc(subscriptions.createdAt));
+    // Use raw SQL to avoid column mapping issues temporarily
+    const result = await db.execute(sql`SELECT * FROM subscriptions WHERE email = ${email} ORDER BY created_at DESC`);
+    return result.rows as any[];
   }
 
   async getActiveSubscriptions(): Promise<Subscription[]> {

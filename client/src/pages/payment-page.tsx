@@ -57,6 +57,10 @@ export default function PaymentPage() {
       return res.json();
     },
     onSuccess: (orderData) => {
+      // Store the access link from the response for later display
+      if (orderData.accessLink) {
+        setAccessLink(orderData.accessLink);
+      }
       handleRazorpayPayment(orderData);
     },
     onError: (error: Error) => {

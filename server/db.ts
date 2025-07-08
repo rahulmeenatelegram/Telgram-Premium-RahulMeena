@@ -5,6 +5,8 @@ import * as schema from "@shared/schema";
 // Use customer's database for handover
 const databaseUrl = process.env.CUSTOMER_DATABASE_URL;
 
+console.log('Database URL being used:', databaseUrl ? 'CUSTOMER_DATABASE_URL is set' : 'CUSTOMER_DATABASE_URL is not set');
+
 if (!databaseUrl) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",

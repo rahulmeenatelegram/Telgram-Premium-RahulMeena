@@ -106,6 +106,7 @@ Changelog:
 - July 8, 2025. Implemented hamburger menu navigation for mobile devices, removed member counts from channel cards, replaced "Explore Channels" with "Get Started" button, fixed horizontal scrolling issues with proper CSS overflow controls
 - July 8, 2025. Migrated authentication system from Passport.js to Firebase Authentication with email verification, password reset functionality, Google sign-in, and comprehensive error handling. Updated protected routes and admin access control.
 - July 8, 2025. Implemented manual renewal system with access control using unique access tokens instead of direct Telegram links. Features: 30-day subscription periods, 3-day grace period, access blocking for expired subscriptions, renewal payment processing through Razorpay, and access portal pages that control channel access through tokens rather than direct links.
+- July 8, 2025. Simplified subscription system to username-only approach (removed user ID requirement) and implemented direct access link system. After subscription payment, users receive a direct Telegram channel access link valid for 30 days. Updated database schema to include telegram_username column and removed token-based access routes. System now uses only CUSTOMER_DATABASE_URL for consistent database operations.
 
 ## User Preferences
 

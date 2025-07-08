@@ -35,7 +35,7 @@ export default function SuccessModal({
           </div>
           <DialogTitle className="text-xl">Subscription Active!</DialogTitle>
           <DialogDescription>
-            Your recurring subscription has been activated
+            Your 30-day access period has started
           </DialogDescription>
         </DialogHeader>
 
@@ -51,12 +51,10 @@ export default function SuccessModal({
                 Auto-renew
               </Badge>
             </div>
-            {nextBillingDate && (
-              <div className="flex items-center justify-center text-sm text-gray-600">
-                <Calendar className="w-4 h-4 mr-1" />
-                Next billing: {new Date(nextBillingDate).toLocaleDateString()}
-              </div>
-            )}
+            <div className="flex items-center justify-center text-sm text-green-600">
+              <Calendar className="w-4 h-4 mr-1" />
+              Valid for 30 days from today
+            </div>
           </div>
 
           <Button
@@ -70,11 +68,14 @@ export default function SuccessModal({
 
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-2">
-              Keep this link safe - you can access your channel anytime:
+              Your Telegram channel access link (valid for 30 days):
             </p>
             <div className="bg-gray-50 rounded p-2 text-xs font-mono break-all">
               {accessLink}
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Click "Join Channel Now" or use this link directly in Telegram
+            </p>
           </div>
 
           <Button variant="outline" onClick={onClose} className="w-full">

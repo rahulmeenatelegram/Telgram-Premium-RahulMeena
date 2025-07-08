@@ -82,9 +82,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
       }
 
-      // Generate unique access link and token
+      // Generate unique access link (no token needed)
       const accessLink = `https://t.me/+${Math.random().toString(36).substring(2, 15)}`;
-      const accessToken = `sub_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
 
       // Create subscription record
       const subscription = await storage.createSubscription({
@@ -92,8 +91,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         channelId,
         email,
         telegramUsername,
-        accessLink,
-        accessToken,
         status: "active",
         subscriptionType,
         amount: channel.price,
@@ -143,6 +140,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionId: subscription.id,
         subscriptionType,
         nextBillingDate: nextBillingDate.toISOString(),
+        accessLink: accessLink,
+        validFor: "30 days"
       });
     } catch (error) {
       console.error("Error creating subscription order:", error);
