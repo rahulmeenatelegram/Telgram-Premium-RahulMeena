@@ -34,9 +34,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      await signInWithEmail(email, password);
       
-      if (auth.currentUser && !auth.currentUser.emailVerified) {
+      try {
+        await signInWithEmail(email, password);
+      } catch (error: any) {
+        // If the admin account doesn't exist, create it automatically
+        if (email === "disruptivefounder@gmail.com" && error.code === "auth/user-not-found") {
+          console.log("Creating admin account...");
+          const userCredential = await registerWithEmail(email, password);
+          // For admin account, we'll skip email verification requirement
+          console.log("Admin account created successfully");
+        } else {
+          throw error; // Re-throw other errors
+        }
+      }
+      
+      // For admin account, skip email verification check
+      if (auth.currentUser && !auth.currentUser.emailVerified && email !== "disruptivefounder@gmail.com") {
         toast({
           title: "Email not verified",
           description: "Please check your email and click the verification link before signing in.",

@@ -32,7 +32,12 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     );
   }
 
-  if (!user || !user.emailVerified) {
+  if (!user) {
+    return null;
+  }
+
+  // For admin account, skip email verification check
+  if (!user.emailVerified && user.email !== "disruptivefounder@gmail.com") {
     return null;
   }
 
@@ -44,16 +49,10 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
           <p className="text-muted-foreground">Admin privileges required.</p>
           <div className="text-sm text-muted-foreground space-y-1">
             <p>Current user: {user.email || 'No email'}</p>
-            <p>Email verified: {user.emailVerified ? 'Yes' : 'No'}</p>
             <p>Required: disruptivefounder@gmail.com</p>
-            <p>Debug: {JSON.stringify({
-              userEmail: user.email,
-              emailVerified: user.emailVerified,
-              uid: user.uid
-            })}</p>
           </div>
           <p className="text-xs text-muted-foreground">
-            Please sign in with the admin account and ensure email is verified.
+            Please sign in with the admin account to access this page.
           </p>
         </div>
       </div>
