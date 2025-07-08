@@ -45,7 +45,13 @@ export default function AuthPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (user && user.emailVerified) {
-      navigate("/dashboard");
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnUrl = urlParams.get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate("/dashboard");
+      }
     }
   }, [user, navigate]);
 
@@ -77,7 +83,13 @@ export default function AuthPage() {
     try {
       await signIn(data.email, data.password);
       if (user?.emailVerified) {
-        navigate("/dashboard");
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl');
+        if (returnUrl) {
+          navigate(returnUrl);
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       // Error is handled in the auth context
@@ -107,7 +119,13 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      navigate("/dashboard");
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnUrl = urlParams.get('returnUrl');
+      if (returnUrl) {
+        navigate(returnUrl);
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       // Error is handled in the auth context
     }

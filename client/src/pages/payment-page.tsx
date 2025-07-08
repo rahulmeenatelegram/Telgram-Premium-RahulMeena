@@ -31,10 +31,11 @@ export default function PaymentPage() {
   const [channelName, setChannelName] = useState("");
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   
-  // Redirect to login if not authenticated
+  // Redirect to auth if not authenticated, with return URL
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/login");
+      const currentPath = window.location.pathname + window.location.search;
+      navigate(`/auth?returnUrl=${encodeURIComponent(currentPath)}`);
     }
   }, [user, loading, navigate]);
   
