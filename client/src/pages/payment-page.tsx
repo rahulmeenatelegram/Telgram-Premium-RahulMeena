@@ -16,7 +16,7 @@ import PaymentModal from "@/components/payment-modal";
 import SuccessModal from "@/components/success-modal";
 
 export default function PaymentPage() {
-  const [, params] = useRoute("/payment");
+  const [, params] = useRoute("/payment/:slug?");
   const [, navigate] = useLocation();
   const { toast } = useToast();
   
@@ -29,9 +29,8 @@ export default function PaymentPage() {
   const [channelName, setChannelName] = useState("");
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 
-  // Get channel slug from URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  const channelSlug = urlParams.get('channel');
+  // Get channel slug from URL params or route params
+  const channelSlug = params?.slug || new URLSearchParams(window.location.search).get('channel');
 
   const { data: channels, isLoading } = useQuery<Channel[]>({
     queryKey: ["/api/channels"],
