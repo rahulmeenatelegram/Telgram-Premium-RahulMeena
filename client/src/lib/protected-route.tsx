@@ -13,11 +13,15 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
 
   useEffect(() => {
     if (!isLoading) {
-      if (!user || !user.emailVerified) {
+      // Only redirect to auth if user is not signed in
+      if (!user) {
         navigate("/auth");
-      } else if (requireAdmin && user.email !== "disruptivefounder@gmail.com") {
-        navigate("/");
       }
+      // For email verification, only redirect if it's not the admin account
+      else if (!user.emailVerified && user.email !== "disruptivefounder@gmail.com") {
+        navigate("/auth");
+      }
+      // Don't automatically redirect admin users - let the component show access denied message
     }
   }, [user, isLoading, navigate, requireAdmin]);
 
