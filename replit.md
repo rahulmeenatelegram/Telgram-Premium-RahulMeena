@@ -74,13 +74,20 @@ The application uses six main tables:
 
 ## Deployment Strategy
 
-The application is configured for deployment on Replit with autoscaling:
+The application is configured for deployment on both Replit and Vercel:
 
+### Development (Replit)
 - **Development**: `npm run dev` starts both frontend and backend in development mode
 - **Build Process**: Vite builds the frontend, esbuild bundles the backend
-- **Production**: Static files served by Express with API routes
 - **Database Migrations**: Drizzle Kit handles schema changes with `npm run db:push`
 - **Environment**: Uses Replit's built-in PostgreSQL and web hosting
+
+### Production (Vercel)
+- **GitHub Integration**: Connect Replit to GitHub, then fork to client's account
+- **Build Command**: `npm run build` (Vite + esbuild)
+- **Output Directory**: `dist` (frontend in `dist/public`, backend in `dist/index.js`)
+- **Serverless Functions**: Express API routes deployed as Vercel functions
+- **Database**: Neon PostgreSQL with serverless connection pooling
 
 ### Build Configuration
 - Frontend builds to `dist/public` directory
@@ -118,6 +125,7 @@ Changelog:
 - July 8, 2025. Fixed overwhelming shadow effects by reducing glass-effect shadows from 32px to 12px blur, decreased neon glow intensity, reduced card hover shadow effects, and simplified background gradients. Added proper padding to CTA section (p-8 to p-20) and channel cards (p-6 to p-8) for better visual spacing and more professional appearance.
 - July 8, 2025. Fixed critical runtime error "Invalid time value" in dashboard and access-portal pages. Added proper date validation for subscription expiry dates, handling both snake_case (expires_at) and camelCase (currentPeriodEnd) field variations. Dashboard and access pages now display "N/A" or "Manual renewal" for invalid dates instead of crashing.
 - July 8, 2025. Fixed access-portal runtime error "Cannot read properties of undefined (reading 'status')". Added proper null checks for missing access tokens and undefined subscription data. Page now shows appropriate error messages instead of crashing when accessed without valid tokens.
+- July 8, 2025. Implemented major system overhaul: removed access token system and replaced with direct subscription display in dashboard. Payment verification now returns subscription details instead of access tokens. Users see active subscriptions directly in dashboard with Telegram invite links for 30-day periods. Updated all field mappings (channelName, telegramInviteLink, etc.) and payment success flow to redirect to dashboard. Prepared Vercel deployment configuration with GitHub integration workflow.
 
 ## User Preferences
 
