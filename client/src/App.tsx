@@ -10,6 +10,7 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import AdminDashboard from "@/pages/admin-dashboard";
 import PaymentPage from "@/pages/payment-page";
+import Dashboard from "@/pages/dashboard";
 import AboutPage from "@/pages/about-page";
 import ContactPage from "@/pages/contact-page";
 import NotFound from "@/pages/not-found";
@@ -23,6 +24,7 @@ function Router() {
         <Route path="/" component={HomePage} />
         <Route path="/auth" component={AuthPage} />
         <Route path="/payment" component={PaymentPage} />
+        <ProtectedRoute path="/dashboard" component={Dashboard} />
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
         <ProtectedRoute path="/admin" component={AdminDashboard} />

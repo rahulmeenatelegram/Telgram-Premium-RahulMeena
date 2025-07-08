@@ -101,6 +101,12 @@ export default function Navbar() {
                     </div>
                   </div>
                   <DropdownMenuSeparator className="bg-white/5" />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                      <User className="mr-2 h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
                   {user.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link href="/admin">
@@ -176,6 +182,11 @@ export default function Navbar() {
                       <p className="text-sm font-medium text-foreground">{user.email}</p>
                       <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
                     </div>
+                    <Link href="/dashboard">
+                      <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">
+                        Dashboard
+                      </div>
+                    </Link>
                     {user.role === "admin" && (
                       <Link href="/admin">
                         <div className="block px-3 py-2 text-base font-light text-foreground hover:text-primary transition-colors cursor-pointer">

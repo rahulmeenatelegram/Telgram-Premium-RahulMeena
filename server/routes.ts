@@ -299,6 +299,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user subscriptions
+  app.get("/api/user/subscriptions", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const subscriptions = await storage.getEmailSubscriptions(req.user.email);
+      
+      // Transform subscriptions to include channel information
+      const enrichedSubscriptions = await Promise.all(
+        subscriptions.map(async (sub) => {
+          const channel = await storage.getChannel(sub.channelId);
+          return {
+            id: sub.id,
+            channelId: sub.channelId,
+            channelName: channel?.name || "Unknown Channel",
+            channelSlug: channel?.slug || "",
+            accessLink: sub.accessLink,
+            status: sub.status,
+            billingPeriod: sub.billingPeriod,
+            price: sub.price,
+            nextBillingDate: sub.nextBillingDate,
+            createdAt: sub.createdAt,
+            autopayEnabled: sub.autopayEnabled,
+          };
+        })
+      );
+
+      res.json(enrichedSubscriptions);
+    } catch (error) {
+      console.error("Error fetching user subscriptions:", error);
+      res.status(500).json({ error: "Failed to fetch subscriptions" });
+    }
+  });
+
+  // Cancel subscription
+  app.post("/api/subscriptions/:id/cancel", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const subscriptionId = parseInt(req.params.id);
+      const subscription = await storage.getSubscription(subscriptionId);
+
+      if (!subscription) {
+        return res.status(404).json({ error: "Subscription not found" });
+      }
+
+      // Verify subscription belongs to user
+      const userSubscriptions = await storage.getEmailSubscriptions(req.user.email);
+      const userOwnsSubscription = userSubscriptions.some(sub => sub.id === subscriptionId);
+
+      if (!userOwnsSubscription) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const cancelledSubscription = await storage.cancelSubscription(subscriptionId);
+      res.json(cancelledSubscription);
+    } catch (error) {
+      console.error("Error cancelling subscription:", error);
+      res.status(500).json({ error: "Failed to cancel subscription" });
+    }
+  });
+
   // Admin routes
   app.use("/api/admin/*", (req, res, next) => {
     if (!req.isAuthenticated() || req.user.role !== "admin") {
