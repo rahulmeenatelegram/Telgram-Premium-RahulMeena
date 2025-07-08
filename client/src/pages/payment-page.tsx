@@ -115,7 +115,10 @@ export default function PaymentPage() {
       return res.json();
     },
     onSuccess: (data) => {
-      setAccessLink(data.accessLink);
+      // Set access link from verification response or use stored link
+      if (data.accessLink) {
+        setAccessLink(data.accessLink);
+      }
       setShowSuccessModal(true);
     },
     onError: (error: Error) => {

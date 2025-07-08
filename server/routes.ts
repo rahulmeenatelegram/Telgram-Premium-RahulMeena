@@ -56,7 +56,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create subscription order with autopay
+  // Verify subscription payment
+  app.post("/api/subscriptions/verify-payment", async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, subscriptionId } = req.body;
+      
+      // Verify signature
+      const expectedSignature = createHmac("sha256", RAZORPAY_KEY_SECRET)
+        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .digest("hex");
+
+      if (expectedSignature !== razorpay_signature) {
+        return res.status(400).json({ message: "Invalid payment signature" });
+      }
+
+      // Get subscription details
+      const subscription = await storage.getSubscription(subscriptionId);
+      if (!subscription) {
+        return res.status(404).json({ message: "Subscription not found" });
+      }
+
+      // Get channel details
+      const channel = await storage.getChannel(subscription.channelId);
+      if (!channel) {
+        return res.status(404).json({ message: "Channel not found" });
+      }
+
+      // Return success response with access link
+      res.json({
+        success: true,
+        accessLink: subscription.accessLink,
+        channelName: channel.name,
+        subscriptionId: subscription.id,
+        message: "Payment verified successfully"
+      });
+    } catch (error) {
+      console.error("Error verifying subscription payment:", error);
+      res.status(500).json({ message: "Failed to verify payment" });
+    }
+  });
+
   app.post("/api/subscriptions/create-order", async (req, res) => {
     try {
       const { channelId, telegramUsername, paymentMethod, subscriptionType = "monthly", enableAutopay = true } = req.body;
