@@ -19,32 +19,16 @@ export default function ContactPage() {
       icon: Mail,
       title: "Email",
       description: "Send us an email",
-      value: "support@onetapay.com",
-      action: "mailto:support@onetapay.com",
+      value: "vickymeena0614@gmail.com",
+      action: "mailto:vickymeena0614@gmail.com",
       color: "bg-blue-500"
     },
     {
-      icon: Instagram,
-      title: "Instagram",
-      description: "Follow us on Instagram",
-      value: "@onetapay",
-      action: "https://instagram.com/onetapay",
-      color: "bg-pink-500"
-    },
-    {
-      icon: Youtube,
-      title: "YouTube",
-      description: "Subscribe to our channel",
-      value: "Onetapay",
-      action: "https://youtube.com/@onetapay",
-      color: "bg-red-500"
-    },
-    {
-      icon: MessageCircle,
-      title: "Support",
-      description: "Get help with your account",
-      value: "Chat with us",
-      action: "#",
+      icon: Phone,
+      title: "Phone",
+      description: "Call us for support",
+      value: "8696803045",
+      action: "tel:+918696803045",
       color: "bg-green-500"
     }
   ];
@@ -127,7 +111,7 @@ export default function ContactPage() {
                     Send us an email for any questions or support
                   </p>
                   <div className="text-base font-medium text-primary">
-                    support@onetapay.com
+                    vickymeena0614@gmail.com
                   </div>
                 </CardContent>
               </Card>
