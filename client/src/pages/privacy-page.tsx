@@ -88,6 +88,29 @@ export default function PrivacyPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="space-y-8 sm:space-y-12">
               
+              {/* Business Information */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Business Information
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p><strong className="text-foreground">Service Name:</strong> Telegram Premium Access Service</p>
+                      <p><strong className="text-foreground">Business Type:</strong> Digital Content Subscription Platform</p>
+                      <p><strong className="text-foreground">Service Category:</strong> Digital Media & Communication</p>
+                      <p><strong className="text-foreground">Data Controller:</strong> Telegram Premium Access Service</p>
+                    </div>
+                    <div>
+                      <p><strong className="text-foreground">Contact Email:</strong> <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
+                      <p><strong className="text-foreground">Contact Phone:</strong> <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                      <p><strong className="text-foreground">Operating Territory:</strong> India</p>
+                      <p><strong className="text-foreground">Establishment:</strong> 2024</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Information We Collect */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 flex items-center">
@@ -95,21 +118,37 @@ export default function PrivacyPage() {
                   Information Collection
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We gather personal data (e.g., name, email, address, payment info) when you use our services. This information is essential for providing our subscription services and managing your account.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Account Information:</strong> Your email address, username, and profile information.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Payment Information:</strong> Payment details processed securely through our payment partners.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Usage Data:</strong> Information about how you interact with our services.
-                  </p>
-                  <p>
-                    <strong className="text-foreground">Communication Data:</strong> Records of your communications with our support team.
-                  </p>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">1. Personal Information</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• <strong className="text-foreground">Account Information:</strong> Email address, username, profile information</li>
+                        <li>• <strong className="text-foreground">Contact Details:</strong> Phone number (optional), preferred communication method</li>
+                        <li>• <strong className="text-foreground">Identity Information:</strong> Name, age (if provided), location (general)</li>
+                        <li>• <strong className="text-foreground">Communication Records:</strong> Support tickets, feedback, correspondence</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">2. Payment Information</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• <strong className="text-foreground">Payment Details:</strong> Processed securely through Razorpay</li>
+                        <li>• <strong className="text-foreground">Billing Information:</strong> Subscription plans, payment history</li>
+                        <li>• <strong className="text-foreground">Transaction Records:</strong> Order IDs, payment confirmations</li>
+                        <li>• <strong className="text-foreground">Financial Data:</strong> We do not store credit card or bank details</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">3. Usage Information</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• <strong className="text-foreground">Service Usage:</strong> Subscription activity, channel access patterns</li>
+                        <li>• <strong className="text-foreground">Technical Data:</strong> Device type, browser, IP address, access times</li>
+                        <li>• <strong className="text-foreground">Preferences:</strong> Settings, notification preferences, communication choices</li>
+                        <li>• <strong className="text-foreground">Analytics:</strong> Aggregated usage statistics (non-personal)</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -120,18 +159,40 @@ export default function PrivacyPage() {
                   Use of Information
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    Data is used to provide and improve services, process payments, handle service requests, and send updates or promotional content (with your consent).
-                  </p>
-                  <ul className="space-y-2">
-                    <li>• Provide and maintain our subscription service</li>
-                    <li>• Process payments and manage billing</li>
-                    <li>• Grant access to premium Telegram channels</li>
-                    <li>• Send important service updates and notifications</li>
-                    <li>• Provide customer support</li>
-                    <li>• Improve our service and user experience</li>
-                    <li>• Send promotional content (with your consent)</li>
-                  </ul>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">1. Service Provision</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Provide and maintain subscription services</li>
+                        <li>• Grant access to premium Telegram channels</li>
+                        <li>• Process payments and manage billing</li>
+                        <li>• Deliver customer support and assistance</li>
+                        <li>• Manage user accounts and preferences</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">2. Communication</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Send service updates and important notifications</li>
+                        <li>• Respond to support requests and inquiries</li>
+                        <li>• Provide payment confirmations and receipts</li>
+                        <li>• Send promotional content (with consent only)</li>
+                        <li>• Notify about policy changes and updates</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">3. Service Improvement</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Analyze usage patterns to improve service quality</li>
+                        <li>• Develop new features and functionalities</li>
+                        <li>• Conduct security monitoring and fraud prevention</li>
+                        <li>• Optimize user experience and interface</li>
+                        <li>• Perform technical maintenance and updates</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -142,52 +203,29 @@ export default function PrivacyPage() {
                   Data Security
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We implement industry-standard measures (encryption, restricted access) to protect your data, though no method is fully secure online.
-                  </p>
-                  <ul className="space-y-2">
-                    <li>• SSL/TLS encryption for all data transmission</li>
-                    <li>• Secure database storage with access controls</li>
-                    <li>• Regular security audits and updates</li>
-                    <li>• Limited access to personal data on a need-to-know basis</li>
-                    <li>• Secure payment processing through trusted partners</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Data Sharing */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Data Sharing
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    Personal data is never sold. We may share it with third-party service providers (e.g., payment processors, delivery partners) who adhere to confidentiality standards.
-                  </p>
-                </div>
-              </div>
-
-              {/* Cookies & Tracking */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Cookies & Tracking
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We use cookies and similar tech for site functionality, analytics, and customization. You may disable cookies via browser settings.
-                  </p>
-                </div>
-              </div>
-
-              {/* Data Retention */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Data Retention
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We retain data as long as your account exists or as needed to comply with the law.
-                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">Security Measures:</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• <strong className="text-foreground">Encryption:</strong> SSL/TLS encryption for all data transmission</li>
+                        <li>• <strong className="text-foreground">Storage:</strong> Secure database storage with access controls</li>
+                        <li>• <strong className="text-foreground">Authentication:</strong> Multi-factor authentication for admin access</li>
+                        <li>• <strong className="text-foreground">Monitoring:</strong> 24/7 security monitoring and threat detection</li>
+                        <li>• <strong className="text-foreground">Audits:</strong> Regular security audits and vulnerability assessments</li>
+                        <li>• <strong className="text-foreground">Compliance:</strong> PCI DSS compliance for payment processing</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">Data Protection:</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Limited access to personal data on need-to-know basis</li>
+                        <li>• Employee training on data protection and privacy</li>
+                        <li>• Regular backups with encryption</li>
+                        <li>• Secure third-party integrations</li>
+                        <li>• Incident response procedures in place</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -195,32 +233,33 @@ export default function PrivacyPage() {
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 flex items-center">
                   <Users className="w-6 h-6 mr-3 text-primary" />
-                  Your Rights
+                  Your Privacy Rights
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>Depending on your location, you may access, correct, or request deletion of your data—contact us to act on your rights.</p>
-                  <ul className="space-y-2">
-                    <li>• <strong className="text-foreground">Access:</strong> Request a copy of your personal data</li>
-                    <li>• <strong className="text-foreground">Correction:</strong> Request correction of inaccurate data</li>
-                    <li>• <strong className="text-foreground">Deletion:</strong> Request deletion of your personal data</li>
-                    <li>• <strong className="text-foreground">Portability:</strong> Request transfer of your data</li>
-                    <li>• <strong className="text-foreground">Objection:</strong> Object to processing of your data</li>
-                  </ul>
-                  <p>
-                    To exercise these rights, please contact us at <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a>
-                  </p>
-                </div>
-              </div>
-
-              {/* Policy Updates */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Policy Updates
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We may update this policy; changes take effect upon posting, and continued use constitutes acceptance.
-                  </p>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">You Have the Right To:</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• <strong className="text-foreground">Access:</strong> Request a copy of your personal data</li>
+                        <li>• <strong className="text-foreground">Correction:</strong> Request correction of inaccurate data</li>
+                        <li>• <strong className="text-foreground">Deletion:</strong> Request deletion of your personal data</li>
+                        <li>• <strong className="text-foreground">Portability:</strong> Request transfer of your data</li>
+                        <li>• <strong className="text-foreground">Restriction:</strong> Request limitation of data processing</li>
+                        <li>• <strong className="text-foreground">Objection:</strong> Object to certain types of processing</li>
+                        <li>• <strong className="text-foreground">Consent Withdrawal:</strong> Withdraw consent for processing</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">How to Exercise Rights:</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Email us at <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></li>
+                        <li>• Call us at <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></li>
+                        <li>• Include your account details and specific request</li>
+                        <li>• We respond within 30 days</li>
+                        <li>• Identity verification may be required</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -234,8 +273,11 @@ export default function PrivacyPage() {
                     If you have any questions about this Privacy Policy or our data practices, please contact us:
                   </p>
                   <div className="space-y-2">
-                    <p>Email: <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
-                    <p>Phone: <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                    <p><strong className="text-foreground">Privacy Officer:</strong> Telegram Premium Access Service</p>
+                    <p><strong className="text-foreground">Email:</strong> <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
+                    <p><strong className="text-foreground">Phone:</strong> <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                    <p><strong className="text-foreground">Response Time:</strong> Within 30 days</p>
+                    <p><strong className="text-foreground">Business Hours:</strong> 9 AM - 9 PM IST (Monday to Sunday)</p>
                   </div>
                 </div>
               </div>

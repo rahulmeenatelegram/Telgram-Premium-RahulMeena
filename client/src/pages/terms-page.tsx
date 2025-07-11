@@ -54,10 +54,10 @@ export default function TermsPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12 sm:mb-16 md:mb-20">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extralight tracking-tight mb-4 sm:mb-6">
-                our commitment
+                our commitments
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground font-light max-w-2xl mx-auto">
-                The principles that guide our terms and service
+                The principles that guide our service terms
               </p>
             </div>
             
@@ -88,133 +88,180 @@ export default function TermsPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="space-y-8 sm:space-y-12">
               
-              {/* Acceptance of Terms */}
+              {/* Business Information */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 flex items-center">
                   <FileText className="w-6 h-6 mr-3 text-primary" />
-                  Acceptance of Terms
+                  Business Information
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    By using our site/services ("Service") you agree to these Terms & Conditions. If you do not agree to abide by these terms, please do not use this service.
-                  </p>
-                  <p>
-                    These terms constitute a legally binding agreement between you and our service. Your continued use of our service indicates your acceptance of these terms.
-                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p><strong className="text-foreground">Service Name:</strong> Telegram Premium Access Service</p>
+                      <p><strong className="text-foreground">Business Type:</strong> Digital Subscription Platform</p>
+                      <p><strong className="text-foreground">Service Category:</strong> Digital Content & Channel Access</p>
+                      <p><strong className="text-foreground">Established:</strong> 2024</p>
+                    </div>
+                    <div>
+                      <p><strong className="text-foreground">Contact Email:</strong> <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
+                      <p><strong className="text-foreground">Contact Phone:</strong> <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                      <p><strong className="text-foreground">Operating Territory:</strong> India</p>
+                      <p><strong className="text-foreground">Service Availability:</strong> 24/7 Digital Access</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* User Obligations */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 flex items-center">
-                  <Scale className="w-6 h-6 mr-3 text-primary" />
-                  User Obligations
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    You're responsible for lawful use of the Service, keeping your account secure, and compliance with all laws.
-                  </p>
-                  <ul className="space-y-2 ml-4">
-                    <li>• Provide accurate and current information when creating an account</li>
-                    <li>• Maintain the security of your account credentials</li>
-                    <li>• Use the service only for lawful purposes</li>
-                    <li>• Not share your account access with others</li>
-                    <li>• Comply with all applicable laws and regulations</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Prohibited Use */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 flex items-center">
-                  <AlertTriangle className="w-6 h-6 mr-3 text-primary" />
-                  Prohibited Use
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    Misuse, interference, reverse engineering, or infringing content is forbidden. The following activities are strictly prohibited:
-                  </p>
-                  <ul className="space-y-2 ml-4">
-                    <li>• Attempting to circumvent payment systems</li>
-                    <li>• Creating multiple accounts to abuse promotions</li>
-                    <li>• Sharing subscription access with unauthorized users</li>
-                    <li>• Using the service for any illegal or harmful activities</li>
-                    <li>• Attempting to reverse engineer or hack our systems</li>
-                    <li>• Interfering with the proper functioning of the service</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Service Modifications */}
-              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
-                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6 flex items-center">
-                  <Clock className="w-6 h-6 mr-3 text-primary" />
-                  Service Modifications
-                </h3>
-                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We may update, suspend, or terminate the Service with or without notice. We reserve the right to modify, suspend, or discontinue any part of our service at our discretion.
-                  </p>
-                </div>
-              </div>
-
-              {/* Intellectual Property */}
+              {/* Service Description */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Intellectual Property
+                  Service Description
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    All rights, titles, and interest in our content and trademarks are owned by us. You may not use our intellectual property without express written permission.
-                  </p>
+                  <p><strong className="text-foreground">Primary Service:</strong> Subscription-based access to premium Telegram channels and content</p>
+                  <p><strong className="text-foreground">Service Delivery:</strong> Digital access links provided instantly after payment verification</p>
+                  <p><strong className="text-foreground">Content Type:</strong> Educational, informational, and entertainment content via Telegram channels</p>
+                  <p><strong className="text-foreground">Access Method:</strong> Secure invitation links to private Telegram channels</p>
+                  <p><strong className="text-foreground">Subscription Plans:</strong> Monthly, quarterly, and annual subscription options</p>
+                  <p><strong className="text-foreground">Payment Processing:</strong> Secure payments through Razorpay payment gateway</p>
                 </div>
               </div>
 
-              {/* Limitation of Liability */}
+              {/* Terms of Service */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Limitation of Liability
+                  Terms of Service
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    Our liability is limited to the amount you've paid in the last six months; not liable for indirect or consequential losses. To the maximum extent permitted by law, we shall not be liable for any damages arising from your use of the service.
-                  </p>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">1. Service Agreement</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• By subscribing, you agree to these terms and conditions</li>
+                        <li>• Service is provided as-is with reasonable efforts for uptime</li>
+                        <li>• Access is granted through secure Telegram channel invitations</li>
+                        <li>• Subscription fees are non-refundable except as stated in refund policy</li>
+                        <li>• Service availability subject to Telegram platform terms</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">2. User Responsibilities</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Maintain confidentiality of access credentials</li>
+                        <li>• Use service only for personal, non-commercial purposes</li>
+                        <li>• Respect intellectual property rights of content creators</li>
+                        <li>• Report any technical issues promptly</li>
+                        <li>• Comply with Telegram's terms of service</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">3. Prohibited Activities</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Sharing access credentials with unauthorized persons</li>
+                        <li>• Attempting to circumvent payment systems</li>
+                        <li>• Using service for illegal or harmful activities</li>
+                        <li>• Reverse engineering or copying protected content</li>
+                        <li>• Disrupting service operations or security</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">4. Payment Terms</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• All payments processed through Razorpay secure gateway</li>
+                        <li>• Subscription fees charged in advance</li>
+                        <li>• Auto-renewal unless cancelled by user</li>
+                        <li>• No hidden fees or additional charges</li>
+                        <li>• Payment confirmation sent via email</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">5. Service Modifications</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Service features may be updated or modified</li>
+                        <li>• Pricing changes with 30-day advance notice</li>
+                        <li>• Content availability subject to provider agreements</li>
+                        <li>• Technical maintenance may cause temporary downtime</li>
+                        <li>• Users notified of significant changes</li>
+                      </ul>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Indemnification */}
+              {/* Billing and Payments */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Indemnification
+                  Billing & Payment Information
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    You agree to defend and hold us harmless from claims arising out of your misuse of the service or violation of these terms.
-                  </p>
+                  <p><strong className="text-foreground">Payment Gateway:</strong> Razorpay (PCI DSS compliant)</p>
+                  <p><strong className="text-foreground">Accepted Methods:</strong> UPI, Credit/Debit Cards, Net Banking, Mobile Wallets</p>
+                  <p><strong className="text-foreground">Currency:</strong> Indian Rupees (INR)</p>
+                  <p><strong className="text-foreground">Billing Cycle:</strong> Monthly, Quarterly, or Annual (as selected)</p>
+                  <p><strong className="text-foreground">Auto-Renewal:</strong> Enabled by default, can be disabled in account settings</p>
+                  <p><strong className="text-foreground">Failed Payments:</strong> Service suspended until payment is resolved</p>
+                  <p><strong className="text-foreground">Refund Policy:</strong> As detailed in our Cancellation & Refunds page</p>
+                </div>
+              </div>
+
+              {/* Liability and Disclaimers */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Liability & Disclaimers
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Service Availability:</strong> We strive for 99.9% uptime but cannot guarantee uninterrupted service</p>
+                  <p><strong className="text-foreground">Content Disclaimer:</strong> Third-party content is provided as-is; we are not responsible for its accuracy</p>
+                  <p><strong className="text-foreground">Limitation of Liability:</strong> Our liability is limited to the subscription fee paid</p>
+                  <p><strong className="text-foreground">Force Majeure:</strong> Not liable for service interruptions due to circumstances beyond our control</p>
+                  <p><strong className="text-foreground">Platform Dependencies:</strong> Service depends on Telegram platform availability</p>
+                </div>
+              </div>
+
+              {/* Data Protection */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Data Protection & Privacy
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Data Collection:</strong> We collect only necessary information for service provision</p>
+                  <p><strong className="text-foreground">Data Security:</strong> All data encrypted and stored securely</p>
+                  <p><strong className="text-foreground">Data Retention:</strong> Personal data retained only as long as necessary</p>
+                  <p><strong className="text-foreground">Third-Party Sharing:</strong> No personal data sold or shared with third parties</p>
+                  <p><strong className="text-foreground">User Rights:</strong> Users can request data access, correction, or deletion</p>
+                  <p><strong className="text-foreground">Compliance:</strong> Compliant with applicable Indian data protection laws</p>
                 </div>
               </div>
 
               {/* Termination */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Termination
+                  Account Termination
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    We may terminate or suspend your account at our discretion, without refund. Upon termination, your right to use the service ceases immediately.
-                  </p>
+                  <p><strong className="text-foreground">User Termination:</strong> Users can cancel subscriptions at any time</p>
+                  <p><strong className="text-foreground">Service Termination:</strong> We may terminate accounts for terms violations</p>
+                  <p><strong className="text-foreground">Data Deletion:</strong> Account data deleted within 30 days of termination</p>
+                  <p><strong className="text-foreground">Refund Upon Termination:</strong> Pro-rated refunds as per refund policy</p>
+                  <p><strong className="text-foreground">Access Removal:</strong> Channel access removed immediately upon termination</p>
                 </div>
               </div>
 
-              {/* Governing Law */}
+              {/* Legal Jurisdiction */}
               <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
-                  Governing Law
+                  Legal Jurisdiction
                 </h3>
                 <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p>
-                    These terms are governed by the laws of India, and disputes will be resolved in its courts.
-                  </p>
+                  <p><strong className="text-foreground">Governing Law:</strong> These terms are governed by the laws of India</p>
+                  <p><strong className="text-foreground">Jurisdiction:</strong> Courts in India have exclusive jurisdiction</p>
+                  <p><strong className="text-foreground">Dispute Resolution:</strong> Initial resolution through negotiation, then arbitration</p>
+                  <p><strong className="text-foreground">Consumer Rights:</strong> Consumer Protection Act, 2019 rights reserved</p>
+                  <p><strong className="text-foreground">Language:</strong> English version prevails in case of translation conflicts</p>
                 </div>
               </div>
 
@@ -223,14 +270,12 @@ export default function TermsPage() {
                 <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
                   Contact Information
                 </h3>
-                <div className="text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
-                  <p className="mb-4">
-                    If you have any questions about these Terms and Conditions, please contact us:
-                  </p>
-                  <div className="space-y-2">
-                    <p>Email: <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
-                    <p>Phone: <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
-                  </div>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">For Terms Related Queries:</strong></p>
+                  <p>Email: <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
+                  <p>Phone: <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                  <p><strong className="text-foreground">Response Time:</strong> Within 24-48 hours</p>
+                  <p><strong className="text-foreground">Business Hours:</strong> 9 AM - 9 PM IST (Monday to Sunday)</p>
                 </div>
               </div>
 

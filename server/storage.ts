@@ -27,6 +27,7 @@ export interface IStorage {
   getPaymentByRazorpayOrderId(orderId: string): Promise<Payment | undefined>;
   updatePayment(id: number, updates: Partial<InsertPayment>): Promise<Payment | undefined>;
   getAllPayments(): Promise<Payment[]>;
+  getAllPayments(): Promise<Payment[]>;
   getRecentPayments(limit?: number): Promise<Payment[]>;
   
   // Subscription methods
@@ -364,16 +365,16 @@ export class DatabaseStorage implements IStorage {
 
   // Analytics methods
   async getTotalUsers(): Promise<number> {
-    const [result] = await db.select({ count: sql<number>`count(*)` }).from(users);
-    return result.count;
+    const [result] = await db.select({ count: sql<number>`count(*)::int` }).from(users);
+    return Number(result.count) || 0;
   }
 
   async getTotalRevenue(): Promise<number> {
     const [result] = await db
-      .select({ total: sql<number>`sum(${payments.amount})` })
+      .select({ total: sql<string>`coalesce(sum(${payments.amount}), 0)::decimal` })
       .from(payments)
       .where(eq(payments.status, 'success'));
-    return result.total || 0;
+    return parseFloat(result.total) || 0;
   }
 
   async getAvailableBalance(): Promise<number> {
@@ -384,10 +385,10 @@ export class DatabaseStorage implements IStorage {
 
   async getTotalWithdrawn(): Promise<number> {
     const [result] = await db
-      .select({ total: sql<number>`sum(${withdrawals.amount})` })
+      .select({ total: sql<string>`coalesce(sum(${withdrawals.amount}), 0)::decimal` })
       .from(withdrawals)
       .where(eq(withdrawals.status, 'completed'));
-    return result.total || 0;
+    return parseFloat(result.total) || 0;
   }
 
   // Admin Wallet methods

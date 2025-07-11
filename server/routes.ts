@@ -533,10 +533,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const requestData = req.body;
       const slug = requestData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       
+      // Array of default emoji icons for channels
+      const defaultIcons = [
+        "📚", "🎯", "💡", "🚀", "🎨", "🔥", "⭐", "💎", "🌟", "🎪",
+        "🎭", "🎸", "🎵", "🎬", "📱", "💻", "🌈", "🔮", "⚡", "🎲",
+        "🎊", "🎉", "🎀", "🎁", "🏆", "👑", "💰", "🌙", "🎓", "📖"
+      ];
+      
+      // Get a random emoji icon
+      const randomIcon = defaultIcons[Math.floor(Math.random() * defaultIcons.length)];
+      
       const channelData = {
         ...requestData,
         slug,
-        icon: "fas fa-telegram" // Default icon since frontend no longer collects this
+        icon: randomIcon // Random emoji icon
       };
       
       const validatedData = insertChannelSchema.parse(channelData);
@@ -592,27 +602,147 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Get analytics
   app.get("/api/admin/analytics", async (req, res) => {
     try {
-      const [totalUsers, totalRevenue, availableBalance, totalWithdrawn] = await Promise.all([
+      const [totalUsers, totalRevenue, availableBalance, totalWithdrawn, activeChannels, allPayments] = await Promise.all([
         storage.getTotalUsers(),
         storage.getTotalRevenue(),
         storage.getAvailableBalance(),
         storage.getTotalWithdrawn(),
+        storage.getActiveChannels(),
+        storage.getAllPayments()
       ]);
 
-      const activeChannels = await storage.getActiveChannels();
-      
+      // Calculate comprehensive payment metrics
+      const successfulPayments = allPayments.filter(p => p.status === 'success');
+      const totalPayments = allPayments.length;
+      const successRate = totalPayments > 0 ? (successfulPayments.length / totalPayments) * 100 : 0;
+
+      // Get current month data
+      const currentMonth = new Date();
+      const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+      const monthlyPayments = successfulPayments.filter(p => new Date(p.createdAt) >= startOfMonth);
+      const monthlyRevenue = monthlyPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+      // Get last month data for comparison
+      const lastMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+      const endOfLastMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 0);
+      const lastMonthPayments = successfulPayments.filter(p => {
+        const paymentDate = new Date(p.createdAt);
+        return paymentDate >= lastMonth && paymentDate <= endOfLastMonth;
+      });
+      const lastMonthRevenue = lastMonthPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+      // Calculate growth rates
+      const revenueGrowth = lastMonthRevenue > 0 ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
+      const userGrowthThisMonth = monthlyPayments.filter((payment, index, arr) => 
+        arr.findIndex(p => p.userId === payment.userId) === index
+      ).length; // Unique users this month
+
+      // Average order value
+      const averageOrderValue = successfulPayments.length > 0 ? 
+        totalRevenue / successfulPayments.length : 0;
+
+      // Get recent activity (last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const weeklyPayments = successfulPayments.filter(p => new Date(p.createdAt) >= sevenDaysAgo);
+      const weeklyRevenue = weeklyPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+
+      // Channel analytics
+      const channelCount = activeChannels.length;
+      const averageChannelPrice = channelCount > 0 ? 
+        activeChannels.reduce((sum, ch) => sum + parseFloat(ch.price), 0) / channelCount : 0;
+
       res.json({
         totalUsers,
-        totalRevenue,
-        availableBalance,
-        totalWithdrawn,
-        activeChannels: activeChannels.length,
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+        availableBalance: parseFloat(availableBalance.toFixed(2)),
+        totalWithdrawn: parseFloat(totalWithdrawn.toFixed(2)),
+        activeChannels: channelCount,
+        monthlyRevenue: parseFloat(monthlyRevenue.toFixed(2)),
+        totalPayments,
+        successfulPayments: successfulPayments.length,
+        successRate: parseFloat(successRate.toFixed(1)),
+        recentActivity: {
+          paymentsThisMonth: monthlyPayments.length,
+          channelsCount: channelCount,
+          averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
+          weeklyRevenue: parseFloat(weeklyRevenue.toFixed(2)),
+          weeklyPayments: weeklyPayments.length,
+          userGrowthThisMonth,
+          revenueGrowth: parseFloat(revenueGrowth.toFixed(1)),
+          lastMonthRevenue: parseFloat(lastMonthRevenue.toFixed(2)),
+          averageChannelPrice: parseFloat(averageChannelPrice.toFixed(2))
+        },
+        insights: {
+          topPerformingDay: getTopPerformingDay(successfulPayments),
+          conversionRate: totalUsers > 0 ? parseFloat(((successfulPayments.length / totalUsers) * 100).toFixed(1)) : 0,
+          repeatCustomers: getRepeatCustomers(successfulPayments),
+          averageMonthlyGrowth: getAverageMonthlyGrowth(successfulPayments)
+        }
       });
     } catch (error) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
     }
   });
+
+  // Helper functions for analytics
+  function getTopPerformingDay(payments: any[]) {
+    const dayRevenue: { [key: string]: number } = {};
+    payments.forEach(payment => {
+      const day = new Date(payment.createdAt).toLocaleDateString();
+      dayRevenue[day] = (dayRevenue[day] || 0) + parseFloat(payment.amount);
+    });
+    
+    const topDay = Object.entries(dayRevenue).reduce((a, b) => 
+      dayRevenue[a[0]] > dayRevenue[b[0]] ? a : b, ['', 0]
+    );
+    
+    return {
+      date: topDay[0],
+      revenue: parseFloat(topDay[1].toFixed(2))
+    };
+  }
+
+  function getRepeatCustomers(payments: any[]) {
+    const userPayments: { [key: string]: number } = {};
+    payments.forEach(payment => {
+      userPayments[payment.userId] = (userPayments[payment.userId] || 0) + 1;
+    });
+    
+    const repeatCount = Object.values(userPayments).filter(count => count > 1).length;
+    const totalCustomers = Object.keys(userPayments).length;
+    
+    return {
+      count: repeatCount,
+      percentage: totalCustomers > 0 ? parseFloat(((repeatCount / totalCustomers) * 100).toFixed(1)) : 0
+    };
+  }
+
+  function getAverageMonthlyGrowth(payments: any[]) {
+    const monthlyRevenue: { [key: string]: number } = {};
+    payments.forEach(payment => {
+      const monthKey = new Date(payment.createdAt).toISOString().substring(0, 7); // YYYY-MM
+      monthlyRevenue[monthKey] = (monthlyRevenue[monthKey] || 0) + parseFloat(payment.amount);
+    });
+    
+    const months = Object.keys(monthlyRevenue).sort();
+    if (months.length < 2) return 0;
+    
+    let totalGrowth = 0;
+    let validGrowthMonths = 0;
+    
+    for (let i = 1; i < months.length; i++) {
+      const current = monthlyRevenue[months[i]];
+      const previous = monthlyRevenue[months[i - 1]];
+      if (previous > 0) {
+        totalGrowth += ((current - previous) / previous) * 100;
+        validGrowthMonths++;
+      }
+    }
+    
+    return validGrowthMonths > 0 ? parseFloat((totalGrowth / validGrowthMonths).toFixed(1)) : 0;
+  }
 
   // Admin: Get all payments
   app.get("/api/admin/payments", async (req, res) => {

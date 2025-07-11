@@ -257,6 +257,187 @@ export default function ShippingPage() {
                 </div>
               </div>
 
+              {/* Business Information */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Business & Service Information
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <p><strong className="text-foreground">Service Type:</strong> Digital Content Delivery</p>
+                      <p><strong className="text-foreground">Business Category:</strong> Digital Subscription Platform</p>
+                      <p><strong className="text-foreground">Delivery Method:</strong> Instant Digital Access</p>
+                      <p><strong className="text-foreground">Service Area:</strong> Global (Internet-based)</p>
+                    </div>
+                    <div>
+                      <p><strong className="text-foreground">Contact Email:</strong> <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
+                      <p><strong className="text-foreground">Contact Phone:</strong> <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                      <p><strong className="text-foreground">Operating Hours:</strong> 24/7 Automated Service</p>
+                      <p><strong className="text-foreground">Support Hours:</strong> 9 AM - 9 PM IST</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed Delivery Information */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Digital Service Delivery Details
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">1. What We Deliver</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Digital access to premium Telegram channels</li>
+                        <li>• Secure invitation links to private content</li>
+                        <li>• Account dashboard access credentials</li>
+                        <li>• Subscription management tools</li>
+                        <li>• Customer support and technical assistance</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">2. Delivery Process</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Payment processed through Razorpay secure gateway</li>
+                        <li>• Automated verification of payment status</li>
+                        <li>• Instant account activation upon payment confirmation</li>
+                        <li>• Access links delivered to registered email</li>
+                        <li>• Dashboard access available immediately</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">3. Delivery Timeframes</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• <strong className="text-foreground">Instant:</strong> Most payments processed within 30 seconds</li>
+                        <li>• <strong className="text-foreground">Standard:</strong> Up to 5 minutes for verification</li>
+                        <li>• <strong className="text-foreground">Delayed:</strong> Up to 24 hours for manual review cases</li>
+                        <li>• <strong className="text-foreground">Failed Payments:</strong> Immediate notification and support</li>
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-3">4. Access Requirements</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Active internet connection required</li>
+                        <li>• Telegram app installed on device</li>
+                        <li>• Valid email address for account management</li>
+                        <li>• Compatible device (smartphone, tablet, or computer)</li>
+                        <li>• Updated web browser for dashboard access</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Technical Specifications */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Technical Specifications
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Platform:</strong> Telegram-based content delivery</p>
+                  <p><strong className="text-foreground">Compatibility:</strong> All devices supporting Telegram (iOS, Android, Windows, Mac, Linux)</p>
+                  <p><strong className="text-foreground">Internet Required:</strong> Yes, for initial setup and ongoing access</p>
+                  <p><strong className="text-foreground">Storage:</strong> No local storage required - cloud-based access</p>
+                  <p><strong className="text-foreground">Bandwidth:</strong> Minimal - depends on content consumption</p>
+                  <p><strong className="text-foreground">Security:</strong> End-to-end encryption via Telegram's security protocols</p>
+                </div>
+              </div>
+
+              {/* Delivery Confirmation */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Delivery Confirmation & Tracking
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Email Confirmation:</strong> Instant confirmation sent to registered email</p>
+                  <p><strong className="text-foreground">Dashboard Updates:</strong> Real-time status updates in user dashboard</p>
+                  <p><strong className="text-foreground">Access Verification:</strong> Automated testing of channel access links</p>
+                  <p><strong className="text-foreground">Support Notifications:</strong> Proactive alerts for any delivery issues</p>
+                  <p><strong className="text-foreground">Delivery Receipt:</strong> Digital receipt with access details</p>
+                </div>
+              </div>
+
+              {/* Troubleshooting */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Delivery Issues & Resolution
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-2">Common Issues:</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Payment processing delays</li>
+                        <li>• Email delivery to spam folder</li>
+                        <li>• Telegram app not installed</li>
+                        <li>• Invalid or expired links</li>
+                        <li>• Account verification pending</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-medium text-foreground mb-2">Resolution Process:</h4>
+                      <ul className="space-y-2 pl-4">
+                        <li>• Immediate automated diagnostics</li>
+                        <li>• Email support response within 24 hours</li>
+                        <li>• Phone support for urgent issues</li>
+                        <li>• Manual verification and redelivery</li>
+                        <li>• Full refund if delivery cannot be completed</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment & Delivery Integration */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Payment & Delivery Integration
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Payment Gateway:</strong> Razorpay (India's leading payment processor)</p>
+                  <p><strong className="text-foreground">Supported Methods:</strong> UPI, Cards, Net Banking, Mobile Wallets</p>
+                  <p><strong className="text-foreground">Currency:</strong> Indian Rupees (INR)</p>
+                  <p><strong className="text-foreground">Security:</strong> PCI DSS compliant payment processing</p>
+                  <p><strong className="text-foreground">Delivery Trigger:</strong> Automated upon successful payment confirmation</p>
+                  <p><strong className="text-foreground">Failure Handling:</strong> Automatic retry and manual intervention</p>
+                </div>
+              </div>
+
+              {/* Customer Support */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Customer Support & Assistance
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Email Support:</strong> <a href="mailto:vickymeena0614@gmail.com" className="text-primary hover:underline">vickymeena0614@gmail.com</a></p>
+                  <p><strong className="text-foreground">Phone Support:</strong> <a href="tel:+918696803045" className="text-primary hover:underline">+91 8696803045</a></p>
+                  <p><strong className="text-foreground">Response Time:</strong> Email within 24 hours, phone immediate</p>
+                  <p><strong className="text-foreground">Support Languages:</strong> English, Hindi</p>
+                  <p><strong className="text-foreground">Technical Support:</strong> Available for delivery and access issues</p>
+                  <p><strong className="text-foreground">Escalation:</strong> Senior support team for complex issues</p>
+                </div>
+              </div>
+
+              {/* Legal & Compliance */}
+              <div className="glass-effect border-white/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10">
+                <h3 className="text-xl sm:text-2xl font-medium mb-4 sm:mb-6">
+                  Legal & Compliance Information
+                </h3>
+                <div className="space-y-4 text-sm sm:text-base text-muted-foreground font-light leading-relaxed">
+                  <p><strong className="text-foreground">Service Location:</strong> India</p>
+                  <p><strong className="text-foreground">Regulatory Compliance:</strong> IT Act 2000, Consumer Protection Act 2019</p>
+                  <p><strong className="text-foreground">Data Protection:</strong> Compliant with Indian data protection laws</p>
+                  <p><strong className="text-foreground">Consumer Rights:</strong> All applicable consumer protection rights reserved</p>
+                  <p><strong className="text-foreground">Dispute Resolution:</strong> Governed by Indian law and jurisdiction</p>
+                  <p><strong className="text-foreground">Terms Integration:</strong> Subject to our Terms and Conditions</p>
+                </div>
+              </div>
+
               {/* Last Updated */}
               <div className="text-center pt-8 border-t border-white/5">
                 <p className="text-sm text-muted-foreground font-light">

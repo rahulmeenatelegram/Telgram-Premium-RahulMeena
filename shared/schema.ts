@@ -19,7 +19,6 @@ export const channels = pgTable("channels", {
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   subscriptionType: text("subscription_type").notNull().default("monthly"), // monthly, yearly
   telegramLink: text("telegram_link").notNull(),
-  telegramInviteLink: text("telegram_invite_link"),
   memberCount: integer("member_count").default(0),
   icon: text("icon").notNull(), // Font Awesome icon class
   isActive: boolean("is_active").default(true),

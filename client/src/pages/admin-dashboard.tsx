@@ -23,6 +23,33 @@ interface Analytics {
   availableBalance: number;
   totalWithdrawn: number;
   activeChannels: number;
+  monthlyRevenue: number;
+  totalPayments: number;
+  successfulPayments: number;
+  successRate: number;
+  recentActivity: {
+    paymentsThisMonth: number;
+    channelsCount: number;
+    averageOrderValue: number;
+    weeklyRevenue: number;
+    weeklyPayments: number;
+    userGrowthThisMonth: number;
+    revenueGrowth: number;
+    lastMonthRevenue: number;
+    averageChannelPrice: number;
+  };
+  insights: {
+    topPerformingDay: {
+      date: string;
+      revenue: number;
+    };
+    conversionRate: number;
+    repeatCustomers: {
+      count: number;
+      percentage: number;
+    };
+    averageMonthlyGrowth: number;
+  };
 }
 
 export default function AdminDashboard() {
@@ -136,9 +163,19 @@ export default function AdminDashboard() {
     },
   });
 
+  // Array of random icons for channels
+  const randomIcons = [
+    "📚", "🎯", "💡", "🚀", "🎨", "🔥", "⭐", "💎", "🌟", "🎪",
+    "🎭", "🎨", "🎸", "🎵", "🎬", "📱", "💻", "🌈", "🔮", "⚡",
+    "🎲", "🎊", "🎉", "🎀", "🎁", "🏆", "👑", "💰", "💡", "🌙"
+  ];
+
   const handleAddChannel = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    
+    // Get a random icon from the array
+    const randomIcon = randomIcons[Math.floor(Math.random() * randomIcons.length)];
     
     const channelData = {
       name: formData.get("name") as string,
@@ -147,7 +184,7 @@ export default function AdminDashboard() {
       price: formData.get("price") as string,
       telegramLink: formData.get("telegramLink") as string,
       memberCount: parseInt(formData.get("memberCount") as string) || 0,
-      icon: formData.get("icon") as string,
+      icon: randomIcon,
     };
 
     addChannelMutation.mutate(channelData);
@@ -202,7 +239,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -210,6 +247,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics?.totalUsers || 0}</div>
+              <p className="text-xs text-muted-foreground">Registered users</p>
             </CardContent>
           </Card>
 
@@ -220,6 +258,18 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(analytics?.totalRevenue || 0)}</div>
+              <p className="text-xs text-muted-foreground">All time earnings</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{formatCurrency(analytics?.monthlyRevenue || 0)}</div>
+              <p className="text-xs text-muted-foreground">This month</p>
             </CardContent>
           </Card>
 
@@ -230,6 +280,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{analytics?.activeChannels || 0}</div>
+              <p className="text-xs text-muted-foreground">Live channels</p>
             </CardContent>
           </Card>
 
@@ -240,6 +291,161 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{formatCurrency(analytics?.availableBalance || 0)}</div>
+              <p className="text-xs text-muted-foreground">Ready to withdraw</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Additional Analytics */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Payment Statistics</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Payments</span>
+                <span className="font-medium">{analytics?.totalPayments || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Successful</span>
+                <span className="font-medium text-green-600">{analytics?.successfulPayments || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Success Rate</span>
+                <span className="font-medium">{analytics?.successRate || 0}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Avg. Order Value</span>
+                <span className="font-medium">{formatCurrency(analytics?.recentActivity?.averageOrderValue || 0)}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">This Month</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Payments</span>
+                <span className="font-medium">{analytics?.recentActivity?.paymentsThisMonth || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Revenue</span>
+                <span className="font-medium">{formatCurrency(analytics?.monthlyRevenue || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">New Users</span>
+                <span className="font-medium">{analytics?.recentActivity?.userGrowthThisMonth || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Growth</span>
+                <span className={`font-medium ${(analytics?.recentActivity?.revenueGrowth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {(analytics?.recentActivity?.revenueGrowth || 0) >= 0 ? '+' : ''}{analytics?.recentActivity?.revenueGrowth || 0}%
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Recent Activity (7 Days)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Weekly Payments</span>
+                <span className="font-medium">{analytics?.recentActivity?.weeklyPayments || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Weekly Revenue</span>
+                <span className="font-medium">{formatCurrency(analytics?.recentActivity?.weeklyRevenue || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Conversion Rate</span>
+                <span className="font-medium">{analytics?.insights?.conversionRate || 0}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Avg. Channel Price</span>
+                <span className="font-medium">{formatCurrency(analytics?.recentActivity?.averageChannelPrice || 0)}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Business Insights</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Repeat Customers</span>
+                <span className="font-medium">{analytics?.insights?.repeatCustomers?.count || 0} ({analytics?.insights?.repeatCustomers?.percentage || 0}%)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Monthly Growth Avg</span>
+                <span className={`font-medium ${(analytics?.insights?.averageMonthlyGrowth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {(analytics?.insights?.averageMonthlyGrowth || 0) >= 0 ? '+' : ''}{analytics?.insights?.averageMonthlyGrowth || 0}%
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Best Day Revenue</span>
+                <span className="font-medium">{formatCurrency(analytics?.insights?.topPerformingDay?.revenue || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Best Day Date</span>
+                <span className="font-medium text-xs">{analytics?.insights?.topPerformingDay?.date || '-'}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Financial Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Financial Overview</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Revenue</span>
+                <span className="font-medium text-2xl">{formatCurrency(analytics?.totalRevenue || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Available Balance</span>
+                <span className="font-medium text-xl text-green-600">{formatCurrency(analytics?.availableBalance || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Withdrawn</span>
+                <span className="font-medium text-red-600">{formatCurrency(analytics?.totalWithdrawn || 0)}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Last Month Revenue</span>
+                <span className="font-medium">{formatCurrency(analytics?.recentActivity?.lastMonthRevenue || 0)}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Performance Metrics</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Total Users</span>
+                <span className="font-medium text-2xl">{analytics?.totalUsers || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Active Channels</span>
+                <span className="font-medium text-xl">{analytics?.activeChannels || 0}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Payment Success Rate</span>
+                <span className="font-medium text-green-600">{analytics?.successRate || 0}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Customer Conversion</span>
+                <span className="font-medium">{analytics?.insights?.conversionRate || 0}%</span>
+              </div>
             </CardContent>
           </Card>
         </div>
