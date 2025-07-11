@@ -530,8 +530,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin: Create channel
   app.post("/api/admin/channels", async (req, res) => {
     try {
+      console.log("Channel creation request received:", req.body);
+      
       const requestData = req.body;
-      const slug = requestData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      
+      // Validate required fields
+      if (!requestData.name || !requestData.description || !requestData.price || !requestData.telegramLink) {
+        return res.status(400).json({ 
+          message: "Missing required fields", 
+          required: ["name", "description", "price", "telegramLink"]
+        });
+      }
+      
+      const slug = requestData.name.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/-+/g, '-') // Replace multiple hyphens with single
+        .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+        .substring(0, 50); // Limit length
+      
+      // Check if slug already exists
+      const existingChannel = await storage.getChannelBySlug(slug);
+      if (existingChannel) {
+        return res.status(400).json({ 
+          message: "Channel with similar name already exists",
+          suggestedSlug: `${slug}-${Date.now()}`
+        });
+      }
       
       // Array of default emoji icons for channels
       const defaultIcons = [
@@ -540,24 +565,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "🎊", "🎉", "🎀", "🎁", "🏆", "👑", "💰", "🌙", "🎓", "📖"
       ];
       
-      // Get a random emoji icon
-      const randomIcon = defaultIcons[Math.floor(Math.random() * defaultIcons.length)];
+      // Use provided icon or random emoji icon
+      const icon = requestData.icon || defaultIcons[Math.floor(Math.random() * defaultIcons.length)];
       
       const channelData = {
-        ...requestData,
-        slug,
-        icon: randomIcon // Random emoji icon
+        name: requestData.name,
+        slug: slug,
+        description: requestData.description,
+        price: requestData.price,
+        telegramLink: requestData.telegramLink,
+        memberCount: parseInt(requestData.memberCount) || 0,
+        icon: icon,
+        subscriptionType: requestData.subscriptionType || "monthly",
+        isActive: requestData.isActive !== false
       };
       
+      console.log("Prepared channel data:", channelData);
+      
       const validatedData = insertChannelSchema.parse(channelData);
+      console.log("Validated channel data:", validatedData);
+      
       const channel = await storage.createChannel(validatedData);
+      console.log("Channel created successfully:", channel);
+      
       res.status(201).json(channel);
     } catch (error) {
       console.error("Error creating channel:", error);
+      
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid channel data", errors: error.errors });
+        console.error("Validation errors:", error.errors);
+        return res.status(400).json({ 
+          message: "Invalid channel data", 
+          errors: error.errors 
+        });
       }
-      res.status(500).json({ message: "Failed to create channel" });
+      
+      res.status(500).json({ 
+        message: "Failed to create channel",
+        error: error.message || "Unknown error"
+      });
     }
   });
 
