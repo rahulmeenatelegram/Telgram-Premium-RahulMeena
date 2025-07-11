@@ -22,11 +22,14 @@
       "dest": "/server/index.ts"
     },
     {
-      "src": "/(.*\\..*)", 
+      "src": "/(.*\\..*)",  
       "dest": "/dist/public/$1"
     },
     {
-      "src": "/(.*)",      
+      "handle": "filesystem"  
+    },
+    {
+      "src": "/(.*)",         
       "dest": "/dist/public/index.html"
     }
   ],
