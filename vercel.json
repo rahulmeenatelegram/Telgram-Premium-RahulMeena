@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "server/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": ["server/**", "shared/**", "dist/**"]
-      }
+      "use": "@vercel/node"
     },
     {
       "src": "package.json",
@@ -16,22 +13,11 @@
       }
     }
   ],
-  "routes": [
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/server/index.ts" },
     {
-      "src": "/api/(.*)",
-      "dest": "server/index.ts"
-    },
-    {
-      "src": "/static/(.*)",
-      "dest": "/dist/public/static/$1"
-    },
-    {
-      "src": "/(.*\\..*)",
-      "dest": "/dist/public/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/public/index.html"
+      "source": "/((?!api/|favicon.ico|static/).*)",
+      "destination": "/index.html"
     }
   ],
   "env": {
