@@ -1,7 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { db } from '../server/db';
-import { channels as channelsTable } from '../shared/schema';
-import { eq } from 'drizzle-orm';
+// Database and schema will be dynamically imported inside handler
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
@@ -17,8 +15,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log(`API Request: ${req.method} ${req.url}`);
 
   if (req.method === 'GET') {
+    // Check database URL env var
+    if (!process.env.CUSTOMER_DATABASE_URL) {
+      console.error('❌ Missing CUSTOMER_DATABASE_URL env var');
+      return res.status(500).json({ message: 'Server misconfiguration: CUSTOMER_DATABASE_URL not set' });
+    }
     try {
       console.log('📡 Fetching channels from database');
+      // Import modules dynamically (use .js extension for runtime)
+      const { db } = await import('../server/db');
+      const { channels: channelsTable } = await import('../shared/schema.js');
+      const { eq } = await import('drizzle-orm');
       // Query active channels
       const channelRows = await db.select().from(channelsTable).where(
         eq(channelsTable.isActive, true)
@@ -32,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         error: error instanceof Error ? error.message : String(error)
       });
     }
-  } else {
-    res.status(405).json({ message: 'Method not allowed' });
   }
+  // Method not allowed
+  res.status(405).json({ message: 'Method not allowed' });
 }
