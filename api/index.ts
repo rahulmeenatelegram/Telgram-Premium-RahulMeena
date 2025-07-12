@@ -39,8 +39,17 @@ async function initializeApp() {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     console.log(`API Request: ${req.method} ${req.url}`);
+    console.log('Request headers:', req.headers);
+    console.log('Request query:', req.query);
     
     const expressApp = await initializeApp();
+    
+    // Ensure the request URL includes /api prefix for proper routing
+    const originalUrl = req.url || '';
+    if (!originalUrl.startsWith('/api/')) {
+      req.url = '/api' + (originalUrl.startsWith('/') ? originalUrl : '/' + originalUrl);
+      console.log('Modified URL to:', req.url);
+    }
     
     // Handle the request with Express
     expressApp(req, res);
