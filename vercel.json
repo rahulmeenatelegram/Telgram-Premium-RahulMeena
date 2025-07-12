@@ -4,23 +4,15 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist/public"
-      }
+      "config": { "distDir": "dist/public" }
     },
     {
-      "src": "api/channels.ts",
+      "src": "api/**/*.ts",
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/channels",
-      "dest": "/api/channels"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
