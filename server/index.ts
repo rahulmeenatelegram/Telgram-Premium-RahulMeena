@@ -58,14 +58,23 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 3000;
-  // Start subscription manager
-  subscriptionManager.start();
+  // Only start the server if not in Vercel environment
+  if (!process.env.VERCEL) {
+    // ALWAYS serve the app on port 5000
+    // this serves both the API and the client.
+    // It is the only port that is not firewalled.
+    const port = 3000;
+    // Start subscription manager
+    subscriptionManager.start();
 
-  server.listen(port, "127.0.0.1", () => {
-  log(`serving on port ${port}`);
-});
+    server.listen(port, "127.0.0.1", () => {
+      log(`serving on port ${port}`);
+    });
+  } else {
+    // Initialize subscription manager for Vercel
+    subscriptionManager.start();
+  }
 })();
+
+// Export the app for Vercel
+export default app;
