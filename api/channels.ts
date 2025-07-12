@@ -1,11 +1,4 @@
-import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Pool } from 'pg';
-
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
@@ -23,16 +16,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
     try {
       console.log("✅ [1] /api/channels handler invoked.");
-      console.log("✅ [2] Executing query to fetch channels...");
       
-      const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
+      // For now, return mock data to test if the API routing works
+      const mockChannels = [
+        {
+          id: 1,
+          name: "Test Channel 1",
+          slug: "test-channel-1",
+          description: "This is a test channel",
+          icon: "🎯",
+          price: 99,
+          is_active: true,
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          name: "Test Channel 2", 
+          slug: "test-channel-2",
+          description: "Another test channel",
+          icon: "🚀",
+          price: 149,
+          is_active: true,
+          created_at: new Date().toISOString()
+        }
+      ];
       
-      console.log("✅ [3] Query successful. Found", result.rows.length, "channels.");
+      console.log("✅ [2] Returning mock channels:", mockChannels.length);
       
-      res.status(200).json(result.rows);
+      res.status(200).json(mockChannels);
     } catch (error) {
       console.error("❌ [ERROR] Failed to fetch channels:", error);
-      res.status(500).json({ message: "Failed to fetch channels", error: error instanceof Error ? error.message : 'Unknown error' });
+      res.status(500).json({ 
+        message: "Failed to fetch channels", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
     }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
