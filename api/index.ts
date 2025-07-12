@@ -1,13 +1,4 @@
-// Vercel serverless function handler for API endpoints
-import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Pool } from 'pg';
-
-// Create a single database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Set CORS headers
@@ -27,73 +18,66 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const path = url.split('?')[0];
     
     console.log(`Processing path: ${path}`);
-    console.log(`Full URL: ${url}`);
 
-    // Handle /channels route (Vercel strips /api prefix)
-    if ((path === '/channels' || path === '/api/channels') && req.method === 'GET') {
-      console.log("✅ [1] /api/channels handler invoked.");
+    // Handle channels route - return mock data for now
+    if (path === '/channels' || path.endsWith('/channels')) {
+      console.log("✅ Channels route matched");
       
-      try {
-        const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
-        console.log("✅ [2] Query successful. Found", result.rows.length, "channels.");
-        
-        res.status(200).json(result.rows);
-        return;
-      } catch (dbError) {
-        console.error("❌ Database error:", dbError);
-        
-        // Return mock data if database fails
-        const mockChannels = [
-          {
-            id: 1,
-            name: "Premium Tech Channel",
-            slug: "premium-tech",
-            description: "Latest tech news and insights",
-            icon: "🚀",
-            price: 99,
-            is_active: true,
-            created_at: new Date().toISOString()
-          },
-          {
-            id: 2,
-            name: "Crypto Updates",
-            slug: "crypto-updates",
-            description: "Real-time cryptocurrency updates",
-            icon: "₿",
-            price: 149,
-            is_active: true,
-            created_at: new Date().toISOString()
-          }
-        ];
-        
-        console.log("✅ [3] Returning mock channels due to DB error:", mockChannels.length);
-        res.status(200).json(mockChannels);
-        return;
-      }
+      const mockChannels = [
+        {
+          id: 1,
+          name: "Premium Tech Channel",
+          slug: "premium-tech",
+          description: "Latest tech news and insights",
+          icon: "🚀",
+          price: 99,
+          is_active: true,
+          created_at: new Date().toISOString()
+        },
+        {
+          id: 2,
+          name: "Crypto Updates",
+          slug: "crypto-updates",
+          description: "Real-time cryptocurrency updates",
+          icon: "₿",
+          price: 149,
+          is_active: true,
+          created_at: new Date().toISOString()
+        }
+      ];
+      
+      console.log("✅ Returning mock channels:", mockChannels.length);
+      res.status(200).json(mockChannels);
+      return;
     }
 
-    // Handle test route (Vercel strips /api prefix)
-    if ((path === '/test' || path === '/api/test') && req.method === 'GET') {
+    // Handle test route
+    if (path === '/test' || path.endsWith('/test')) {
+      console.log("✅ Test route matched");
       res.status(200).json({
         message: 'API is working!',
         timestamp: new Date().toISOString(),
         method: req.method,
         url: req.url,
-        path: path,
-        environment: process.env.NODE_ENV || 'unknown'
+        path: path
       });
       return;
     }
 
-    // Default 404 for unmatched routes
-    res.status(404).json({ message: 'Route not found', path });
+    // Default response for any other route
+    console.log("✅ Default response");
+    res.status(200).json({ 
+      message: 'API handler is working',
+      path: path,
+      url: url,
+      timestamp: new Date().toISOString()
+    });
 
   } catch (error) {
     console.error('API Handler Error:', error);
     res.status(500).json({ 
       error: 'Internal Server Error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      path: req.url
+      message: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }
