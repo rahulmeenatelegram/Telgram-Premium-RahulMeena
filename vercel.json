@@ -7,12 +7,12 @@
       "config": { "distDir": "dist/public" }
     },
     {
-      "src": "api/**/*.ts",
+      "src": "api/**/*.{js,ts}",
       "use": "@vercel/node"
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1.ts" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
