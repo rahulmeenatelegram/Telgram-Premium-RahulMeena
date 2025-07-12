@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "server/index.ts",
+      "src": "dist/server/index.js",
       "use": "@vercel/node"
     },
     {
@@ -14,13 +14,10 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server/index.ts" },
+    { "source": "/api/(.*)", "destination": "/dist/server/index.js" },
     {
       "source": "/((?!api/|favicon.ico|static/).*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }
