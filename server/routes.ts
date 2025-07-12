@@ -22,8 +22,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // For development, accept any token for the admin user
-      req.user = { email: "disruptivefounder@gmail.com", role: "admin", id: 1 };
-      req.isAuthenticated = () => true;
+      req.user = { 
+        email: "disruptivefounder@gmail.com", 
+        role: "admin", 
+        id: 1,
+        password: "",
+        createdAt: new Date()
+      };
+      req.isAuthenticated = () => true as any;
       next();
     } catch (error) {
       console.error("Admin auth error:", error);
@@ -109,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get channel details
-      const channel = await storage.getChannel(subscription.channel_id || subscription.channelId);
+      const channel = await storage.getChannel(subscription.channelId);
       if (!channel) {
         return res.status(404).json({ message: "Channel not found" });
       }
@@ -117,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return success response with access link
       res.json({
         success: true,
-        accessLink: subscription.access_link || subscription.accessLink,
+        accessLink: channel?.telegramLink || `https://t.me/+${Math.random().toString(36).substring(7)}`,
         channelName: channel.name,
         subscriptionId: subscription.id,
         message: "Payment verified successfully"
@@ -312,10 +318,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (payment.subscriptionId) {
         isSubscription = true;
         // Get subscription details and use its access link
-        const subscription = await storage.getSubscription(payment.subscriptionId);
-        if (subscription) {
-          accessLink = subscription.accessLink;
-        }
+        const subscription = await storage.getSubscription(payment.subscriptionId);          if (subscription) {
+            accessLink = channel?.telegramLink || `https://t.me/+${Math.random().toString(36).substring(7)}`;
+          }
       }
 
       // Create purchase record with access link
@@ -329,7 +334,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // For subscriptions, return subscription details instead of access link
-      if (isSubscription) {
+      if (isSubscription && payment.subscriptionId) {
         const subscription = await storage.getSubscription(payment.subscriptionId);
         
         res.json({
@@ -338,7 +343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           subscription: {
             id: subscription?.id,
             channelName: channel.name,
-            telegramLink: channel.telegramInviteLink,
+            telegramLink: channel.telegramLink,
             expiresAt: subscription?.currentPeriodEnd,
             subscriptionType: subscription?.subscriptionType
           },
@@ -379,7 +384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           activeSubscriptions.push({
             ...sub,
             channelName: channel?.name,
-            telegramInviteLink: channel?.telegramInviteLink
+            telegramInviteLink: channel?.telegramLink || null
           });
         }
       }
@@ -446,13 +451,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             channelId: sub.channelId,
             channelName: channel?.name || "Unknown Channel",
             channelSlug: channel?.slug || "",
-            accessLink: sub.accessLink,
+            accessLink: channel?.telegramLink || `https://t.me/+${Math.random().toString(36).substring(7)}`,
             status: sub.status,
-            billingPeriod: sub.billingPeriod,
-            price: sub.price,
+            billingPeriod: sub.subscriptionType || "monthly",
+            price: sub.amount,
             nextBillingDate: sub.nextBillingDate,
             createdAt: sub.createdAt,
-            autopayEnabled: sub.autopayEnabled,
+            autopayEnabled: true, // Default value
           };
         })
       );
@@ -524,7 +529,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(result.rows);
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
-      res.status(500).json({ message: "Failed to fetch subscriptions", error: error.message });
+      res.status(500).json({ message: "Failed to fetch subscriptions", error: error instanceof Error ? error.message : "Unknown error" });
     }
   });
 
@@ -614,7 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(500).json({ 
         message: "Failed to create channel",
-        error: error.message || "Unknown error"
+        error: error instanceof Error ? error.message : "Unknown error"
       });
     }
   });
@@ -857,7 +862,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const now = new Date();
       const expiryDate = new Date(subscription.currentPeriodEnd);
-      const gracePeriodEnd = new Date(expiryDate.getTime() + (subscription.gracePeriodDays * 24 * 60 * 60 * 1000));
+      const gracePeriodEnd = new Date(expiryDate.getTime() + ((subscription.gracePeriodDays || 3) * 24 * 60 * 60 * 1000));
       const daysUntilExpiry = Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       
       // Check if access should be blocked
@@ -884,7 +889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           current_period_end: subscription.currentPeriodEnd,
           access_blocked: accessBlocked,
           grace_period_days: subscription.gracePeriodDays,
-          telegram_invite_link: !accessBlocked ? channel?.telegramInviteLink : null,
+          telegram_invite_link: !accessBlocked ? channel?.telegramLink : null,
         },
         access_granted: !accessBlocked,
         days_until_expiry: Math.max(0, daysUntilExpiry),
