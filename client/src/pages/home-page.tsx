@@ -29,13 +29,48 @@ export default function HomePage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // Fallback to empty array if channels is undefined or null
-  const featuredChannels = (channels && Array.isArray(channels) ? channels.slice(0, 3) : []);
+  // Fallback data when API fails
+  const fallbackChannels = [
+    {
+      id: 1,
+      name: "Premium Tech Channel",
+      slug: "premium-tech",
+      description: "Latest tech news and insights",
+      icon: "🚀",
+      price: 99,
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 2,
+      name: "Crypto Updates",
+      slug: "crypto-updates", 
+      description: "Real-time cryptocurrency updates",
+      icon: "₿",
+      price: 149,
+      is_active: true,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 3,
+      name: "Business Insights",
+      slug: "business-insights",
+      description: "Professional business analysis and market trends", 
+      icon: "📊",
+      price: 199,
+      is_active: true,
+      created_at: new Date().toISOString()
+    }
+  ];
+
+  // Use API data if available, otherwise use fallback
+  const featuredChannels = (channels && Array.isArray(channels) ? channels.slice(0, 3) : fallbackChannels);
   
   // Debug logging
   console.log('Channels data:', channels);
   console.log('Is loading:', isLoading);
   console.log('Error:', error);
+  console.log('Using featured channels:', featuredChannels);
 
   return (
     <div className="min-h-screen relative w-full overflow-x-hidden">
