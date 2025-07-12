@@ -40,6 +40,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
   }
+
+  if (req.method === 'POST') {
+    if (!process.env.CUSTOMER_DATABASE_URL) {
+      console.error('❌ Missing CUSTOMER_DATABASE_URL env var');
+      return res.status(500).json({ message: 'Server misconfiguration: CUSTOMER_DATABASE_URL not set' });
+    }
+    try {
+      console.log('📡 Adding new channel');
+      const { db } = await import('../server/db.js');
+      const { channels: channelsTable, insertChannelSchema } = await import('../shared/schema.js');
+      const { ZodError } = await import('zod');
+      // Validate request body
+      const channelData = insertChannelSchema.parse(req.body);
+      // Insert new channel
+      const inserted = await db.insert(channelsTable).values(channelData).returning();
+      const newChannel = Array.isArray(inserted) ? inserted[0] : inserted;
+      console.log('✅ Channel created:', newChannel);
+      return res.status(201).json(newChannel);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        console.error('❌ Validation error:', error.errors);
+        return res.status(400).json({ message: 'Invalid channel data', errors: error.errors });
+      }
+      console.error('❌ Error adding channel:', error);
+      return res.status(500).json({
+        message: 'Failed to add channel',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
   // Method not allowed
   res.status(405).json({ message: 'Method not allowed' });
 }
