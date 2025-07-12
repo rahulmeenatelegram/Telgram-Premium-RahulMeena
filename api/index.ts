@@ -18,10 +18,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const url = req.url || '';
     const path = url.split('?')[0];
     
-    console.log(`Processing path: ${path}`);
+    console.log(`Processing path: "${path}"`);
+    console.log(`Full URL: "${url}"`);
+    console.log(`Request headers:`, req.headers);
 
     // Handle channels route - return mock data for now
-    if (path === '/channels' || path.endsWith('/channels')) {
+    // Note: Vercel strips the /api prefix, so we check for both
+    if (path === '/channels' || path.endsWith('/channels') || path === '/api/channels') {
       console.log("✅ Channels route matched");
       
       const mockChannels = [
@@ -62,7 +65,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Handle test route
-    if (path === '/test' || path.endsWith('/test')) {
+    if (path === '/test' || path.endsWith('/test') || path === '/api/test') {
       console.log("✅ Test route matched");
       return res.status(200).json({
         message: 'API is working!',
