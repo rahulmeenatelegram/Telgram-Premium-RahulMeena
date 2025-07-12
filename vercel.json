@@ -9,15 +9,15 @@
       }
     },
     {
-      "src": "api/simple.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "api/channels.js",
+      "src": "api/index.ts",
       "use": "@vercel/node"
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index"
+    },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
