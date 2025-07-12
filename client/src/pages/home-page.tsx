@@ -6,14 +6,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, TrendingUp, Zap, Star, ArrowUpRight } from "lucide-react";
 import { BackgroundGlow } from "@/components/background-effects";
-import type { Channel } from "@shared/schema";
+import type { Channel } from "@shared/schema.js";
 
 export default function HomePage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
 
-  const { data: channels, isLoading } = useQuery<Channel[]>({
+  const { data: channels, isLoading, error } = useQuery<Channel[]>({
     queryKey: ["/api/channels"],
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   useEffect(() => {
@@ -27,7 +29,13 @@ export default function HomePage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const featuredChannels = channels?.slice(0, 3) || [];
+  // Fallback to empty array if channels is undefined or null
+  const featuredChannels = (channels && Array.isArray(channels) ? channels.slice(0, 3) : []);
+  
+  // Debug logging
+  console.log('Channels data:', channels);
+  console.log('Is loading:', isLoading);
+  console.log('Error:', error);
 
   return (
     <div className="min-h-screen relative w-full overflow-x-hidden">
@@ -108,6 +116,21 @@ export default function HomePage() {
                   <div className="h-8 sm:h-10 bg-white/5 rounded-full" />
                 </div>
               ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <div className="glass-effect p-6 rounded-2xl border border-red-500/20 bg-red-500/5">
+                <p className="text-red-400 mb-2">Failed to load channels</p>
+                <p className="text-gray-400 text-sm">Please refresh the page or try again later</p>
+                <pre className="text-xs text-gray-500 mt-2 overflow-auto">{error?.toString()}</pre>
+              </div>
+            </div>
+          ) : featuredChannels.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="glass-effect p-6 rounded-2xl border border-white/10">
+                <p className="text-gray-400">No channels available at the moment</p>
+                <p className="text-gray-500 text-sm mt-2">Please check back later</p>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
