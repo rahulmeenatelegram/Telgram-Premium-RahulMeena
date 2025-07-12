@@ -14,9 +14,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const { pool } = await import("./db");
 
   // Admin routes middleware - must be BEFORE setupAuth to bypass passport
-  // Import types at the top if not already:
-  // import type { AuthenticatedRequest } from "./auth"; // Adjust path as needed
-
   app.use("/api/admin/*", (req, res, next) => {
     try {
       const authHeader = req.headers.authorization;
@@ -25,16 +22,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // For development, accept any token for the admin user
-      (req as any).user = { 
-        email: "disruptivefounder@gmail.com", 
-        role: "admin", 
-        id: 1, 
-        createdAt: new Date(), 
-        password: "" 
-      };
-      (req as any).isAuthenticated = function (): this is typeof req & { user: typeof (req as any).user } {
-        return true;
-      };
+      req.user = { email: "disruptivefounder@gmail.com", role: "admin", id: 1 };
+      req.isAuthenticated = () => true;
       next();
     } catch (error) {
       console.error("Admin auth error:", error);
@@ -116,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Return success response with access link
       res.json({
         success: true,
-        accessLink: subscription.access_link || subscription.accessLink || null,
+        accessLink: subscription.access_link || subscription.accessLink,
         channelName: channel.name,
         subscriptionId: subscription.id,
         message: "Payment verified successfully"
