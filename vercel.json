@@ -9,14 +9,17 @@
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "distDir": "dist/public"
       }
     }
   ],
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/dist/server.js" },
     {
-      "source": "/((?!api/|favicon.ico|assets/).*)",
+      "source": "/api/(.*)",
+      "destination": "/dist/server.js"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
