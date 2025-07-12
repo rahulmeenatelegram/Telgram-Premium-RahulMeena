@@ -1,14 +1,22 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public",
-  "functions": {
-    "api/simple.js": {
-      "runtime": "nodejs18.x"
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/public"
+      }
     },
-    "api/channels.js": {
-      "runtime": "nodejs18.x"
+    {
+      "src": "api/simple.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/channels.js",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "rewrites": [
     {
       "source": "/((?!api/).*)",
