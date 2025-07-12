@@ -1,5 +1,5 @@
-import { users, channels, payments, purchases, withdrawals, subscriptions, adminWallet, adminWalletTransactions, adminWithdrawals, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type Purchase, type InsertPurchase, type Withdrawal, type InsertWithdrawal, type Subscription, type InsertSubscription, type AdminWallet, type AdminWalletTransaction, type InsertAdminWalletTransaction, type AdminWithdrawal, type InsertAdminWithdrawal } from "@shared/schema";
-import { db, pool } from "./db";
+import { users, channels, payments, purchases, withdrawals, subscriptions, adminWallet, adminWalletTransactions, adminWithdrawals, type User, type InsertUser, type Channel, type InsertChannel, type Payment, type InsertPayment, type Purchase, type InsertPurchase, type Withdrawal, type InsertWithdrawal, type Subscription, type InsertSubscription, type AdminWallet, type AdminWalletTransaction, type InsertAdminWalletTransaction, type AdminWithdrawal, type InsertAdminWithdrawal } from "@shared/schema.js";
+import { db, pool } from "./db.js";
 import { eq, desc, sql, and } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";

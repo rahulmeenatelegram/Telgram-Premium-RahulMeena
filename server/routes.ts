@@ -1,9 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "./auth";
-import { storage } from "./storage";
+import { setupAuth } from "./auth.js";
+import { storage } from "./storage.js";
 import { z } from "zod";
-import { insertChannelSchema, insertWithdrawalSchema } from "@shared/schema";
+import { insertChannelSchema, insertWithdrawalSchema } from "@shared/schema.js";
 import { createHmac } from "crypto";
 import Razorpay from "razorpay";
 
@@ -11,7 +11,7 @@ const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || "razorpay_secret";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  const { pool } = await import("./db");
+  const { pool } = await import("./db.js");
 
   // Admin routes middleware - must be BEFORE setupAuth to bypass passport
   app.use("/api/admin/*", (req, res, next) => {
@@ -29,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: "",
         createdAt: new Date()
       };
-      req.isAuthenticated = () => true as any;
+      req.isAuthenticated = (() => true) as any;
       next();
     } catch (error) {
       console.error("Admin auth error:", error);
@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   console.log("✅ [1] /api/channels handler invoked.");
 
   try {
-    const { pool } = await import("./db"); // Assuming db.ts is in the same directory
+    const { pool } = await import("./db.js"); // Assuming db.ts is in the same directory
     console.log("⏳ [2] Awaiting database query...");
 
     const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
@@ -166,7 +166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create subscription record
       const subscription = await storage.createSubscription({
-        userId: req.user?.id,
+        userId: (req.user as any)?.id,
         channelId,
         email,
         telegramUsername,
@@ -180,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create initial payment record
       const payment = await storage.createPayment({
-        userId: req.user?.id,
+        userId: (req.user as any)?.id,
         channelId,
         subscriptionId: subscription.id,
         email,
@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create payment record
       const payment = await storage.createPayment({
-        userId: req.user?.id,
+        userId: (req.user as any)?.id,
         channelId,
         email,
         amount: channel.price,
@@ -318,7 +318,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (payment.subscriptionId) {
         isSubscription = true;
         // Get subscription details and use its access link
-        const subscription = await storage.getSubscription(payment.subscriptionId);          if (subscription) {
+        const subscription = await storage.getSubscription(payment.subscriptionId);
+        if (subscription) {
             accessLink = channel?.telegramLink || `https://t.me/+${Math.random().toString(36).substring(7)}`;
           }
       }
@@ -372,9 +373,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get subscriptions by email since user might not have ID if authenticated via Firebase
-      const subscriptions = req.user.id 
-        ? await storage.getUserSubscriptions(req.user.id)
-        : await storage.getEmailSubscriptions(req.user.email);
+      const subscriptions = (req.user as any).id 
+        ? await storage.getUserSubscriptions((req.user as any).id)
+        : await storage.getEmailSubscriptions((req.user as any).email);
       
       // Filter only active subscriptions and add channel info
       const activeSubscriptions = [];
@@ -406,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const subscriptionId = parseInt(req.params.id);
       const subscription = await storage.getSubscription(subscriptionId);
       
-      if (!subscription || subscription.userId !== req.user.id) {
+      if (!subscription || subscription.userId !== (req.user as any).id) {
         return res.status(404).json({ message: "Subscription not found" });
       }
 
@@ -425,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Authentication required" });
       }
 
-      const purchases = await storage.getUserPurchases(req.user.id);
+      const purchases = await storage.getUserPurchases((req.user as any).id);
       res.json(purchases);
     } catch (error) {
       console.error("Error fetching purchases:", error);
@@ -440,7 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const subscriptions = await storage.getEmailSubscriptions(req.user.email);
+      const subscriptions = await storage.getEmailSubscriptions((req.user as any).email);
       
       // Transform subscriptions to include channel information
       const enrichedSubscriptions = await Promise.all(
@@ -484,7 +485,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify subscription belongs to user
-      const userSubscriptions = await storage.getEmailSubscriptions(req.user.email);
+      const userSubscriptions = await storage.getEmailSubscriptions((req.user as any).email);
       const userOwnsSubscription = userSubscriptions.some(sub => sub.id === subscriptionId);
 
       if (!userOwnsSubscription) {

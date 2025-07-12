@@ -1,5 +1,5 @@
-import { storage } from "./storage";
-import { log } from "./vite";
+import { storage } from "./storage.js";
+import { log } from "./vite.js";
 
 /**
  * Subscription Manager - Handles subscription expiration and renewal
@@ -79,16 +79,8 @@ export class SubscriptionManager {
         if (now > nextBillingDate) {
           log(`Subscription ${subscription.id} has expired`);
           
-          if (subscription.autopayEnabled) {
-            // Attempt automatic renewal
-            const renewed = await this.attemptRenewal(subscription);
-            if (renewed) {
-              renewedCount++;
-              continue;
-            }
-          }
-          
-          // Expire the subscription
+          // For now, we'll expire all subscriptions without autopay
+          // TODO: Implement autopay functionality with proper payment method storage
           await this.expireSubscription(subscription);
           expiredCount++;
         }
@@ -124,7 +116,7 @@ export class SubscriptionManager {
       }
       
       await storage.updateSubscription(subscription.id, {
-        nextBillingDate: nextBillingDate.toISOString(),
+        nextBillingDate: nextBillingDate,
         status: "active"
       });
       
@@ -197,14 +189,9 @@ export class SubscriptionManager {
       const nextBillingDate = new Date(subscription.nextBillingDate);
       
       if (now > nextBillingDate && subscription.status === "active") {
-        if (subscription.autopayEnabled) {
-          const renewed = await this.attemptRenewal(subscription);
-          if (!renewed) {
-            await this.expireSubscription(subscription);
-          }
-        } else {
-          await this.expireSubscription(subscription);
-        }
+        // For now, we'll expire all subscriptions without autopay
+        // TODO: Implement autopay functionality with proper payment method storage
+        await this.expireSubscription(subscription);
       }
       
     } catch (error) {
