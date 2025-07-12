@@ -1,4 +1,4 @@
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   console.log('Simple JS API test endpoint hit!');
   
   res.setHeader('Access-Control-Allow-Origin', '*');
