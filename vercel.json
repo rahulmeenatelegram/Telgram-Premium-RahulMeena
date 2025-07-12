@@ -15,6 +15,10 @@
     {
       "src": "api/channels.ts",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/test-direct.js",
+      "use": "@vercel/node"
     }
   ],
   "rewrites": [
