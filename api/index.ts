@@ -27,9 +27,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const path = url.split('?')[0];
     
     console.log(`Processing path: ${path}`);
+    console.log(`Full URL: ${url}`);
 
-    // Handle /api/channels route
-    if (path === '/api/channels' && req.method === 'GET') {
+    // Handle /channels route (Vercel strips /api prefix)
+    if ((path === '/channels' || path === '/api/channels') && req.method === 'GET') {
       console.log("✅ [1] /api/channels handler invoked.");
       
       try {
@@ -71,13 +72,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Handle test route
-    if (path === '/api/test' && req.method === 'GET') {
+    // Handle test route (Vercel strips /api prefix)
+    if ((path === '/test' || path === '/api/test') && req.method === 'GET') {
       res.status(200).json({
         message: 'API is working!',
         timestamp: new Date().toISOString(),
         method: req.method,
         url: req.url,
+        path: path,
         environment: process.env.NODE_ENV || 'unknown'
       });
       return;

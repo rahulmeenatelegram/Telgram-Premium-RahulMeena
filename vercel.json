@@ -9,6 +9,10 @@
       }
     },
     {
+      "src": "api/hello.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "api/index.ts",
       "use": "@vercel/node"
     }
