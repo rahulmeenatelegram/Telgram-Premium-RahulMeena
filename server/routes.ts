@@ -35,35 +35,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // Get all active channels
-  // app.get("/api/channels", async (req, res) => {
-  //   try {
-  //     const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
-  //     res.json(result.rows);
-  //   } catch (error) {
-  //     console.error("Error fetching channels:", error);
-  //     res.status(500).json({ message: "Failed to fetch channels" });
-  //   }
-  // });
-
   app.get("/api/channels", async (req, res) => {
-  console.log("✅ [1] /api/channels handler invoked.");
+    try {
+      const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
+      res.json(result.rows);
+    } catch (error) {
+      console.error("Error fetching channels:", error);
+      res.status(500).json({ message: "Failed to fetch channels" });
+    }
+  });
 
-  try {
-    const { pool } = await import("./db"); // Assuming db.ts is in the same directory
-    console.log("⏳ [2] Awaiting database query...");
+//   app.get("/api/channels", async (req, res) => {
+//   console.log("✅ [1] /api/channels handler invoked.");
 
-    const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
+//   try {
+//     const { pool } = await import("./db"); // Assuming db.ts is in the same directory
+//     console.log("⏳ [2] Awaiting database query...");
+
+//     const result = await pool.query("SELECT * FROM channels WHERE is_active = true ORDER BY created_at DESC");
     
-    console.log("✅ [3] Query successful. Found", result.rows.length, "channels.");
-    res.json(result.rows);
+//     console.log("✅ [3] Query successful. Found", result.rows.length, "channels.");
+//     res.json(result.rows);
 
-  } catch (error) {
-    console.error("❌ [ERROR] The function crashed:", error);
-    res.status(500).json({ message: "Failed to fetch channels" });
-  } finally {
-    console.log("✅ [4] Handler execution finished.");
-  }
-});
+//   } catch (error) {
+//     console.error("❌ [ERROR] The function crashed:", error);
+//     res.status(500).json({ message: "Failed to fetch channels" });
+//   } finally {
+//     console.log("✅ [4] Handler execution finished.");
+//   }
+// });
 
   // Get channel by slug
   app.get("/api/channels/:slug", async (req, res) => {
