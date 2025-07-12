@@ -1,7 +1,8 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "../components/ui/badge";
+// Make sure this path is correct and the file exists:
+import { Card, CardContent } from "../components/ui/card";
 import { RefreshCw, CreditCard, Clock, AlertCircle, CheckCircle, Mail } from "lucide-react";
-import { BackgroundGlow, FloatingParticles } from "@/components/background-effects";
+import { BackgroundGlow, FloatingParticles } from "../components/background-effects";
 
 export default function CancellationRefundsPage() {
   const refundPolicies = [
