@@ -1,5 +1,6 @@
 // Vercel serverless function handler for API endpoints
 import 'dotenv/config';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express, { type Express } from "express";
 import { registerRoutes } from "../server/routes.js";
 
@@ -14,7 +15,20 @@ async function initializeApp() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
   
-  // Register routes asynchronously - this returns a Server but we just need the app
+  // Add CORS middleware
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(200);
+      return;
+    }
+    next();
+  });
+  
+  // Register routes asynchronously
   await registerRoutes(app);
   
   console.log('Express app initialized successfully');
@@ -22,7 +36,7 @@ async function initializeApp() {
 }
 
 // Vercel handler
-export default async function handler(req: any, res: any) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     console.log(`API Request: ${req.method} ${req.url}`);
     
