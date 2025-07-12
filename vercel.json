@@ -7,13 +7,12 @@
       "config": {
         "distDir": "dist/public"
       }
+    },
+    {
+      "src": "api/index.ts",
+      "use": "@vercel/node"
     }
   ],
-  "functions": {
-    "api/index.ts": {
-      "runtime": "@vercel/node"
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
