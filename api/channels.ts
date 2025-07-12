@@ -23,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       console.log('📡 Fetching channels from database');
       // Import modules dynamically (use .js extension for runtime)
-      const { db } = await import('../server/db');
+      const { db } = await import('../server/db.js');
       const { channels: channelsTable } = await import('../shared/schema.js');
       const { eq } = await import('drizzle-orm');
       // Query active channels
